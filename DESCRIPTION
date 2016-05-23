@@ -20,5 +20,6 @@ Imports:
     lubridate,
     lazyeval,
     zoo,
-    MESS
+    MESS,
+    magrittr
 RoxygenNote: 5.0.1

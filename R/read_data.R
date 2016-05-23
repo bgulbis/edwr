@@ -7,17 +7,11 @@
 #' files and binds them together into a data frame using
 #' \code{\link[readr]{read_csv}} from the readr package.
 #'
-#' Valid options for type include: blood, charges, demographics, diagnosis*,
-#' encounters, events, home_meds, icd9, icd10, icu_assess, id, labs, locations,
-#' measures, meds_continuous, meds_sched, meds_sched_freq, mpp, mrn, orders,
-#' patients, problems, procedures**, procedures_icd9, procedures_icd10,
-#' radiology, services, surgeries, uop, vent_settings, vent_start, visits,
-#' vitals, warfarin
-#'
-#' * diagnosis option is deprecated; use icd9 or icd10 instead
-#'
-#' ** procedures option is deprecated; use procedures_icd9 or procedures_icd10
-#' instead
+#' Valid options for type include: blood, charges, demographics, encounters,
+#' events, home_meds, icd9, icd10, icu_assess, id, labs, locations, measures,
+#' meds_continuous, meds_sched, meds_sched_freq, mpp, mrn, orders, patients,
+#' problems, procedures_icd9, procedures_icd10, radiology, services, surgeries,
+#' uop, vent_settings, vent_start, visits, vitals, warfarin
 #'
 #' @param data.dir A character string with the name of the directory containing
 #'   the data files
@@ -94,13 +88,6 @@ read_edw_data <- function(data.dir, file.name, type = NA,
                               "facility")
                col.types <- readr::cols("c", "i", "c", "c", "c", "d", "c",
                                         "c", "c")
-           },
-
-           diagnosis = {
-               col.raw <- c(raw.names$id, "ICD9 Diagnosis Code",
-                            "Diagnosis Type", "Diagnosis Code Sequence")
-               col.names <- c(pt.id, "diag.code", "diag.type", "diag.seq")
-               col.types <- readr::cols("c", "c", "c", "c")
            },
 
            encounters = {
@@ -270,13 +257,6 @@ read_edw_data <- function(data.dir, file.name, type = NA,
                               "life.cycle.datetime")
                col.types <- readr::cols("c", "c", "c", "c", "c", "c", "c",
                                         col_dt, col_dt, "c")
-           },
-
-           procedures = {
-               col.raw <- c(raw.names$id, "Procedure Date and Time",
-                            "ICD9 Procedure Code")
-               col.names <- c(pt.id, "proc.date", "proc.code")
-               col.types <- readr::cols("c", col_dt, "c")
            },
 
            procedures_icd9 = {

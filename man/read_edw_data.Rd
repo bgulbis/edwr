@@ -13,7 +13,8 @@ the data files}
 \item{file.name}{A character string with name of data file or pattern to
 match}
 
-\item{type}{An optional character string indicating type of data being tidied}
+\item{type}{An optional character string indicating type of data being
+tidied; uses file.name if no value is provided}
 
 \item{check.distinct}{An optional logical, calls
 \code{\link[dplyr]{distinct}} on the imported data if \code{TRUE}}

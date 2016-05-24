@@ -17,7 +17,8 @@
 #'   the data files
 #' @param file.name A character string with name of data file or pattern to
 #'   match
-#' @param type An optional character string indicating type of data being tidied
+#' @param type An optional character string indicating type of data being
+#'   tidied; uses file.name if no value is provided
 #' @param check.distinct An optional logical, calls
 #'   \code{\link[dplyr]{distinct}} on the imported data if \code{TRUE}
 #'
@@ -26,8 +27,7 @@
 #' @seealso \code{\link[readr]{read_csv}}
 #'
 #' @export
-read_edw_data <- function(data.dir, file.name, type = NA,
-                          check.distinct = TRUE) {
+read_edw_data <- function(data.dir, file.name, type = NA, check.distinct = TRUE) {
 
     # Change "" to NA
     fill_na <- function(x) {
@@ -222,14 +222,28 @@ read_edw_data <- function(data.dir, file.name, type = NA,
            },
 
            orders = {
-               col.raw <- c(raw.names$id, "Order Date & Time",
+               col.raw <- c(raw.names$id,
                             "Order Catalog Mnemonic",
                             "Person Location- Nurse Unit (Order)",
-                            "Personnel - Order", "Personnel Position  Order",
-                            "Order Discontinue Date & Time")
-               col.names <- c(pt.id, "order.datetime", "order", "order.unit",
-                              "provider", "provider.role", "order.stop.datetime")
-               col.types <- readr::cols("c", col_dt, "c", "c", "c", "c", col_dt)
+                            "Action Provider",
+                            "Action Provider Position",
+                            "Order Action Date & Time",
+                            "Action Type",
+                            "Action Personnel",
+                            "Action Personnel Position",
+                            "Action Communication Type")
+               col.names <- c(pt.id,
+                              "order",
+                              "order.unit",
+                              "provider",
+                              "provider.role",
+                              "action.datetime",
+                              "action.type",
+                              "action.provider",
+                              "action.provider.role",
+                              "action.comm")
+               col.types <- readr::cols("c", "c", "c", "c", col_dt, "c", "c",
+                                        "c", "c")
            },
 
            patients = {

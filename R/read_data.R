@@ -7,12 +7,12 @@
 #' files and binds them together into a data frame using
 #' \code{\link[readr]{read_csv}} from the readr package.
 #'
-#' Valid options for type include: blood, charges, demographics, diagnosis,
-#' encounters, events, home_meds, icu_assess, id, labs, locations, measures,
-#' meds_cont, meds_cont_detail, meds_sched, meds_sched_freq, mpp, mrn, orders,
-#' order_detail, patients, problems, procedures_icd9, procedures_icd10,
-#' radiology, services, surgeries, uop, vent_settings, vent_start, visits,
-#' vitals, warfarin
+#' Valid options for type include: skip (read in columns as is), blood, charges,
+#' demographics, diagnosis, encounters, events, home_meds, icu_assess, id, labs,
+#' locations, measures, meds_cont, meds_cont_detail, meds_sched,
+#' meds_sched_freq, mpp, mrn, orders, order_detail, patients, problems,
+#' procedures_icd9, procedures_icd10, radiology, services, surgeries, uop,
+#' vent_settings, vent_start, visits, vitals, warfarin
 #'
 #' @param data.dir A character string with the name of the directory containing
 #'   the data files
@@ -55,6 +55,12 @@ read_edw_data <- function(data.dir, file.name, type = NA, check.distinct = TRUE)
     col.types <- readr::cols_only("c", col_dt, "c", "c")
 
     switch(type,
+           skip = {
+               # read in columns as is
+               read <- purrr::map_df(raw, readr::read_csv)
+               return(read)
+           },
+
            blood = {
                # use default columns
                col.names <- c(pt.id,

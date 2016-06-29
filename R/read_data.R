@@ -7,11 +7,12 @@
 #' files and binds them together into a data frame using
 #' \code{\link[readr]{read_csv}} from the readr package.
 #'
-#' Valid options for type include: blood, charges, demographics, encounters,
-#' events, home_meds, icd9, icd10, icu_assess, id, labs, locations, measures,
-#' meds_continuous, meds_sched, meds_sched_freq, mpp, mrn, orders, patients,
-#' problems, procedures_icd9, procedures_icd10, radiology, services, surgeries,
-#' uop, vent_settings, vent_start, visits, vitals, warfarin
+#' Valid options for type include: blood, charges, demographics, diagnosis,
+#' encounters, events, home_meds, icu_assess, id, labs, locations, measures,
+#' meds_cont, meds_cont_detail, meds_sched, meds_sched_freq, mpp, mrn, orders,
+#' order_detail, patients, problems, procedures_icd9, procedures_icd10,
+#' radiology, services, surgeries, uop, vent_settings, vent_start, visits,
+#' vitals, warfarin
 #'
 #' @param data.dir A character string with the name of the directory containing
 #'   the data files
@@ -30,10 +31,10 @@
 read_edw_data <- function(data.dir, file.name, type = NA, check.distinct = TRUE) {
 
     # Change "" to NA
-    fill_na <- function(x) {
-        x[x == ""] <- NA
-        x
-    }
+    # fill_na <- function(x) {
+    #     x[x == ""] <- NA
+    #     x
+    # }
 
     # if type is NA, then set type to file.name
     if (is.na(type)) {
@@ -62,19 +63,28 @@ read_edw_data <- function(data.dir, file.name, type = NA, check.distinct = TRUE)
     switch(type,
            blood = {
                # use default columns
-               col.names <- c(pt.id, "blood.datetime", "blood.prod",
+               col.names <- c(pt.id,
+                              "blood.datetime",
+                              "blood.prod",
                               "blood.type")
-               prods <- c("Cryo(.*)" = "cryo", "FFP(.*)" = "ffp",
-                          "(P)?RBC(.*)" = "prbc", "Platelet(.*)" = "platelet")
+               prods <- c("Cryo(.*)" = "cryo",
+                          "FFP(.*)" = "ffp",
+                          "(P)?RBC(.*)" = "prbc",
+                          "Platelet(.*)" = "platelet")
 
                dots <- list(~stringr::str_replace_all(blood.prod, prods))
                nm <- "blood.prod"
            },
 
            charges = {
-               col.raw <- c(raw.names$id, "Cdm Code", "Service Date",
+               col.raw <- c(raw.names$id,
+                            "Cdm Code",
+                            "Service Date",
                             "Institution Desc")
-               col.names <- c(pt.id, "cdm.code", "service.date", "institution")
+               col.names <- c(pt.id,
+                              "cdm.code",
+                              "service.date",
+                              "institution")
                col.types <- readr::cols_only("c", "c", col_dt, "c")
            },
 
@@ -88,6 +98,22 @@ read_edw_data <- function(data.dir, file.name, type = NA, check.distinct = TRUE)
                               "facility")
                col.types <- readr::cols("c", "i", "c", "c", "c", "d", "c",
                                         "c", "c")
+           },
+
+           diagnosis = {
+               col.raw <- c(raw.names$id,
+                            "Diagnosis Code",
+                            "Diagnosis Code Source Vocabulary",
+                            "Diagnosis Type",
+                            "Diagnosis Code Sequence",
+                            "Present on Admission")
+               col.names <- c(pt.id,
+                              "diag.code",
+                              "code.source",
+                              "diag.type",
+                              "diag.seq",
+                              "present.admit")
+               col.types <- readr::cols_only("c", "c", "c", "c", "c", "c")
            },
 
            encounters = {
@@ -115,20 +141,6 @@ read_edw_data <- function(data.dir, file.name, type = NA, check.distinct = TRUE)
                col.types <- readr::cols("c", "c", "c", "c")
                dots <- list(~stringr::str_to_lower(med))
                nm <- "med"
-           },
-
-           icd9 = {
-               col.raw <- c(raw.names$id, "ICD9 Diagnosis Code",
-                            "Diagnosis Type", "Diagnosis Code Sequence")
-               col.names <- c(pt.id, "diag.code", "diag.type", "diag.seq")
-               col.types <- readr::cols("c", "c", "c", "c")
-           },
-
-           icd10 = {
-               col.raw <- c(raw.names$id, "ICD10 Diagnosis Code",
-                            "Diagnosis Type", "Diagnosis Code Sequence")
-               col.names <- c(pt.id, "diag.code", "diag.type", "diag.seq")
-               col.types <- readr::cols("c", "c", "c", "c")
            },
 
            icu_assess = {
@@ -161,7 +173,8 @@ read_edw_data <- function(data.dir, file.name, type = NA, check.distinct = TRUE)
                col.names <- c(pt.id, "arrive.datetime", "depart.datetime",
                               "unit.to", "unit.from")
                col.types <- readr::cols("c", col_dt, col_dt, "c", "c")
-               dots <- list(~fill_na(unit.to), ~fill_na(unit.from))
+               dots <- list(~dplyr::na_if(unit.to, ""),
+                            ~dplyr::na_if(unit.from, ""))
                nm <- list("unit.to", "unit.from")
            },
 
@@ -173,14 +186,41 @@ read_edw_data <- function(data.dir, file.name, type = NA, check.distinct = TRUE)
                col.types <- readr::cols("c", col_dt, "c", "d", "c")
            },
 
-           meds_continuous = {
+           meds_cont = {
                col.raw <- c(raw.names$id, raw.names$dt, raw.names$ev,
                             "Infusion Rate", "Infusion Rate Unit",
                             "Event ID")
                col.names <- c(pt.id, "med.datetime", "med", "med.rate",
                               "med.rate.units", "event.id")
                col.types <- readr::cols("c", col_dt, "c", "d", "c", "c")
-               dots <- list(~stringr::str_to_lower(med), ~fill_na(med.rate.units))
+               dots <- list(~stringr::str_to_lower(med),
+                            ~dplyr::na_if(med.rate.units, ""))
+               nm <- list("med", "med.rate.units")
+           },
+
+           meds_cont_detail = {
+               col.raw <- c(raw.names$id,
+                            "Clinical Event Order ID",
+                            "Event ID",
+                            raw.names$dt,
+                            raw.names$ev,
+                            "Infusion Rate",
+                            "Infusion Rate Unit",
+                            "Route of Administration - Short",
+                            "Event Tag")
+               col.names <- c(pt.id,
+                              "order.id",
+                              "event.id",
+                              "med.datetime",
+                              "med",
+                              "med.rate",
+                              "med.rate.units",
+                              "route",
+                              "event.tag")
+               col.types <- readr::cols("c", "c", "c", col_dt, "c", "d", "c",
+                                        "c", "c")
+               dots <- list(~stringr::str_to_lower(med),
+                            ~dplyr::na_if(med.rate.units, ""))
                nm <- list("med", "med.rate.units")
            },
 
@@ -242,8 +282,33 @@ read_edw_data <- function(data.dir, file.name, type = NA, check.distinct = TRUE)
                               "action.provider",
                               "action.provider.role",
                               "action.comm")
-               col.types <- readr::cols("c", "c", "c", "c", col_dt, "c", "c",
-                                        "c", "c")
+               col.types <- readr::cols("c", "c", "c", "c", "c", col_dt, "c",
+                                        "c", "c", "c")
+           },
+
+           order_detail = {
+               col.raw <- c(raw.names$id,
+                            "Source Order ID",
+                            "Order Catalog Mnemonic",
+                            "Ingredient Catalog Short Desc",
+                            "Dose Strength - Order",
+                            "Dose Strength - Unit",
+                            "Dose Freetext",
+                            "Person Location- Nurse Unit (Order)",
+                            "Order Action Date & Time",
+                            "Action Type")
+               col.names <- c(pt.id,
+                              "order.id",
+                              "order",
+                              "ingredient",
+                              "ingredient.dose",
+                              "ingredient.unit",
+                              "ingredient.freetext",
+                              "order.unit",
+                              "action.datetime",
+                              "action.type")
+               col.types <- readr::cols("c", "c", "c", "c", "d", "c", "c", "c",
+                                        col_dt, "c")
            },
 
            patients = {
@@ -301,7 +366,8 @@ read_edw_data <- function(data.dir, file.name, type = NA, check.distinct = TRUE)
                col.names <- c(pt.id, "start.datetime", "end.datetime",
                               "service", "service.from")
                col.types <- readr::cols("c", col_dt, col_dt, "c", "c")
-               dots <- list(~fill_na(service), ~fill_na(service.from))
+               dots <- list(~dplyr::na_if(service, ""),
+                            ~dplyr::na_if(service.from, ""))
                nm <- list("service", "service.from")
            },
 

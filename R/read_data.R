@@ -576,7 +576,7 @@ read_edw_data <- function(data.dir,
     # convert vector of columns to a list of symbols which work with dplyr, then
     # rename columns to more convenient names
     col.raw <- purrr::map(col.raw, as.symbol)
-    read <- dplyr::rename_(read, .dots = setNames(col.raw, col.names))
+    read <- dplyr::rename_(read, .dots = purrr::set_names(col.raw, col.names))
 
     # indicator to remove duplicates; defaults to TRUE but use FALSE for faster
     # read times with large data sets
@@ -586,7 +586,7 @@ read_edw_data <- function(data.dir,
 
     # perform any necessary data mutations
     if (!is.null(dots)) {
-        read <- dplyr::mutate_(read, .dots = setNames(dots, nm))
+        read <- dplyr::mutate_(read, .dots = purrr::set_names(dots, nm))
     }
 
     # limit to only patients included in study

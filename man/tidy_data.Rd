@@ -2,30 +2,25 @@
 % Please edit documentation in R/tidy_data.R
 \name{tidy_data}
 \alias{tidy_data}
-\title{Tidy EDW data}
+\title{Tidy data}
 \usage{
-tidy_data(raw.data, type, ...)
+tidy_data(x, ...)
 }
 \arguments{
-\item{raw.data}{A data frame with the data to be tidied}
+\item{x}{A data frame with an edw class type}
 
-\item{type}{A character indicating what type of data is being tidied}
-
-\item{...}{parameters to pass on to the underlying tidy function}
-}
-\value{
-A data frame
+\item{...}{additional arguments passed on to particular methods}
 }
 \description{
-\code{tidy_data} tidy data from standard EDW queries
+\code{tidy_data} transforms raw EDW data into a tidy format
 }
 \details{
-This function calls the underlying tidy function based on the value passed to
-the type parameter and returns the tidy data frame. Valid options for type
-are: icd9, icd10, labs, locations, meds_cont, meds_outpt, meds_sched,
-services, visit_times.
+This is a generic function for tidying EDW data read in using
+\code{\link{read_edw_data}}. The function invokes the appropriate method
+based on the type of data being transformed (i.e., lab results, medication
+data, etc.).
 }
 \seealso{
-\code{\link{tidy_icd}}
+\code{\link{tidy_data.edw_labs}}
 }
 

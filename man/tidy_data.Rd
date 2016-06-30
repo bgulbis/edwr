@@ -2,14 +2,23 @@
 % Please edit documentation in R/tidy_data.R
 \name{tidy_data}
 \alias{tidy_data}
+\alias{tidy_data.default}
+\alias{tidy_data.labs}
 \title{Tidy data}
 \usage{
 tidy_data(x, ...)
+
+\method{tidy_data}{default}(x, ...)
+
+\method{tidy_data}{labs}(x, censor = TRUE, ...)
 }
 \arguments{
 \item{x}{A data frame with an edw class type}
 
 \item{...}{additional arguments passed on to individual methods}
+
+\item{censor}{A logical, if TRUE will add a column indicating the data was
+censored (default)}
 }
 \description{
 \code{tidy_data} transforms raw EDW data into a tidy format
@@ -20,7 +29,18 @@ This is an S3 generic function for tidying EDW data read in using
 based on the type of data being transformed (i.e., lab results, medication
 data, etc.).
 }
-\seealso{
-\code{\link{tidy_data.labs}}
+\examples{
+x <- read_edw_data(
+  data.dir = paste0(system.file(package = "edwr", "extdata")),
+  file.name = "test_labs.csv",
+  type = "labs"
+)
+
+suppressWarnings(
+  y <- tidy_data(x)
+)
+
+print(head(y))
+
 }
 

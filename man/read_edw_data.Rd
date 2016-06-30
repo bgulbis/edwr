@@ -43,9 +43,12 @@ problems, procedures_icd9, procedures_icd10, radiology, services, surgeries,
 uop, vent_settings, vent_start, visits, vitals, warfarin
 }
 \examples{
-x <- read_edw_data(data.dir = paste0(system.file(package = "edwr", "extdata")),
-                     file.name = "test_demographics.csv",
-                     type = "demographics")
+x <- read_edw_data(
+  data.dir = paste0(system.file(package = "edwr", "extdata")),
+  file.name = "test_demographics.csv",
+  type = "demographics"
+)
+
 str(x)
 
 }

@@ -12,8 +12,21 @@
 #'
 #' @param x A data frame with an edw class type
 #' @param ... additional arguments passed on to individual methods
+#' @param censor A logical, if TRUE will add a column indicating the data was
+#'   censored (default)
 #'
-#' @seealso \code{\link{tidy_data.labs}}
+#' @examples
+#' x <- read_edw_data(
+#'   data.dir = paste0(system.file(package = "edwr", "extdata")),
+#'   file.name = "test_labs.csv",
+#'   type = "labs"
+#' )
+#'
+#' suppressWarnings(
+#'   y <- tidy_data(x)
+#' )
+#'
+#' print(head(y))
 #'
 #' @export
 tidy_data <- function(x, ...) {
@@ -21,26 +34,14 @@ tidy_data <- function(x, ...) {
 }
 
 #' @export
+#' @rdname tidy_data
 tidy_data.default <- function(x, ...) {
     warning(paste("No tidy_data method available for class", class(x)))
     x
 }
 
-#' Tidy lab results
-#'
-#' \code{tidy_data.labs} transforms lab result data into a tidy format
-#'
-#' This function takes a data frame with lab results and returns a tidy data
-#' frame. Results will be converted to numeric values and censored data will be
-#' indicated.
-#'
-#' @param x A data frame with raw lab results
-#' @param censor A logical, if TRUE will add a column indicating the data was
-#'   censored (default)
-#' @param ... for S3 generic compatibility
-#'
-#' @return A data frame
 #' @export
+#' @rdname tidy_data
 tidy_data.labs <- function(x, censor = TRUE, ...) {
     tidy <- x
     # create a column noting if data was censored

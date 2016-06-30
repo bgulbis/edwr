@@ -30,9 +30,12 @@
 #' @seealso \code{\link[readr]{read_csv}}
 #'
 #' @examples
-#' x <- read_edw_data(data.dir = paste0(system.file(package = "edwr", "extdata")),
-#'                      file.name = "test_demographics.csv",
-#'                      type = "demographics")
+#' x <- read_edw_data(
+#'   data.dir = paste0(system.file(package = "edwr", "extdata")),
+#'   file.name = "test_demographics.csv",
+#'   type = "demographics"
+#' )
+#'
 #' str(x)
 #'
 #' @export

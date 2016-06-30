@@ -9,18 +9,18 @@ tidy_data(x, ...)
 \arguments{
 \item{x}{A data frame with an edw class type}
 
-\item{...}{additional arguments passed on to particular methods}
+\item{...}{additional arguments passed on to individual methods}
 }
 \description{
 \code{tidy_data} transforms raw EDW data into a tidy format
 }
 \details{
-This is a generic function for tidying EDW data read in using
+This is an S3 generic function for tidying EDW data read in using
 \code{\link{read_edw_data}}. The function invokes the appropriate method
 based on the type of data being transformed (i.e., lab results, medication
 data, etc.).
 }
 \seealso{
-\code{\link{tidy_data.edw_labs}}
+\code{\link{tidy_data.labs}}
 }
 

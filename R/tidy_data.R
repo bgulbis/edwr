@@ -5,15 +5,15 @@
 #'
 #' \code{tidy_data} transforms raw EDW data into a tidy format
 #'
-#' This is a generic function for tidying EDW data read in using
+#' This is an S3 generic function for tidying EDW data read in using
 #' \code{\link{read_edw_data}}. The function invokes the appropriate method
 #' based on the type of data being transformed (i.e., lab results, medication
 #' data, etc.).
 #'
 #' @param x A data frame with an edw class type
-#' @param ... additional arguments passed on to particular methods
+#' @param ... additional arguments passed on to individual methods
 #'
-#' @seealso \code{\link{tidy_data.edw_labs}}
+#' @seealso \code{\link{tidy_data.labs}}
 #'
 #' @export
 tidy_data <- function(x, ...) {
@@ -21,7 +21,7 @@ tidy_data <- function(x, ...) {
 }
 
 #' @export
-tidy_data.default <- function(x) {
+tidy_data.default <- function(x, ...) {
     warning(paste("No tidy_data method available for class", class(x)))
     x
 }
@@ -37,10 +37,11 @@ tidy_data.default <- function(x) {
 #' @param x A data frame with raw lab results
 #' @param censor A logical, if TRUE will add a column indicating the data was
 #'   censored (default)
+#' @param ... for S3 generic compatibility
 #'
 #' @return A data frame
 #' @export
-tidy_data.labs <- function(x, censor = TRUE) {
+tidy_data.labs <- function(x, censor = TRUE, ...) {
     tidy <- x
     # create a column noting if data was censored
     if (censor == TRUE) {

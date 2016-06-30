@@ -4,13 +4,15 @@
 \alias{tidy_data.labs}
 \title{Tidy lab results}
 \usage{
-\method{tidy_data}{labs}(x, censor = TRUE)
+\method{tidy_data}{labs}(x, censor = TRUE, ...)
 }
 \arguments{
 \item{x}{A data frame with raw lab results}
 
 \item{censor}{A logical, if TRUE will add a column indicating the data was
 censored (default)}
+
+\item{...}{for S3 generic compatibility}
 }
 \value{
 A data frame

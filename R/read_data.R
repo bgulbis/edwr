@@ -25,7 +25,7 @@
 #' @param include.pts If not NULL, the returned data frame will be limited to
 #'   only the included patients
 #'
-#' @return A data frame (tbl_df)
+#' @return A data frame with an edw class type (inherits from tbl_df)
 #'
 #' @seealso \code{\link[readr]{read_csv}}
 #'
@@ -593,5 +593,10 @@ read_edw_data <- function(data.dir,
     if (!is.null(include.pts)) {
         read <- dplyr::semi_join(read, include.pts, by = "pie.id")
     }
+
+    # set class of object for future function calls
+    new_class <- paste("edw", type, sep = "_")
+    class(read) <- c(new_class, class(read))
+
     read
 }

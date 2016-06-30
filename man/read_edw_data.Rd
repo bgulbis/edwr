@@ -4,7 +4,8 @@
 \alias{read_edw_data}
 \title{Read EDW data from csv files}
 \usage{
-read_edw_data(data.dir, file.name, type = NA, check.distinct = TRUE)
+read_edw_data(data.dir, file.name, type = NA, check.distinct = TRUE,
+  include.pts = NULL)
 }
 \arguments{
 \item{data.dir}{A character string with the name of the directory containing
@@ -18,6 +19,9 @@ tidied; uses file.name if no value is provided}
 
 \item{check.distinct}{An optional logical, calls
 \code{\link[dplyr]{distinct}} on the imported data if \code{TRUE}}
+
+\item{include.pts}{If not NULL, the returned data frame will be limited to only
+the included patients}
 }
 \value{
 A data frame (tbl_df)

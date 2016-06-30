@@ -22,13 +22,16 @@
 #'   tidied; uses file.name if no value is provided
 #' @param check.distinct An optional logical, calls
 #'   \code{\link[dplyr]{distinct}} on the imported data if \code{TRUE}
+#' @param include.pts If not NULL, the returned data frame will be limited to only
+#'   the included patients
 #'
 #' @return A data frame (tbl_df)
 #'
 #' @seealso \code{\link[readr]{read_csv}}
 #'
 #' @export
-read_edw_data <- function(data.dir, file.name, type = NA, check.distinct = TRUE) {
+read_edw_data <- function(data.dir, file.name, type = NA,
+                          check.distinct = TRUE, include.pts = NULL) {
 
     # if type is NA, then set type to file.name
     if (is.na(type)) {
@@ -577,5 +580,9 @@ read_edw_data <- function(data.dir, file.name, type = NA, check.distinct = TRUE)
         read <- dplyr::mutate_(read, .dots = setNames(dots, nm))
     }
 
+    # limit to only patients included in study
+    if (!is.null(include.pts)) {
+        read <- dplyr::semi_join(read, include.pts, by = "pie.id")
+    }
     read
 }

@@ -1,7 +1,7 @@
 Package: edwr
 Type: Package
 Title: Standardized Functions for Working with Data from the EDW
-Version: 0.0.0.9004
+Version: 0.0.0.9005
 Depends:
     R (>= 2.10)
 Authors@R: person("Brian", "Gulbis", email="brian.gulbis@gmail.com", role=c("aut","cre"))
@@ -23,3 +23,4 @@ Imports:
     MESS,
     magrittr
 RoxygenNote: 5.0.1
+Suggests: testthat

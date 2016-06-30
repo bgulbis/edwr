@@ -1,6 +1,6 @@
 # tests for read_edw_data
 
-dir <- "../../inst/extdata"
+dir <- paste0(system.file(package = "edwr", "extdata"))
 
 library(edwr)
 context("Check read_edw_data")

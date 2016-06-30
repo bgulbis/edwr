@@ -20,8 +20,8 @@ tidied; uses file.name if no value is provided}
 \item{check.distinct}{An optional logical, calls
 \code{\link[dplyr]{distinct}} on the imported data if \code{TRUE}}
 
-\item{include.pts}{If not NULL, the returned data frame will be limited to only
-the included patients}
+\item{include.pts}{If not NULL, the returned data frame will be limited to
+only the included patients}
 }
 \value{
 A data frame (tbl_df)
@@ -41,6 +41,13 @@ icu_assess, id, labs, locations, measures, meds_cont, meds_cont_detail,
 meds_sched, meds_sched_freq, mpp, mrn, orders, order_detail, patients,
 problems, procedures_icd9, procedures_icd10, radiology, services, surgeries,
 uop, vent_settings, vent_start, visits, vitals, warfarin
+}
+\examples{
+x <- read_edw_data(data.dir = paste0(system.file(package = "edwr", "extdata")),
+                     file.name = "test_demographics.csv",
+                     type = "demographics")
+str(x)
+
 }
 \seealso{
 \code{\link[readr]{read_csv}}

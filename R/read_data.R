@@ -22,12 +22,18 @@
 #'   tidied; uses file.name if no value is provided
 #' @param check.distinct An optional logical, calls
 #'   \code{\link[dplyr]{distinct}} on the imported data if \code{TRUE}
-#' @param include.pts If not NULL, the returned data frame will be limited to only
-#'   the included patients
+#' @param include.pts If not NULL, the returned data frame will be limited to
+#'   only the included patients
 #'
 #' @return A data frame (tbl_df)
 #'
 #' @seealso \code{\link[readr]{read_csv}}
+#'
+#' @examples
+#' x <- read_edw_data(data.dir = paste0(system.file(package = "edwr", "extdata")),
+#'                      file.name = "test_demographics.csv",
+#'                      type = "demographics")
+#' str(x)
 #'
 #' @export
 read_edw_data <- function(data.dir,

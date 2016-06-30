@@ -20,6 +20,12 @@ tidy_data <- function(x, ...) {
     UseMethod("tidy_data")
 }
 
+#' @export
+tidy_data.default <- function(x) {
+    warning(paste("No tidy_data method available for class", class(x)))
+    x
+}
+
 #' Tidy lab results
 #'
 #' \code{tidy_data.labs} transforms lab result data into a tidy format
@@ -49,9 +55,4 @@ tidy_data.labs <- function(x, censor = TRUE) {
     # keep original class
     class(tidy) <- class(x)
     tidy
-}
-
-#' @export
-tidy_data.default <- function(x) {
-    "default"
 }

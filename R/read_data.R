@@ -30,11 +30,14 @@
 #' @seealso \code{\link[readr]{read_csv}}
 #'
 #' @export
-read_edw_data <- function(data.dir, file.name, type = NA,
-                          check.distinct = TRUE, include.pts = NULL) {
+read_edw_data <- function(data.dir,
+                          file.name,
+                          type = NULL,
+                          check.distinct = TRUE,
+                          include.pts = NULL) {
 
     # if type is NA, then set type to file.name
-    if (is.na(type)) {
+    if (is.null(type)) {
         type <- file.name
     }
 

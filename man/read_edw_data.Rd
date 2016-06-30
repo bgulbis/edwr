@@ -4,7 +4,7 @@
 \alias{read_edw_data}
 \title{Read EDW data from csv files}
 \usage{
-read_edw_data(data.dir, file.name, type = NA, check.distinct = TRUE,
+read_edw_data(data.dir, file.name, type = NULL, check.distinct = TRUE,
   include.pts = NULL)
 }
 \arguments{

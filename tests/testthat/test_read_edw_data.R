@@ -11,7 +11,7 @@ test_that("invalid type returns error", {
 
 test_that("returns proper class", {
     expect_s3_class(read_edw_data(dir, "test_demographics.csv", "demographics"), "tbl_df")
-    expect_s3_class(read_edw_data(dir, "test_demographics.csv", "demographics"), "edw_demographics")
+    expect_s3_class(read_edw_data(dir, "test_demographics.csv", "demographics"), "demographics")
 })
 
 test_examples()

@@ -595,8 +595,7 @@ read_edw_data <- function(data.dir,
     }
 
     # set class of object for future function calls
-    new_class <- paste("edw", type, sep = "_")
-    class(read) <- c(new_class, class(read))
+    class(read) <- c(type, class(read))
 
     read
 }

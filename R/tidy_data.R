@@ -22,7 +22,7 @@ tidy_data <- function(x, ...) {
 
 #' Tidy lab results
 #'
-#' \code{tidy_labs} transforms lab result data into a tidy format
+#' \code{tidy_data.labs} transforms lab result data into a tidy format
 #'
 #' This function takes a data frame with lab results and returns a tidy data
 #' frame. Results will be converted to numeric values and censored data will be
@@ -34,7 +34,7 @@ tidy_data <- function(x, ...) {
 #'
 #' @return A data frame
 #' @export
-tidy_data.edw_labs <- function(x, censor = TRUE) {
+tidy_data.labs <- function(x, censor = TRUE) {
     tidy <- x
     # create a column noting if data was censored
     if (censor == TRUE) {
@@ -46,6 +46,7 @@ tidy_data.edw_labs <- function(x, censor = TRUE) {
     dots <- list(~as.numeric(lab.result))
     tidy <- dplyr::mutate_(tidy, .dots = purrr::set_names(dots, "lab.result"))
 
+    # keep original class
     class(tidy) <- class(x)
     tidy
 }

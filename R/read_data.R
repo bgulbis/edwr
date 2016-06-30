@@ -25,7 +25,7 @@
 #' @param include.pts If not NULL, the returned data frame will be limited to
 #'   only the included patients
 #'
-#' @return A data frame, as an edw class type if type is not skip
+#' @return A data frame, as an \code{edwr} class type if type is not skip
 #'
 #' @seealso \code{\link[readr]{read_csv}}
 #'

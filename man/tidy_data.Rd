@@ -4,6 +4,8 @@
 \alias{tidy_data}
 \alias{tidy_data.default}
 \alias{tidy_data.labs}
+\alias{tidy_data.meds_cont}
+\alias{tidy_data.meds_sched}
 \title{Tidy data}
 \usage{
 tidy_data(x, ...)
@@ -11,6 +13,10 @@ tidy_data(x, ...)
 \method{tidy_data}{default}(x, ...)
 
 \method{tidy_data}{labs}(x, censor = TRUE, ...)
+
+\method{tidy_data}{meds_cont}(x, ref, sched, ...)
+
+\method{tidy_data}{meds_sched}(x, ref, ...)
 }
 \arguments{
 \item{x}{A data frame with an edw class type}
@@ -19,6 +25,10 @@ tidy_data(x, ...)
 
 \item{censor}{A logical, if TRUE will add a column indicating the data was
 censored (default)}
+
+\item{ref}{A data frame with three columns: name, type, and group}
+
+\item{sched}{A data frame with intermittent medications}
 }
 \description{
 \code{tidy_data} transforms raw EDW data into a tidy format
@@ -28,6 +38,12 @@ This is an S3 generic function for tidying EDW data read in using
 \code{\link{read_edw_data}}. The function invokes the appropriate method
 based on the type of data being transformed (i.e., lab results, medication
 data, etc.).
+
+The data frame passed to \code{ref} should contain three columns: name, type,
+and group. The name column should contain either generic medication names or
+medication classes. The type column should specify whether the value in name
+is a "class" or "med". The group column should specify whether the medication
+is a continous ("cont") or scheduled ("sched") medication.
 }
 \examples{
 x <- read_edw_data(

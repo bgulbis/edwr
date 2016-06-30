@@ -24,7 +24,7 @@ tidied; uses file.name if no value is provided}
 only the included patients}
 }
 \value{
-A data frame with an edw class type (inherits from tbl_df)
+A data frame, as an edw class type if type is not skip
 }
 \description{
 \code{read_edw_data} takes a directory and file name and reads in all

@@ -24,8 +24,8 @@
 #' @param sched A data frame with intermittent medications
 #' @param pts An optional data frame with a column pie.id including all patients
 #'   in study
-#' @param home An optional logical, if TRUE (default) look for home medications,
-#'   otherwise look for discharge medicatio
+#' @param home A logical, if TRUE (default) look for home medications,
+#'   otherwise look for discharge medications
 #'
 #' @examples
 #' x <- read_data(

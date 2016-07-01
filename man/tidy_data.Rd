@@ -36,8 +36,8 @@ censored (default)}
 \item{pts}{An optional data frame with a column pie.id including all patients
 in study}
 
-\item{home}{An optional logical, if TRUE (default) look for home medications,
-otherwise look for discharge medicatio}
+\item{home}{A logical, if TRUE (default) look for home medications,
+otherwise look for discharge medications}
 }
 \description{
 \code{tidy_data} transforms raw EDW data into a tidy format

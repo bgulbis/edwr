@@ -1,6 +1,6 @@
-#' Read EDW data from csv files
+#' Read data from csv files
 #'
-#' \code{read_edw_data} takes a directory and file name and reads in all
+#' \code{read_data} takes a directory and file name and reads in all
 #' matching csv files and binds them together into a data frame
 #'
 #' This function takes a directory and file name and reads in all matching csv
@@ -60,7 +60,7 @@
 #' @seealso \code{\link[readr]{read_csv}}
 #'
 #' @examples
-#' x <- read_edw_data(
+#' x <- read_data(
 #'   data.dir = paste0(system.file(package = "edwr", "extdata")),
 #'   file.name = "test_demographics.csv",
 #'   type = "demographics"
@@ -69,7 +69,7 @@
 #' str(x)
 #'
 #' @export
-read_edw_data <- function(data.dir,
+read_data <- function(data.dir,
                           file.name,
                           type = NULL,
                           check.distinct = TRUE,

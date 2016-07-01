@@ -35,7 +35,7 @@ censored (default)}
 }
 \details{
 This is an S3 generic function for tidying EDW data read in using
-\code{\link{read_edw_data}}. The function invokes the appropriate method
+\code{\link{read_data}}. The function invokes the appropriate method
 based on the type of data being transformed (i.e., lab results, medication
 data, etc.).
 
@@ -46,7 +46,7 @@ is a "class" or "med". The group column should specify whether the medication
 is a continous ("cont") or scheduled ("sched") medication.
 }
 \examples{
-x <- read_edw_data(
+x <- read_data(
   data.dir = paste0(system.file(package = "edwr", "extdata")),
   file.name = "test_labs.csv",
   type = "labs"

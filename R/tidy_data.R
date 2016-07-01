@@ -6,7 +6,7 @@
 #' \code{tidy_data} transforms raw EDW data into a tidy format
 #'
 #' This is an S3 generic function for tidying EDW data read in using
-#' \code{\link{read_edw_data}}. The function invokes the appropriate method
+#' \code{\link{read_data}}. The function invokes the appropriate method
 #' based on the type of data being transformed (i.e., lab results, medication
 #' data, etc.).
 #'
@@ -24,7 +24,7 @@
 #' @param sched A data frame with intermittent medications
 #'
 #' @examples
-#' x <- read_edw_data(
+#' x <- read_data(
 #'   data.dir = paste0(system.file(package = "edwr", "extdata")),
 #'   file.name = "test_labs.csv",
 #'   type = "labs"

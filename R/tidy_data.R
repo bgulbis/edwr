@@ -162,7 +162,7 @@ tidy_data.home_meds <- function(x, ref, pts = NULL, home = TRUE, ...) {
 add_patients <- function(tidy, patients) {
     tidy <- dplyr::full_join(tidy, patients["pie.id"], by = "pie.id") %>%
         dplyr::mutate_at(
-            .cols = dplyr::vars(-pie.id),
+            .cols = dplyr::vars(quote(-pie.id)),
             .funs = function(x) dplyr::coalesce(x, FALSE)
         )
 }

@@ -3,6 +3,7 @@
 \name{tidy_data}
 \alias{tidy_data}
 \alias{tidy_data.default}
+\alias{tidy_data.home_meds}
 \alias{tidy_data.labs}
 \alias{tidy_data.meds_cont}
 \alias{tidy_data.meds_sched}
@@ -17,6 +18,8 @@ tidy_data(x, ...)
 \method{tidy_data}{meds_cont}(x, ref, sched, ...)
 
 \method{tidy_data}{meds_sched}(x, ref, ...)
+
+\method{tidy_data}{home_meds}(x, ref, pts = NULL, home = TRUE, ...)
 }
 \arguments{
 \item{x}{A data frame with an edw class type}
@@ -29,15 +32,21 @@ censored (default)}
 \item{ref}{A data frame with three columns: name, type, and group}
 
 \item{sched}{A data frame with intermittent medications}
+
+\item{pts}{An optional data frame with a column pie.id including all patients
+in study}
+
+\item{home}{An optional logical, if TRUE (default) look for home medications,
+otherwise look for discharge medicatio}
 }
 \description{
 \code{tidy_data} transforms raw EDW data into a tidy format
 }
 \details{
 This is an S3 generic function for tidying EDW data read in using
-\code{\link{read_data}}. The function invokes the appropriate method
-based on the type of data being transformed (i.e., lab results, medication
-data, etc.).
+\code{\link{read_data}}. The function invokes the appropriate method based on
+the type of data being transformed (i.e., lab results, medication data,
+etc.).
 
 The data frame passed to \code{ref} should contain three columns: name, type,
 and group. The name column should contain either generic medication names or

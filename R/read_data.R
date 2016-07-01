@@ -7,12 +7,42 @@
 #' files and binds them together into a data frame using
 #' \code{\link[readr]{read_csv}} from the readr package.
 #'
-#' Valid options for type include: skip (read in columns without renaming),
-#' blood, charges, demographics, diagnosis, encounters, events, home_meds,
-#' icu_assess, id, labs, locations, measures, meds_cont, meds_cont_detail,
-#' meds_sched, meds_sched_freq, mpp, mrn, orders, order_detail, patients,
-#' problems, procedures_icd9, procedures_icd10, radiology, services, surgeries,
-#' uop, vent_settings, vent_start, visits, vitals, warfarin
+#' Valid options for type include:
+#'
+#' \itemize{
+#'   \item skip (read in columns without renaming)
+#'   \item blood (blood product administration)
+#'   \item charges (charges by CDM code)
+#'   \item demographics (patient demographics)
+#'   \item diagnosis (ICD-9/10-CM codes)
+#'   \item encounters (all encounters by person)
+#'   \item events (generic clinical events)
+#'   \item home_meds (home / discharge medication lists)
+#'   \item icu_assess (RASS, GCS, etc.)
+#'   \item id (encounter ID, FIN, person ID)
+#'   \item labs (lab results)
+#'   \item measures (height, weight)
+#'   \item meds_cont (continuous medication administration)
+#'   \item meds_sched (intermittent medication administration)
+#'   \item meds_freq (intermittent meds with order frequency)
+#'   \item mpp (MPP used to order medication)
+#'   \item mrn (medical record number)
+#'   \item order_by (ordering provider data)
+#'   \item order_detail (medication order data)
+#'   \item patients (patients identified by CDM, diagnosis codes, or unit admission)
+#'   \item problems (problem list from EMR)
+#'   \item procedures9 (ICD-9 procedure codes)
+#'   \item procedures10 (ICD-10 procedure codes)
+#'   \item radiology (radiology orders)
+#'   \item services (list of patient's primary medical services)
+#'   \item surgeries (list of surgeries from surgery database)
+#'   \item uop (urine output)
+#'   \item vent_settings (FIO2, PaO2, etc.)
+#'   \item vent_start (vent start/stop dates/times)
+#'   \item visits (arrival, admit, discharge data)
+#'   \item vitals (vital signs)
+#'   \item warfarin (warfarin duration, indication, goal)
+#' }
 #'
 #' @param data.dir A character string with the name of the directory containing
 #'   the data files
@@ -245,24 +275,6 @@ read_edw_data <- function(data.dir,
 
            meds_cont = {
                col.raw <- c(raw.names$id,
-                            raw.names$dt,
-                            raw.names$ev,
-                            "Infusion Rate",
-                            "Infusion Rate Unit",
-                            "Event ID")
-               col.names <- c(pt.id,
-                              "med.datetime",
-                              "med",
-                              "med.rate",
-                              "med.rate.units", "event.id")
-               col.types <- readr::cols("c", col_dt, "c", "d", "c", "c")
-               dots <- list(~stringr::str_to_lower(med),
-                            ~dplyr::na_if(med.rate.units, ""))
-               nm <- list("med", "med.rate.units")
-           },
-
-           meds_cont_detail = {
-               col.raw <- c(raw.names$id,
                             "Clinical Event Order ID",
                             "Event ID",
                             raw.names$dt,
@@ -289,6 +301,7 @@ read_edw_data <- function(data.dir,
 
            meds_sched = {
                col.raw <- c(raw.names$id,
+                            "Clinical Event Order ID",
                             raw.names$dt,
                             raw.names$ev,
                             "Dosage Amount",
@@ -299,14 +312,18 @@ read_edw_data <- function(data.dir,
                               "med.datetime",
                               "med",
                               "med.dose",
-                              "med.dose.units", "med.route", "event.id")
-               col.types <- readr::cols_only("c", col_dt, "c", "d", "c", "c", "c")
+                              "med.dose.units",
+                              "med.route",
+                              "event.id")
+               col.types <- readr::cols_only("c", "c", col_dt, "c", "d", "c",
+                                             "c", "c")
                dots <- list(~stringr::str_to_lower(med))
                nm <- "med"
            },
 
-           meds_sched_freq = {
+           meds_freq = {
                col.raw <- c(raw.names$id,
+                            "Clinical Event Order ID",
                             raw.names$dt,
                             raw.names$ev,
                             "Dosage Amount",
@@ -322,8 +339,8 @@ read_edw_data <- function(data.dir,
                               "med.route",
                               "freq",
                               "event.id")
-               col.types <- readr::cols_only("c", col_dt, "c", "d", "c", "c",
-                                             "c", "c")
+               col.types <- readr::cols_only("c", "c", col_dt, "c", "d", "c",
+                                             "c", "c", "c")
                dots <- list(~stringr::str_to_lower(med))
                nm <- "med"
            },
@@ -340,7 +357,7 @@ read_edw_data <- function(data.dir,
                col.types <- readr::cols("c", "c")
            },
 
-           orders = {
+           order_by = {
                col.raw <- c(raw.names$id,
                             "Order Catalog Mnemonic",
                             "Person Location- Nurse Unit (Order)",
@@ -421,7 +438,7 @@ read_edw_data <- function(data.dir,
                                         col_dt, col_dt, "c")
            },
 
-           procedures_icd9 = {
+           procedures9 = {
                col.raw <- c(raw.names$id,
                             "Procedure Date and Time",
                             "ICD9 Procedure Code")
@@ -431,7 +448,7 @@ read_edw_data <- function(data.dir,
                col.types <- readr::cols("c", col_dt, "c")
            },
 
-           procedures_icd10 = {
+           procedures10 = {
                col.raw <- c(raw.names$id,
                             "Procedure Date and Time",
                             "ICD10 Procedure Code")

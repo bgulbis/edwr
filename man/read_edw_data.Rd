@@ -35,12 +35,42 @@ This function takes a directory and file name and reads in all matching csv
 files and binds them together into a data frame using
 \code{\link[readr]{read_csv}} from the readr package.
 
-Valid options for type include: skip (read in columns without renaming),
-blood, charges, demographics, diagnosis, encounters, events, home_meds,
-icu_assess, id, labs, locations, measures, meds_cont, meds_cont_detail,
-meds_sched, meds_sched_freq, mpp, mrn, orders, order_detail, patients,
-problems, procedures_icd9, procedures_icd10, radiology, services, surgeries,
-uop, vent_settings, vent_start, visits, vitals, warfarin
+Valid options for type include:
+
+\itemize{
+  \item skip (read in columns without renaming)
+  \item blood (blood product administration)
+  \item charges (charges by CDM code)
+  \item demographics (patient demographics)
+  \item diagnosis (ICD-9/10-CM codes)
+  \item encounters (all encounters by person)
+  \item events (generic clinical events)
+  \item home_meds (home / discharge medication lists)
+  \item icu_assess (RASS, GCS, etc.)
+  \item id (encounter ID, FIN, person ID)
+  \item labs (lab results)
+  \item measures (height, weight)
+  \item meds_cont (continuous medication administration)
+  \item meds_sched (intermittent medication administration)
+  \item meds_freq (intermittent meds with order frequency)
+  \item mpp (MPP used to order medication)
+  \item mrn (medical record number)
+  \item order_by (ordering provider data)
+  \item order_detail (medication order data)
+  \item patients (patients identified by CDM, diagnosis codes, or unit admission)
+  \item problems (problem list from EMR)
+  \item procedures9 (ICD-9 procedure codes)
+  \item procedures10 (ICD-10 procedure codes)
+  \item radiology (radiology orders)
+  \item services (list of patient's primary medical services)
+  \item surgeries (list of surgeries from surgery database)
+  \item uop (urine output)
+  \item vent_settings (FIO2, PaO2, etc.)
+  \item vent_start (vent start/stop dates/times)
+  \item visits (arrival, admit, discharge data)
+  \item vitals (vital signs)
+  \item warfarin (warfarin duration, indication, goal)
+}
 }
 \examples{
 x <- read_edw_data(

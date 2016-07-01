@@ -69,27 +69,21 @@ tidy_data.labs <- function(x, censor = TRUE, ...) {
 
 #' @export
 #' @rdname tidy_data
+#' @importFrom magrittr %>%
 tidy_data.meds_cont <- function(x, ref, sched, ...) {
-    # filter to tidy only continuous meds
-    ref <- dplyr::filter_(ref, .dots = list(~group == "cont"))
-
     # for any med classes, lookup the meds included in the class
-    class.meds <- dplyr::filter_(ref, .dots = list(~type == "class"))
-    class.meds <- med_lookup(class.meds$name)
+    y <- dplyr::filter_(ref, .dots = list(~type == "class", ~group == "cont"))
+    class.meds <- med_lookup(y$name)
 
     # join the list of meds with any indivdual meds included
-    lookup.meds <- dplyr::filter_(ref, .dots = list(~type == "med"))
-    lookup.meds <- c(lookup.meds$name, class.meds$med.name)
+    y <- dplyr::filter_(ref, .dots = list(~type == "med", ~group == "cont"))
+    lookup.meds <- c(y$name, class.meds$med.name)
 
-    # remove any rows in continuous data which are actually scheduled doses
-    tidy <- dplyr::anti_join(x, sched, by = "event.id")
-
-    # filter to meds in lookup
-    dots <- list(~med %in% lookup.meds)
-    tidy <- dplyr::filter_(tidy, .dots = dots)
-
-    # sort by pie.id, med, med.datetime
-    tidy <- dplyr::arrange_(tidy, .dots = list("pie.id", "med", "med.datetime"))
+    # remove any rows in continuous data which are actually scheduled doses,
+    # then filter to meds in lookup, then sort by pie.id, med, med.datetime
+    tidy <- dplyr::anti_join(x, sched, by = "event.id") %>%
+        dplyr::filter_(.dots = list(~med %in% lookup.meds)) %>%
+        dplyr::arrange_(.dots = list("pie.id", "med", "med.datetime"))
 
     # keep original class
     class(tidy) <- class(x)
@@ -98,6 +92,7 @@ tidy_data.meds_cont <- function(x, ref, sched, ...) {
 
 #' @export
 #' @rdname tidy_data
+#' @importFrom magrittr %>%
 tidy_data.meds_sched <- function(x, ref, ...) {
     # filter to tidy only scheduled meds
     ref <- dplyr::filter_(ref, .dots = list(~group == "sched"))

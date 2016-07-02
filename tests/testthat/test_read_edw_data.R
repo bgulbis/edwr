@@ -1,4 +1,4 @@
-# tests for read_edw_data
+# tests for read_data
 
 dir <- paste0(system.file(package = "edwr", "extdata"))
 

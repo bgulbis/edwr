@@ -1,4 +1,4 @@
-# tests for read_edw_data
+# tests for tidy_data
 
 dir <- paste0(system.file(package = "edwr", "extdata"))
 
@@ -6,8 +6,7 @@ library(edwr)
 context("Check tidy_data")
 
 test_that("returns proper class", {
-    tmp <- read_data(dir, "test_labs.csv", "labs")
-    expect_s3_class(tidy_data(tmp), "labs")
+    expect_s3_class(tidy_data(labs), "labs")
 
 })
 

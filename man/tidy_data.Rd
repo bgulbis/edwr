@@ -55,14 +55,8 @@ is a "class" or "med". The group column should specify whether the medication
 is a continous ("cont") or scheduled ("sched") medication.
 }
 \examples{
-x <- read_data(
-  data.dir = paste0(system.file(package = "edwr", "extdata")),
-  file.name = "test_labs.csv",
-  type = "labs"
-)
-
 suppressWarnings(
-  y <- tidy_data(x)
+  y <- tidy_data(labs)
 )
 
 print(head(y))

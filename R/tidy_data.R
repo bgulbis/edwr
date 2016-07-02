@@ -28,14 +28,8 @@
 #'   otherwise look for discharge medications
 #'
 #' @examples
-#' x <- read_data(
-#'   data.dir = paste0(system.file(package = "edwr", "extdata")),
-#'   file.name = "test_labs.csv",
-#'   type = "labs"
-#' )
-#'
-#' suppressWarnings(
-#'   y <- tidy_data(x)
+##' suppressWarnings(
+#'   y <- tidy_data(labs)
 #' )
 #'
 #' print(head(y))

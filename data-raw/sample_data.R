@@ -2,8 +2,6 @@
 
 library(edwr)
 
-dir <- paste0(system.file(package = "edwr", "extdata"))
-
-labs <- read_data(dir, "test_labs.csv", "labs")
+labs <- read_data("data-raw", "test_labs.csv", "labs")
 
 devtools::use_data(labs)

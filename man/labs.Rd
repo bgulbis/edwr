@@ -4,7 +4,7 @@
 \name{labs}
 \alias{labs}
 \title{Sample lab result data}
-\format{A data frame with 15 rows and 4 variables
+\format{A data frame with sample laboratory data for 15 patients
 \describe{
   \item{pie.id}{encounter identifier}
   \item{lab.datetime}{date / time the lab was drawn at}

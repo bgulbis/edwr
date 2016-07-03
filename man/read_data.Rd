@@ -85,7 +85,7 @@ EDW Standard Project Queries which correspond to each \code{type}.
   uop \tab \tab Urine output\cr
   vent_settings \tab \tab Ventilator Data - Settings\cr
   vent_start \tab \tab Ventilator Data - Start and Stop\cr
-  visits \tab \tab Visits - Admit Facility, Unit, Dates, Source\cr
+  visits \tab \tab Visit Data\cr
   vitals \tab \tab Vitals\cr
   warfarin \tab \tab Warfarin Information\cr
 }

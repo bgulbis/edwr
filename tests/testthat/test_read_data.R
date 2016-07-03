@@ -3,7 +3,7 @@
 dir <- system.file(package = "edwr", "extdata")
 
 library(edwr)
-context("Check read_edw_data")
+context("Check read_data")
 
 test_that("invalid type returns error", {
     expect_error(

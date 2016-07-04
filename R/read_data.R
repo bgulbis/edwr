@@ -225,7 +225,7 @@ read_data <- function(data.dir,
                               "med",
                               "order.name",
                               "med.type")
-               col.types <- readr::cols("c", "c", "c", "c")
+               col.types <- readr::cols_only("c", "c", "c", "c")
                dots <- list(~stringr::str_to_lower(med))
                nm <- "med"
            },

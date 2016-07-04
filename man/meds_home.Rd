@@ -5,7 +5,7 @@
 \alias{meds_home}
 \title{Sample home medication data}
 \format{A data frame with sample home medication / discharge prescription
-  data.. The data has been read in via \code{\link{read_data}} but no further
+  data. The data has been read in via \code{\link{read_data}} but no further
   tidying or transformation has been performed.
 \describe{
   \item{pie.id}{encounter identifier}

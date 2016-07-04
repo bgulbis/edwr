@@ -55,11 +55,20 @@ is a "class" or "med". The group column should specify whether the medication
 is a continous ("cont") or scheduled ("sched") medication.
 }
 \examples{
-suppressWarnings(
-  y <- tidy_data(labs)
-)
+# tidy lab data; non-numeric results will be converted to NA
+suppressWarnings(head(
+  tidy_data(labs)
+))
 
-print(head(y))
+# tidy labs without marking censored data (will be converted to NA's)
+suppressWarnings(head(
+  tidy_data(labs, censor = FALSE)
+))
+
+# tidy continuous medications; keep only heparin drips
+ref <- data.frame(name = "heparin", type = "med", group = "cont")
+heparin <- tidy_data(meds_cont, ref, meds_sched)
+head(heparin)
 
 }
 

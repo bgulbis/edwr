@@ -4,7 +4,9 @@
 \name{labs}
 \alias{labs}
 \title{Sample lab result data}
-\format{A data frame with sample laboratory data for 15 patients
+\format{A data frame with sample laboratory data for 15 patients. The data
+  has been read in via \code{\link{read_data}} but no further tidying or
+  transformation has been performed.
 \describe{
   \item{pie.id}{encounter identifier}
   \item{lab.datetime}{date / time the lab was drawn at}

@@ -29,7 +29,8 @@ tidy_data(x, ...)
 \item{censor}{A logical, if TRUE will add a column indicating the data was
 censored (default)}
 
-\item{ref}{A data frame with three columns: name, type, and group}
+\item{ref}{A data frame with three columns: name, type, and group. See
+details below.}
 
 \item{sched}{A data frame with intermittent medications}
 

@@ -20,7 +20,8 @@
 #' @param ... additional arguments passed on to individual methods
 #' @param censor A logical, if TRUE will add a column indicating the data was
 #'   censored (default)
-#' @param ref A data frame with three columns: name, type, and group
+#' @param ref A data frame with three columns: name, type, and group. See
+#'   details below.
 #' @param sched A data frame with intermittent medications
 #' @param pts An optional data frame with a column pie.id including all patients
 #'   in study

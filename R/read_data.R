@@ -19,7 +19,6 @@
 #'   diagnosis \tab \tab Diagnosis Codes (ICD-9/10-CM) - All\cr
 #'   encounters \tab \tab Encounters - by Person ID\cr
 #'   events \tab \tab Clinical Events - Prompt\cr
-#'   home_meds \tab \tab Medications - Home and Discharge - [All, Prompt]\cr
 #'   icu_assess \tab \tab ICU Assessments (CAM-ICU, GCS, RASS)\cr
 #'   id \tab \tab Identifiers - by FIN\cr
 #'   \tab \tab Identifiers - by MRN\cr
@@ -36,9 +35,10 @@
 #'   \tab \tab Vomiting Output\cr
 #'   measures \tab \tab Measures (Height and Weight)\cr
 #'   meds_cont \tab \tab Medications - Inpatient Continuous - [All, Prompt]\cr
-#'   meds_sched \tab \tab Medications - Inpatient Intermittent - [All, Prompt]\cr
 #'   meds_freq \tab \tab Medications - Inpatient Intermittent with Frequency - [All,
 #'     Prompt]\cr
+#'   meds_home \tab \tab Medications - Home and Discharge - [All, Prompt]\cr
+#'   meds_sched \tab \tab Medications - Inpatient Intermittent - [All, Prompt]\cr
 #'   mpp \tab \tab MPP's Ordered - [All, Order Prompt]\cr
 #'   mrn \tab \tab Identifiers - Person by MRN\cr
 #'   order_by \tab \tab Orders - Prompt\cr
@@ -216,7 +216,7 @@ read_data <- function(data.dir,
                nm <- "event"
            },
 
-           home_meds = {
+           meds_home = {
                col.raw <- c(raw.names$id,
                             "Order Catalog Short Description",
                             "Order Catalog Mnemonic",
@@ -325,16 +325,19 @@ read_data <- function(data.dir,
                             "Dosage Amount",
                             "Dosage Unit",
                             "Route of Administration - Short",
+                            "Event Type Code",
                             "Event ID")
                col.names <- c(pt.id,
+                              "order.id",
                               "med.datetime",
                               "med",
                               "med.dose",
                               "med.dose.units",
                               "med.route",
+                              "event.type",
                               "event.id")
                col.types <- readr::cols_only("c", "c", col_dt, "c", "d", "c",
-                                             "c", "c")
+                                             "c", "c", "c")
                dots <- list(~stringr::str_to_lower(med))
                nm <- "med"
            },

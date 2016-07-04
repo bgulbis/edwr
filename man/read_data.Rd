@@ -47,7 +47,6 @@ EDW Standard Project Queries which correspond to each \code{type}.
   diagnosis \tab \tab Diagnosis Codes (ICD-9/10-CM) - All\cr
   encounters \tab \tab Encounters - by Person ID\cr
   events \tab \tab Clinical Events - Prompt\cr
-  home_meds \tab \tab Medications - Home and Discharge - [All, Prompt]\cr
   icu_assess \tab \tab ICU Assessments (CAM-ICU, GCS, RASS)\cr
   id \tab \tab Identifiers - by FIN\cr
   \tab \tab Identifiers - by MRN\cr
@@ -64,9 +63,10 @@ EDW Standard Project Queries which correspond to each \code{type}.
   \tab \tab Vomiting Output\cr
   measures \tab \tab Measures (Height and Weight)\cr
   meds_cont \tab \tab Medications - Inpatient Continuous - [All, Prompt]\cr
-  meds_sched \tab \tab Medications - Inpatient Intermittent - [All, Prompt]\cr
   meds_freq \tab \tab Medications - Inpatient Intermittent with Frequency - [All,
     Prompt]\cr
+  meds_home \tab \tab Medications - Home and Discharge - [All, Prompt]\cr
+  meds_sched \tab \tab Medications - Inpatient Intermittent - [All, Prompt]\cr
   mpp \tab \tab MPP's Ordered - [All, Order Prompt]\cr
   mrn \tab \tab Identifiers - Person by MRN\cr
   order_by \tab \tab Orders - Prompt\cr

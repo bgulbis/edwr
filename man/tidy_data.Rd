@@ -58,14 +58,14 @@ medication.
 }
 \examples{
 # tidy lab data; non-numeric results will be converted to NA
-suppressWarnings(head(
+suppressWarnings(print(head(
   tidy_data(labs)
-))
+)))
 
 # tidy labs without marking censored data (will be converted to NA's)
-suppressWarnings(head(
+suppressWarnings(print(head(
   tidy_data(labs, censor = FALSE)
-))
+)))
 
 # make a reference data frame for tidying meds
 ref <- tibble::data_frame(
@@ -75,23 +75,30 @@ ref <- tibble::data_frame(
 )
 
 # tidy continuous medications; will keep only heparin drips
-heparin <- tidy_data(meds_cont, ref, meds_sched)
-head(heparin)
+print(head(
+  tidy_data(meds_cont, ref, meds_sched)
+))
 
 # tidy intermittent medications; will keep warfarin and antiplatelet agents
-sched <- tidy_data(meds_sched, ref)
-head(sched)
+print(head(
+  tidy_data(meds_sched, ref)
+))
 
 # tidy home medications
-hm <- tidy_data(meds_home, ref)
-head(hm)
+print(head(
+  tidy_data(meds_home, ref)
+))
 
 # return all patients, even if they do not have any of the desired home meds
 pts <- dplyr::distinct(labs, pie.id)
-hm.all <- tidy_data(meds_home, ref, pts = pts)
+print(head(
+  tidy_data(meds_home, ref, pts = pts)
+))
 
 # return discharge prescriptions instead of home meds
-dc.all <- tidy_data(meds_home, ref, pts = pts, home = FALSE)
+print(head(
+  tidy_data(meds_home, ref, pts = pts, home = FALSE)
+))
 
 }
 

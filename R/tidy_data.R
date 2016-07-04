@@ -10,11 +10,12 @@
 #' the type of data being transformed (i.e., lab results, medication data,
 #' etc.).
 #'
-#' The data frame passed to \code{ref} should contain three columns: name, type,
-#' and group. The name column should contain either generic medication names or
-#' medication classes. The type column should specify whether the value in name
-#' is a "class" or "med". The group column should specify whether the medication
-#' is a continous ("cont") or scheduled ("sched") medication.
+#' The data frame passed to \code{ref} should contain three character columns:
+#' name, type, and group. The name column should contain either generic
+#' medication names or medication classes. The type column should specify
+#' whether the value in name is a "class" or "med". The group column should
+#' specify whether the medication is a continous ("cont") or scheduled ("sched")
+#' medication.
 #'
 #' @param x A data frame with an edw class type
 #' @param ... additional arguments passed on to individual methods
@@ -26,7 +27,7 @@
 #' @param pts An optional data frame with a column pie.id including all patients
 #'   in study
 #' @param home A logical, if TRUE (default) look for home medications,
-#'   otherwise look for discharge medications
+#'   otherwise look for discharge prescriptions
 #'
 #' @examples
 #' # tidy lab data; non-numeric results will be converted to NA
@@ -39,10 +40,31 @@
 #'   tidy_data(labs, censor = FALSE)
 #' ))
 #'
-#' # tidy continuous medications; keep only heparin drips
-#' ref <- data.frame(name = "heparin", type = "med", group = "cont")
+#' # make a reference data frame for tidying meds
+#' ref <- tibble::data_frame(
+#'   name = c("heparin", "warfarin", "antiplatelet agents"),
+#'   type = c("med", "med", "class"),
+#'   group = c("cont", "sched", "sched")
+#' )
+#'
+#' # tidy continuous medications; will keep only heparin drips
 #' heparin <- tidy_data(meds_cont, ref, meds_sched)
 #' head(heparin)
+#'
+#' # tidy intermittent medications; will keep warfarin and antiplatelet agents
+#' sched <- tidy_data(meds_sched, ref)
+#' head(sched)
+#'
+#' # tidy home medications
+#' hm <- tidy_data(meds_home, ref)
+#' head(hm)
+#'
+#' # return all patients, even if they do not have any of the desired home meds
+#' pts <- dplyr::distinct(labs, pie.id)
+#' hm.all <- tidy_data(meds_home, ref, pts = pts)
+#'
+#' # return discharge prescriptions instead of home meds
+#' dc.all <- tidy_data(meds_home, ref, pts = pts, home = FALSE)
 #'
 #' @export
 tidy_data <- function(x, ...) {
@@ -122,7 +144,7 @@ tidy_data.meds_sched <- function(x, ref, ...) {
 #' @export
 #' @rdname tidy_data
 #' @importFrom magrittr %>%
-tidy_data.home_meds <- function(x, ref, pts = NULL, home = TRUE, ...) {
+tidy_data.meds_home <- function(x, ref, pts = NULL, home = TRUE, ...) {
     # for any med classes, lookup the meds included in the class
     y <- dplyr::filter_(ref, .dots = list(~type == "class"))
     meds <- med_lookup(y$name)

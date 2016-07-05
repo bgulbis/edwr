@@ -91,13 +91,17 @@ tidy_data.labs <- function(x, censor = TRUE, ...) {
     tidy <- x
     # create a column noting if data was censored
     if (censor == TRUE) {
-        dots <- list(~stringr::str_detect(lab.result, ">|<"))
-        tidy <- dplyr::mutate_(tidy, .dots = purrr::set_names(dots, "censored"))
+        tidy <- dplyr::mutate_(tidy, .dots = purrr::set_names(
+            x = list(~stringr::str_detect(lab.result, ">|<")),
+            nm = "censored"
+        ))
     }
 
     # convert lab results to numeric values
-    dots <- list(~as.numeric(lab.result))
-    tidy <- dplyr::mutate_(tidy, .dots = purrr::set_names(dots, "lab.result"))
+    tidy <- dplyr::mutate_(tidy, .dots = purrr::set_names(
+        x = list(~as.numeric(lab.result)),
+        nm = "lab.result"
+    ))
 
     # keep original class
     class(tidy) <- class(x)
@@ -169,12 +173,13 @@ tidy_data.meds_home <- function(x, ref, pts = NULL, home = TRUE, ...) {
         dots <- list(~med.type == "Prescription / Discharge Order")
     }
 
-    dots2 <- list(~ifelse(is.na(med.class), med, med.class),
-                  lazyeval::interp("y", y = TRUE))
-
     tidy <- dplyr::filter_(x, .dots = c(dots, list(~med %in% lookup.meds))) %>%
         dplyr::left_join(meds, by = c("med" = "med.name")) %>%
-        dplyr::mutate_(.dots = purrr::set_names(dots2, c("group", "value"))) %>%
+        dplyr::mutate_(.dots = purrr::set_names(
+            x = list(~dplyr::if_else(is.na(med.class), med, med.class),
+                     lazyeval::interp("y", y = TRUE)),
+            nm = c("group", "value")
+        )) %>%
         dplyr::select_(.dots = list("pie.id", "group", "value")) %>%
         dplyr::distinct_(.dots = list("pie.id", "group"), .keep_all = TRUE) %>%
         tidyr::spread_("group", "value", fill = FALSE, drop = FALSE)
@@ -197,41 +202,39 @@ tidy_data.locations <- function(x, ...) {
     # This function accounts for incorrect departure time from raw EDW data by
     # calculating the departure time using the arrival time of the next unit
     # (unless it was the patient's last unit during the hospitalization in which
-    # case discharge time is used). It also combines multiple rows of data when
-    # the patient did not actually leave that unit.
-
-    # determine if they went to a different unit and count num of different
-    # units, then use the count to group multiple rows of the same unit together
-    dots <- list(~is.na(unit.to) |
-                     is.na(dplyr::lag(unit.to)) |
-                     unit.to != dplyr::lag(unit.to),
-                 ~cumsum(diff.unit))
-    nm <- list("diff.unit", "unit.count")
-
-    dots2 <- list(~dplyr::first(unit.to),
-                  ~dplyr::first(arrive.datetime),
-                  ~dplyr::last(depart.datetime))
-    nm2 <- list("location", "arrive.datetime", "depart.recorded")
-
-    # use the arrival time for the next unit to calculate a depart time; if
-    # there is no arrival time for the next unit then used the depart date/time
-    # from EDW
-    dots3 <- list(~dplyr::lead(arrive.datetime),
-                  ~dplyr::coalesce(depart.datetime, depart.recorded))
-    nm3 <- c("depart.datetime", "depart.datetime")
-
-    dots4 <- list(~as.numeric(
-        difftime(depart.datetime, arrive.datetime, units = "days")
-    ))
+    # case the recorded departure time is used). It also combines multiple rows
+    # of data when the patient did not actually leave that unit.
 
     tidy <- dplyr::group_by_(x, "pie.id") %>%
         dplyr::arrange_("arrive.datetime") %>%
-        dplyr::mutate_(.dots = purrr::set_names(dots, nm)) %>%
+        # determine if pt went to different unit, count num of different units
+        dplyr::mutate_(.dots = purrr::set_names(
+            x = list(~is.na(unit.to) | is.na(dplyr::lag(unit.to)) |
+                         unit.to != dplyr::lag(unit.to),
+                     ~cumsum(diff.unit)),
+            nm = list("diff.unit", "unit.count")
+        )) %>%
+        # use the count to group multiple rows of the same unit together
         dplyr::group_by_(.dots = list("pie.id", "unit.count")) %>%
-        dplyr::summarize_(.dots = purrr::set_names(dots2, nm2)) %>%
-        dplyr::mutate_(.dots = purrr::set_names(dots3, nm3)) %>%
+        dplyr::summarize_(.dots = purrr::set_names(
+            x = list(~dplyr::first(unit.to),
+                     ~dplyr::first(arrive.datetime),
+                     ~dplyr::last(depart.datetime)),
+            nm = list("location", "arrive.datetime", "depart.recorded")
+        )) %>%
+        # use the arrival time for the next unit to calculate a depart time; if
+        # there is no arrival time for the next unit then used the depart
+        # date/time from EDW
+        dplyr::mutate_(.dots = purrr::set_names(
+            x = list(~dplyr::lead(arrive.datetime),
+                     ~dplyr::coalesce(depart.datetime, depart.recorded)),
+            nm = list("depart.datetime", "depart.datetime")
+        )) %>%
         dplyr::ungroup() %>%
-        dplyr::mutate_(.dots = purrr::set_names(dots4, "unit.length.stay")) %>%
+        dplyr::mutate_(.dots = purrr::set_names(
+            x = list(~difftime(depart.datetime, arrive.datetime, units = "days")),
+            nm = "unit.length.stay"
+        )) %>%
         dplyr::select_(.dots = list(quote(-depart.recorded)))
 
     # keep original class

@@ -4,6 +4,7 @@
 \alias{tidy_data}
 \alias{tidy_data.default}
 \alias{tidy_data.labs}
+\alias{tidy_data.locations}
 \alias{tidy_data.meds_cont}
 \alias{tidy_data.meds_home}
 \alias{tidy_data.meds_sched}
@@ -20,6 +21,8 @@ tidy_data(x, ...)
 \method{tidy_data}{meds_sched}(x, ref, ...)
 
 \method{tidy_data}{meds_home}(x, ref, pts = NULL, home = TRUE, ...)
+
+\method{tidy_data}{locations}(x, ...)
 }
 \arguments{
 \item{x}{A data frame with an edw class type}

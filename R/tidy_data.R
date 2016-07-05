@@ -189,3 +189,52 @@ tidy_data.meds_home <- function(x, ref, pts = NULL, home = TRUE, ...) {
     class(tidy) <- class(x)
     tidy
 }
+
+#' @export
+#' @rdname tidy_data
+#' @importFrom magrittr %>%
+tidy_data.locations <- function(x, ...) {
+    # This function accounts for incorrect departure time from raw EDW data by
+    # calculating the departure time using the arrival time of the next unit
+    # (unless it was the patient's last unit during the hospitalization in which
+    # case discharge time is used). It also combines multiple rows of data when
+    # the patient did not actually leave that unit.
+
+    # determine if they went to a different unit and count num of different
+    # units, then use the count to group multiple rows of the same unit together
+    dots <- list(~is.na(unit.to) |
+                     is.na(dplyr::lag(unit.to)) |
+                     unit.to != dplyr::lag(unit.to),
+                 ~cumsum(diff.unit))
+    nm <- list("diff.unit", "unit.count")
+
+    dots2 <- list(~dplyr::first(unit.to),
+                  ~dplyr::first(arrive.datetime),
+                  ~dplyr::last(depart.datetime))
+    nm2 <- list("location", "arrive.datetime", "depart.recorded")
+
+    # use the arrival time for the next unit to calculate a depart time; if
+    # there is no arrival time for the next unit then used the depart date/time
+    # from EDW
+    dots3 <- list(~dplyr::lead(arrive.datetime),
+                  ~dplyr::coalesce(depart.datetime, depart.recorded))
+    nm3 <- c("depart.datetime", "depart.datetime")
+
+    dots4 <- list(~as.numeric(
+        difftime(depart.datetime, arrive.datetime, units = "days")
+    ))
+
+    tidy <- dplyr::group_by_(x, "pie.id") %>%
+        dplyr::arrange_("arrive.datetime") %>%
+        dplyr::mutate_(.dots = purrr::set_names(dots, nm)) %>%
+        dplyr::group_by_(.dots = list("pie.id", "unit.count")) %>%
+        dplyr::summarize_(.dots = purrr::set_names(dots2, nm2)) %>%
+        dplyr::mutate_(.dots = purrr::set_names(dots3, nm3)) %>%
+        dplyr::ungroup() %>%
+        dplyr::mutate_(.dots = purrr::set_names(dots4, "unit.length.stay")) %>%
+        dplyr::select_(.dots = list(quote(-depart.recorded)))
+
+    # keep original class
+    class(tidy) <- class(x)
+    tidy
+}

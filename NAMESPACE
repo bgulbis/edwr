@@ -2,6 +2,7 @@
 
 S3method(tidy_data,default)
 S3method(tidy_data,labs)
+S3method(tidy_data,locations)
 S3method(tidy_data,meds_cont)
 S3method(tidy_data,meds_home)
 S3method(tidy_data,meds_sched)

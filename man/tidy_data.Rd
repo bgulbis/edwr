@@ -68,7 +68,7 @@ suppressWarnings(print(head(
 )))
 
 # make a reference data frame for tidying meds
-ref <- tibble::data_frame(
+ref <- tibble::tibble(
   name = c("heparin", "warfarin", "antiplatelet agents"),
   type = c("med", "med", "class"),
   group = c("cont", "sched", "sched")

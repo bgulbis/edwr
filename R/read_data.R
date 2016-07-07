@@ -81,7 +81,7 @@
 #' @examples
 #' x <- read_data(
 #'   data.dir = paste0(system.file(package = "edwr", "extdata")),
-#'   file.name = "test_demographics.csv",
+#'   file.name = "demographics.csv",
 #'   type = "demographics"
 #' )
 #'

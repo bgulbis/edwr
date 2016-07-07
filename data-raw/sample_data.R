@@ -79,8 +79,15 @@ locations <- x %>%
            unit.to = str_replace_all(unit.to, hosp))
 class(locations) <- class(x)
 
+x <- read_data(dir.sample, "services")
+services <- x %>%
+    mutate(pie.id = as.character(as.numeric(pie.id) + rnum),
+           start.datetime = start.datetime + days(rdays),
+           end.datetime = end.datetime + days(rdays))
+class(services) <- class(x)
+
 # save data for use in package
 devtools::use_data(diagnosis, labs, meds_cont, meds_home, meds_sched, warfarin,
-                   locations, overwrite = TRUE)
+                   locations, services, overwrite = TRUE)
 
 rm(rnum, rdays)

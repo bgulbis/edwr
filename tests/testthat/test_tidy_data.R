@@ -11,6 +11,6 @@ test_that("returns proper class", {
 })
 
 test_that("returns default method warning", {
-    tmp <- read_data(dir, "test_demographics.csv", "demographics")
+    tmp <- read_data(dir, "demographics.csv", "demographics")
     expect_warning(tidy_data(tmp), "No tidy_data method available for class")
 })

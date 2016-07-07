@@ -33,6 +33,7 @@
 #'   \tab \tab Labs - Renal\cr
 #'   \tab \tab Urine Drug Screen\cr
 #'   \tab \tab Vomiting Output\cr
+#'   locations \tab \tab Location History\cr
 #'   measures \tab \tab Measures (Height and Weight)\cr
 #'   meds_cont \tab \tab Medications - Inpatient Continuous - [All, Prompt]\cr
 #'   meds_freq \tab \tab Medications - Inpatient Intermittent with Frequency - [All,

@@ -241,3 +241,54 @@ tidy_data.locations <- function(x, ...) {
     class(tidy) <- class(x)
     tidy
 }
+
+#' @export
+#' @rdname tidy_data
+#' @importFrom magrittr %>%
+tidy_data.services <- function(x, ...) {
+    # This function accounts for incorrect end times from raw EDW data by
+    # calculating the end time using the start time of the next service (unless
+    # it was the patient's last service during the hospitalization). It also
+    # combines multiple rows of data when the patient did not actually leave
+    # that service.
+    tidy <- dplyr::group_by_(x, "pie.id") %>%
+        dplyr::arrange_("start.datetime") %>%
+        # determine if they went to a different service, then make a count of
+        # different services
+        dplyr::mutate_(.dots = purrr::set_names(
+            x = list(~dplyr::if_else(is.na(service) |
+                                         is.na(dplyr::lag(service)) |
+                                         service != dplyr::lag(service),
+                                     TRUE, FALSE),
+                     ~cumsum(diff.service)),
+            nm = list("diff.service", "service.count")
+        )) %>%
+        # use the service.count to group multiple rows of the same service
+        # together and combine data
+        dplyr::group_by_(.dots = list("pie.id", "service.count")) %>%
+        dplyr::summarize_(.dots = purrr::set_names(
+            x = list(~dplyr::first(service),
+                     ~dplyr::first(start.datetime),
+                     ~dplyr::last(end.datetime)),
+            nm = list("service", "start.datetime", "end.recorded")
+        )) %>%
+        # use the start time for the next service to calculate an end time
+        dplyr::mutate_(.dots = purrr::set_names(
+            x = list(~dplyr::lead(start.datetime)),
+            nm = "end.calculated"
+        )) %>%
+        dplyr::mutate_(.dots = purrr::set_names(
+            x = list(~dplyr::if_else(
+                is.na(end.calculated),
+                difftime(end.recorded, start.datetime, units = "days"),
+                difftime(end.calculated, start.datetime, units = "days")
+            )),
+            nm = "service.duration"
+        )) %>%
+        dplyr::select_(.dots = list(quote(-end.recorded),
+                                    quote(-end.calculated)))
+
+    # keep original class
+    class(tidy) <- class(x)
+    tidy
+}

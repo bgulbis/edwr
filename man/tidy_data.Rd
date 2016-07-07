@@ -8,6 +8,7 @@
 \alias{tidy_data.meds_cont}
 \alias{tidy_data.meds_home}
 \alias{tidy_data.meds_sched}
+\alias{tidy_data.services}
 \title{Tidy data}
 \usage{
 tidy_data(x, ...)
@@ -23,6 +24,8 @@ tidy_data(x, ...)
 \method{tidy_data}{meds_home}(x, ref, pts = NULL, home = TRUE, ...)
 
 \method{tidy_data}{locations}(x, ...)
+
+\method{tidy_data}{services}(x, ...)
 }
 \arguments{
 \item{x}{A data frame with an edw class type}

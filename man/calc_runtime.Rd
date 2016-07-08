@@ -5,6 +5,7 @@
 \alias{calc_runtime.default}
 \alias{calc_runtime.labs}
 \alias{calc_runtime.meds_cont}
+\alias{calc_runtime.meds_sched}
 \title{Calculate the running time for continuous data}
 \usage{
 calc_runtime(x, ...)
@@ -13,6 +14,8 @@ calc_runtime(x, ...)
 
 \method{calc_runtime}{meds_cont}(x, drip.off = 12, no.doc = 24,
   units = "hours", ...)
+
+\method{calc_runtime}{meds_sched}(x, units = "hours", ...)
 
 \method{calc_runtime}{labs}(x, units = "hours", ...)
 }
@@ -49,5 +52,23 @@ data.
 For continuous medications, the data will be grouped into distinct sets of
 infusions, for patients who may have been restarted on the drip one or more
 times.
+}
+\examples{
+
+# make a reference data frame for tidying meds
+ref <- tibble::tibble(
+  name = c("heparin", "warfarin", "antiplatelet agents"),
+  type = c("med", "med", "class"),
+  group = c("cont", "sched", "sched")
+)
+
+# tidy continuous medications; will keep only heparin drips
+x <- tidy_data(meds_cont, ref, meds_sched)
+
+# calculate the runtime for continuous heparin infusion
+print(head(
+  calc_runtime(x)
+))
+
 }
 

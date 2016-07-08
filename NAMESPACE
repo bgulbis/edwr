@@ -3,6 +3,7 @@
 S3method(calc_runtime,default)
 S3method(calc_runtime,labs)
 S3method(calc_runtime,meds_cont)
+S3method(calc_runtime,meds_sched)
 S3method(tidy_data,default)
 S3method(tidy_data,labs)
 S3method(tidy_data,locations)

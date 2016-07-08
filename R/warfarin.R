@@ -82,6 +82,12 @@ make_inr_ranges <- function(x) {
 #'
 #' @export
 make_indications <- function(x) {
+    # make sure we are only working with warfarin indication data, remove and
+    # empty values
+    tidy <- dplyr::filter_(x, .dots = list(
+        ~warfarin.event == "warfarin indication",
+        ~warfarin.result != ""
+    ))
 
     # detect the matching pattern
     find_string <- function(x) {
@@ -103,18 +109,14 @@ make_indications <- function(x) {
               "malig|anti(.)?phos|lupus|apla|hypercoag|deficien|leiden|fvl|factor v",
               "prophylax")
 
-    # make sure we are only working with warfarin indication data, remove and
-    # empty values
-    tidy <- dplyr::filter_(x, .dots = list(
-        ~warfarin.event == "warfarin indication",
-        ~warfarin.result != ""
-    )) %>%
-        # substitute an alternate string for standard DVT and PE strings, at
-        # facilitate identifying other types of thrombosis
-        purrr::dmap_at(.at = "warfarin.result",
-                       .f = stringr::str_replace_all,
-                       pattern = "Deep vein thrombosis",
-                       replacement = "D-V-T") %>%
+
+    # substitute an alternate string for standard DVT and PE strings, at
+    # facilitate identifying other types of thrombosis
+    tidy <- purrr::dmap_at(.d = tidy,
+                           .at = "warfarin.result",
+                           .f = stringr::str_replace_all,
+                           pattern = "Deep vein thrombosis",
+                           replacement = "D-V-T") %>%
         purrr::dmap_at(.at = "warfarin.result",
                        .f = stringr::str_replace_all,
                        pattern = "Pulmonary embolism",

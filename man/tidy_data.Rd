@@ -9,6 +9,7 @@
 \alias{tidy_data.meds_home}
 \alias{tidy_data.meds_sched}
 \alias{tidy_data.services}
+\alias{tidy_data.vent_times}
 \title{Tidy data}
 \usage{
 tidy_data(x, ...)
@@ -26,6 +27,8 @@ tidy_data(x, ...)
 \method{tidy_data}{locations}(x, ...)
 
 \method{tidy_data}{services}(x, ...)
+
+\method{tidy_data}{vent_times}(x, dc, ...)
 }
 \arguments{
 \item{x}{A data frame with an edw class type}
@@ -45,6 +48,8 @@ in study}
 
 \item{home}{A logical, if TRUE (default) look for home medications,
 otherwise look for discharge prescriptions}
+
+\item{dc}{A data frame with discharge date/times}
 }
 \description{
 \code{tidy_data} transforms raw EDW data into a tidy format

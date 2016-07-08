@@ -28,6 +28,7 @@
 #'   in study
 #' @param home A logical, if TRUE (default) look for home medications,
 #'   otherwise look for discharge prescriptions
+#' @param dc A data frame with discharge date/times
 #'
 #' @examples
 #' # tidy lab data; non-numeric results will be converted to NA
@@ -286,6 +287,56 @@ tidy_data.services <- function(x, ...) {
         )) %>%
         dplyr::select_(.dots = list(quote(-end.recorded),
                                     quote(-end.calculated)))
+
+    # keep original class
+    class(tidy) <- class(x)
+    tidy
+}
+
+#' @export
+#' @rdname tidy_data
+#' @importFrom magrittr %>%
+tidy_data.vent_times <- function(x, dc, ...) {
+    tidy <- dplyr::filter_(x, .dots = list(~!is.na(vent.datetime))) %>%
+        # remove any missing data
+        dplyr::group_by_(.dots = "pie.id") %>%
+        dplyr::arrange_(.dots = "vent.datetime") %>%
+        # if it's the first event or the next event is a stop, then count as a
+        # new vent event
+        dplyr::mutate_(.dots = purrr::set_names(
+            x = list(~is.na(dplyr::lag(vent.event)) |
+                         vent.event != lag(vent.event),
+                     ~cumsum(diff.event)),
+            nm = c("diff.event", "event.count")
+        )) %>%
+        dplyr::group_by_(.dots = list("pie.id", "event.count")) %>%
+        # for each event count, get the first and last date/time
+        dplyr::summarize_(.dots = purrr::set_names(
+            x = list(~dplyr::first(vent.event),
+                     ~dplyr::first(vent.datetime),
+                     ~dplyr::last(vent.datetime)),
+            nm = c("event", "first.event.datetime", "last.event.datetime")
+        )) %>%
+        dplyr::group_by_(.dots = "pie.id") %>%
+        dplyr::left_join(dc[c("pie.id", "discharge.datetime")], by = "pie.id") %>%
+        # use the last date/time of the next event as stop date/time; this would
+        # be the last stop event if there are multiple stop events in a row. if
+        # there isn't a stop date/time because there was start with no stop, use
+        # the discharge date/time as stop date/time
+        dplyr::mutate_(.dots = purrr::set_names(
+            x = list(~dplyr::lead(last.event.datetime),
+                     ~dplyr::coalesce(stop.datetime, discharge.datetime)),
+            nm = c("stop.datetime", "stop.datetime")
+        )) %>%
+        dplyr::filter_(.dots = list(~event == "vent start time")) %>%
+        dplyr::select_(.dots = list("pie.id",
+                                    "start.datetime" = "first.event.datetime",
+                                    "stop.datetime")) %>%
+        dplyr::ungroup() %>%
+        dplyr::mutate_(.dots = purrr::set_names(
+            x = list(~difftime(stop.datetime, start.datetime, units = "hours")),
+            nm = "vent.duration"
+        ))
 
     # keep original class
     class(tidy) <- class(x)

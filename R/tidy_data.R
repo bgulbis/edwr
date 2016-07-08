@@ -180,8 +180,7 @@ tidy_data.meds_home <- function(x, ref, pts = NULL, home = TRUE, ...) {
                      lazyeval::interp("y", y = TRUE)),
             nm = c("group", "value")
         )) %>%
-        dplyr::select_(.dots = list("pie.id", "group", "value")) %>%
-        dplyr::distinct_(.dots = list("pie.id", "group"), .keep_all = TRUE) %>%
+        dplyr::distinct_(.dots = list("pie.id", "group", "value")) %>%
         tidyr::spread_("group", "value", fill = FALSE, drop = FALSE)
 
     # join with list of all patients, fill in values of FALSE for any patients

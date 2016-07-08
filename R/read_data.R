@@ -57,7 +57,7 @@
 #'   surgeries \tab \tab Surgeries\cr
 #'   uop \tab \tab Urine output\cr
 #'   vent_settings \tab \tab Ventilator Data - Settings\cr
-#'   vent_start \tab \tab Ventilator Data - Start and Stop\cr
+#'   vent_times \tab \tab Ventilator Data - Start and Stop\cr
 #'   visits \tab \tab Visit Data\cr
 #'   vitals \tab \tab Vitals\cr
 #'   warfarin \tab \tab Warfarin Information\cr
@@ -551,7 +551,7 @@ read_data <- function(data.dir,
                nm <- "vent.event"
            },
 
-           vent_start = {
+           vent_times = {
                col.raw <- c(raw.names$id,
                             "Clinical Event Date Result",
                             raw.names$ev)

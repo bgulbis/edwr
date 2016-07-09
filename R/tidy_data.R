@@ -111,7 +111,6 @@ tidy_data.labs <- function(x, censor = TRUE, ...) {
 
 #' @export
 #' @rdname tidy_data
-#' @importFrom magrittr %>%
 tidy_data.meds_cont <- function(x, ref, sched, ...) {
     # for any med classes, lookup the meds included in the class
     y <- dplyr::filter_(ref, .dots = list(~type == "class", ~group == "cont"))
@@ -134,7 +133,6 @@ tidy_data.meds_cont <- function(x, ref, sched, ...) {
 
 #' @export
 #' @rdname tidy_data
-#' @importFrom magrittr %>%
 tidy_data.meds_sched <- function(x, ref, ...) {
     # for any med classes, lookup the meds included in the class
     y <- dplyr::filter_(ref, .dots = list(~type == "class", ~group == "sched"))
@@ -155,7 +153,6 @@ tidy_data.meds_sched <- function(x, ref, ...) {
 
 #' @export
 #' @rdname tidy_data
-#' @importFrom magrittr %>%
 tidy_data.meds_home <- function(x, ref, pts = NULL, home = TRUE, ...) {
     # for any med classes, lookup the meds included in the class
     y <- dplyr::filter_(ref, .dots = list(~type == "class"))
@@ -197,7 +194,6 @@ tidy_data.meds_home <- function(x, ref, pts = NULL, home = TRUE, ...) {
 
 #' @export
 #' @rdname tidy_data
-#' @importFrom magrittr %>%
 tidy_data.locations <- function(x, ...) {
     # This function accounts for incorrect departure time from raw EDW data by
     # calculating the departure time using the arrival time of the next unit
@@ -244,7 +240,6 @@ tidy_data.locations <- function(x, ...) {
 
 #' @export
 #' @rdname tidy_data
-#' @importFrom magrittr %>%
 tidy_data.services <- function(x, ...) {
     # This function accounts for incorrect end times from raw EDW data by
     # calculating the end time using the start time of the next service (unless
@@ -295,7 +290,6 @@ tidy_data.services <- function(x, ...) {
 
 #' @export
 #' @rdname tidy_data
-#' @importFrom magrittr %>%
 tidy_data.vent_times <- function(x, dc, ...) {
     tidy <- dplyr::filter_(x, .dots = list(~!is.na(vent.datetime))) %>%
         # remove any missing data

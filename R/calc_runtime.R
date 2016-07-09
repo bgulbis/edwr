@@ -60,7 +60,6 @@ calc_runtime.default <- function(x, ...) {
 
 #' @export
 #' @rdname calc_runtime
-#' @importFrom magrittr %>%
 calc_runtime.meds_cont <- function(x, drip.off = 12, no.doc = 24, units = "hours", ...) {
     # group the data by pie.id and med
     cont <- dplyr::group_by_(x, .dots = list("pie.id", "med")) %>%
@@ -162,7 +161,6 @@ calc_runtime.meds_cont <- function(x, drip.off = 12, no.doc = 24, units = "hours
 
 #' @export
 #' @rdname calc_runtime
-#' @importFrom magrittr %>%
 calc_runtime.meds_sched <- function(x, units = "hours", ...) {
     cont <- dplyr::group_by_(x, .dots = c("pie.id", "med")) %>%
         dplyr::arrange_(.dots = list("pie.id", "med", "med.datetime")) %>%
@@ -183,7 +181,6 @@ calc_runtime.meds_sched <- function(x, units = "hours", ...) {
 
 #' @export
 #' @rdname calc_runtime
-#' @importFrom magrittr %>%
 calc_runtime.labs <- function(x, units = "hours", ...) {
     cont <- dplyr::group_by_(x, .dots = c("pie.id", "lab")) %>%
         dplyr::arrange_(.dots = list("pie.id", "lab", "lab.datetime")) %>%

@@ -97,7 +97,6 @@ summarize_data.meds_cont <- function(x, units = "hours", ...) {
 
 #' @export
 #' @rdname summarize_data
-#' @importFrom magrittr %>%
 summarize_data.meds_sched <- function(x, units = "hours", ...) {
     # turn off scientific notation
     options(scipen = 999)
@@ -136,7 +135,6 @@ summarize_data.meds_sched <- function(x, units = "hours", ...) {
 
 #' @export
 #' @rdname summarize_data
-#' @importFrom magrittr %>%
 summarize_data.labs <- function(x, units = "hours", ...) {
     # turn off scientific notation
     options(scipen = 999)

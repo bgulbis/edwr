@@ -1,8 +1,9 @@
 # calc_runtime.R
 
-#' Calculate the running time for continuous data
+#' Calculate the running time for serial measurement data
 #'
-#' \code{calc_runtime} calculates the duration of time at current value
+#' \code{calc_runtime} calculates the duration of time at current value and
+#' total run time
 #'
 #' This function takes a data frame with serial measurement data (e.g.,
 #' continuous medications or repeated lab data) and produces a data frame with
@@ -13,7 +14,8 @@
 #'
 #' For continuous medications, the data will be grouped into distinct sets of
 #' infusions, for patients who may have been restarted on the drip one or more
-#' times.
+#' times. Use the \code{drip.off} argument to modify the criteria for
+#' determining distinct infusions.
 #'
 #' @param x A data frame with serial measurement data
 #' @param ... additional arguments passed on to individual methods
@@ -29,7 +31,6 @@
 #' @return A data frame
 #'
 #' @examples
-#'
 #' # make a reference data frame for tidying meds
 #' ref <- tibble::tibble(
 #'   name = c("heparin", "warfarin", "antiplatelet agents"),

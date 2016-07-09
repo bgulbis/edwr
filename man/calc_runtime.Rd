@@ -6,7 +6,7 @@
 \alias{calc_runtime.labs}
 \alias{calc_runtime.meds_cont}
 \alias{calc_runtime.meds_sched}
-\title{Calculate the running time for continuous data}
+\title{Calculate the running time for serial measurement data}
 \usage{
 calc_runtime(x, ...)
 
@@ -39,7 +39,8 @@ calculations, default is hours}
 A data frame
 }
 \description{
-\code{calc_runtime} calculates the duration of time at current value
+\code{calc_runtime} calculates the duration of time at current value and
+total run time
 }
 \details{
 This function takes a data frame with serial measurement data (e.g.,
@@ -51,10 +52,10 @@ data.
 
 For continuous medications, the data will be grouped into distinct sets of
 infusions, for patients who may have been restarted on the drip one or more
-times.
+times. Use the \code{drip.off} argument to modify the criteria for
+determining distinct infusions.
 }
 \examples{
-
 # make a reference data frame for tidying meds
 ref <- tibble::tibble(
   name = c("heparin", "warfarin", "antiplatelet agents"),

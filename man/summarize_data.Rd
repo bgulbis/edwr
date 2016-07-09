@@ -6,7 +6,7 @@
 \alias{summarize_data.labs}
 \alias{summarize_data.meds_cont}
 \alias{summarize_data.meds_sched}
-\title{Summary calculations for continuous data}
+\title{Summary calculations for serial measurement data}
 \usage{
 summarize_data(x, ...)
 
@@ -28,18 +28,19 @@ calculations, default is hours}
 A data frame
 }
 \description{
-\code{summarize_data} summarizes continuous data
+\code{summarize_data} summarizes serial measurement  data
 }
 \details{
-This function takes a data frame with continuous data (e.g., medications, lab
-results) and produces a data frame with summary data for each patient.
+This function takes a data frame with serial measurement  data (e.g.,
+medications, lab results) and produces a data frame with summary data for
+each patient.
 
 For continuous medications, the calculations include: first rate, last rate,
 minimum rate, maximum rate, AUC, time-weighted average rate, total infusion
 duration, total infusion running time, and cumulative dose.
 
-For labs, the calculations include: first, last, median, maximum, minimum,
-AUC, and time-weighted average result.
+For labs and intermittent medications, the calculations include: first, last,
+median, maximum, minimum, AUC, and time-weighted average result.
 }
 \examples{
 # make a reference data frame for tidying meds

@@ -1,18 +1,19 @@
 # summarize_data.R
 
-#' Summary calculations for continuous data
+#' Summary calculations for serial measurement data
 #'
-#' \code{summarize_data} summarizes continuous data
+#' \code{summarize_data} summarizes serial measurement  data
 #'
-#' This function takes a data frame with continuous data (e.g., medications, lab
-#' results) and produces a data frame with summary data for each patient.
+#' This function takes a data frame with serial measurement  data (e.g.,
+#' medications, lab results) and produces a data frame with summary data for
+#' each patient.
 #'
 #' For continuous medications, the calculations include: first rate, last rate,
 #' minimum rate, maximum rate, AUC, time-weighted average rate, total infusion
 #' duration, total infusion running time, and cumulative dose.
 #'
-#' For labs, the calculations include: first, last, median, maximum, minimum,
-#' AUC, and time-weighted average result.
+#' For labs and intermittent medications, the calculations include: first, last,
+#' median, maximum, minimum, AUC, and time-weighted average result.
 #'
 #' @param x A data frame with continuous data
 #' @param units An optional character string specifying the time units to use in

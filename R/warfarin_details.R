@@ -13,6 +13,11 @@
 #'
 #' @return A data frame
 #'
+#' @examples
+#' print(head(
+#'   make_inr_ranges(warfarin)
+#' ))
+#'
 #' @export
 make_inr_ranges <- function(x) {
     # make sure we are only working with INR range data, remove and empty values
@@ -79,6 +84,11 @@ make_inr_ranges <- function(x) {
 #' @param x A data frame with warfarin indications
 #'
 #' @return A data frame
+#'
+#' @examples
+#' print(head(
+#'   make_indications(warfarin)
+#' ))
 #'
 #' @export
 make_indications <- function(x) {

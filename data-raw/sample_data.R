@@ -62,11 +62,11 @@ meds_sched <- x %>%
            med.datetime = med.datetime + days(rdays))
 class(meds_sched) <- class(x)
 
-# x <- read_data(dir.sample, "warfarin")
-# warfarin <- x %>%
-#     mutate(pie.id = as.character(as.numeric(pie.id) + rnum),
-#            warfarin.datetime = warfarin.datetime + days(rdays))
-# class(warfarin) <- class(x)
+x <- read_data(dir.sample, "warfarin")
+warfarin <- x %>%
+    mutate(pie.id = as.character(as.numeric(pie.id) + rnum),
+           warfarin.datetime = warfarin.datetime + days(rdays))
+class(warfarin) <- class(x)
 
 # hosp <- c("Jones" = "Smith", "Hermann" = "George", "HVI" = "HeartHosp",
 #           "Cullen" = "Roy", "PAHH" = "PACU")
@@ -78,7 +78,7 @@ class(meds_sched) <- class(x)
 #            unit.from = str_replace_all(unit.from, hosp),
 #            unit.to = str_replace_all(unit.to, hosp))
 # class(locations) <- class(x)
-#
+
 # x <- read_data(dir.sample, "services")
 # services <- x %>%
 #     mutate(pie.id = as.character(as.numeric(pie.id) + rnum),
@@ -103,6 +103,7 @@ class(meds_sched) <- class(x)
 # class(visits) <- class(x)
 #
 # save data for use in package
-devtools::use_data(labs, meds_cont, meds_home, meds_sched, overwrite = TRUE)
+devtools::use_data(labs, meds_cont, meds_home, meds_sched, warfarin,
+                   overwrite = TRUE)
 
 rm(rnum, rdays)

@@ -97,6 +97,45 @@ summarize_data.meds_cont <- function(x, units = "hours", ...) {
 #' @export
 #' @rdname summarize_data
 #' @importFrom magrittr %>%
+summarize_data.meds_sched <- function(x, units = "hours", ...) {
+    # turn off scientific notation
+    options(scipen = 999)
+
+    cont <- dplyr::group_by_(x, .dots = list("pie.id", "med")) %>%
+        dplyr::summarize_(.dots = purrr::set_names(
+            x = list(~dplyr::first(med.datetime),
+                     ~dplyr::last(med.datetime),
+                     ~dplyr::first(med.dose),
+                     ~dplyr::last(med.dose),
+                     ~median(med.dose, na.rm = TRUE),
+                     ~max(med.dose, na.rm = TRUE),
+                     ~min(med.dose, na.rm = TRUE),
+                     ~MESS::auc(run.time, med.dose),
+                     ~dplyr::last(run.time)),
+            nm = c("first.datetime",
+                   "last.datetime",
+                   "first.result",
+                   "last.result",
+                   "median.result",
+                   "max.result",
+                   "min.result",
+                   "auc",
+                   "duration")
+        )) %>%
+        # calculate the time-weighted average
+        dplyr::mutate_(.dots = purrr::set_names(
+            x = list(~auc/duration),
+            nm = "time.wt.avg"
+        ))
+
+    # keep original class
+    class(cont) <- class(x)
+    cont
+}
+
+#' @export
+#' @rdname summarize_data
+#' @importFrom magrittr %>%
 summarize_data.labs <- function(x, units = "hours", ...) {
     # turn off scientific notation
     options(scipen = 999)

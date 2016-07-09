@@ -16,6 +16,7 @@
 #' median, maximum, minimum, AUC, and time-weighted average result.
 #'
 #' @param x A data frame with continuous data
+#' @param ... additional arguments passed on to individual methods
 #' @param units An optional character string specifying the time units to use in
 #'   calculations, default is hours
 #'
@@ -52,7 +53,6 @@ summarize_data.default <- function(x, ...) {
 
 #' @export
 #' @rdname summarize_data
-#' @importFrom magrittr %>%
 summarize_data.meds_cont <- function(x, units = "hours", ...) {
     # turn off scientific notation
     options(scipen = 999)

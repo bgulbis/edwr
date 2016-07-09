@@ -21,6 +21,8 @@ summarize_data(x, ...)
 \arguments{
 \item{x}{A data frame with continuous data}
 
+\item{...}{additional arguments passed on to individual methods}
+
 \item{units}{An optional character string specifying the time units to use in
 calculations, default is hours}
 }

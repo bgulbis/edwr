@@ -10,4 +10,6 @@
 #' The main functions include: \code{\link{read_data}} for reading data from
 #' csv files, and \code{\link{tidy_data}} for transforming the data into a tidy
 #' data set.
+#'
+#' @importFrom magrittr %>%
 "_PACKAGE"

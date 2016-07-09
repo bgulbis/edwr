@@ -11,11 +11,31 @@
 #' minimum rate, maximum rate, AUC, time-weighted average rate, total infusion
 #' duration, total infusion running time, and cumulative dose.
 #'
+#' For labs, the calculations include: first, last, median, maximum, minimum,
+#' AUC, and time-weighted average result.
+#'
 #' @param x A data frame with continuous data
 #' @param units An optional character string specifying the time units to use in
 #'   calculations, default is hours
 #'
 #' @return A data frame
+#'
+#' @examples
+#' # make a reference data frame for tidying meds
+#' ref <- tibble::tibble(
+#'   name = c("heparin", "warfarin", "antiplatelet agents"),
+#'   type = c("med", "med", "class"),
+#'   group = c("cont", "sched", "sched")
+#' )
+#'
+#' # tidy continuous medications and calculate runtime
+#' x <- tidy_data(meds_cont, ref, meds_sched)
+#' x <- calc_runtime(x)
+#'
+#' # pass runtime data to summarize
+#' print(head(
+#'   summarize_data(x)
+#' ))
 #'
 #' @export
 summarize_data <- function(x, ...) {
@@ -78,5 +98,37 @@ summarize_data.meds_cont <- function(x, units = "hours", ...) {
 #' @rdname summarize_data
 #' @importFrom magrittr %>%
 summarize_data.labs <- function(x, units = "hours", ...) {
+    # turn off scientific notation
+    options(scipen = 999)
 
+    cont <- dplyr::group_by_(x, .dots = list("pie.id", "lab")) %>%
+        dplyr::summarize_(.dots = purrr::set_names(
+            x = list(~dplyr::first(lab.datetime),
+                     ~dplyr::last(lab.datetime),
+                     ~dplyr::first(lab.result),
+                     ~dplyr::last(lab.result),
+                     ~median(lab.result, na.rm = TRUE),
+                     ~max(lab.result, na.rm = TRUE),
+                     ~min(lab.result, na.rm = TRUE),
+                     ~MESS::auc(run.time, lab.result),
+                     ~dplyr::last(run.time)),
+            nm = c("first.datetime",
+                   "last.datetime",
+                   "first.result",
+                   "last.result",
+                   "median.result",
+                   "max.result",
+                   "min.result",
+                   "auc",
+                   "duration")
+        )) %>%
+        # calculate the time-weighted average and interval
+        dplyr::mutate_(.dots = purrr::set_names(
+            x = list(~auc/duration),
+            nm = "time.wt.avg"
+        ))
+
+    # keep original class
+    class(cont) <- class(x)
+    cont
 }

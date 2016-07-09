@@ -34,5 +34,26 @@ results) and produces a data frame with summary data for each patient.
 For continuous medications, the calculations include: first rate, last rate,
 minimum rate, maximum rate, AUC, time-weighted average rate, total infusion
 duration, total infusion running time, and cumulative dose.
+
+For labs, the calculations include: first, last, median, maximum, minimum,
+AUC, and time-weighted average result.
+}
+\examples{
+# make a reference data frame for tidying meds
+ref <- tibble::tibble(
+  name = c("heparin", "warfarin", "antiplatelet agents"),
+  type = c("med", "med", "class"),
+  group = c("cont", "sched", "sched")
+)
+
+# tidy continuous medications and calculate runtime
+x <- tidy_data(meds_cont, ref, meds_sched)
+x <- calc_runtime(x)
+
+# pass runtime data to summarize
+print(head(
+  summarize_data(x)
+))
+
 }
 

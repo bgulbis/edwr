@@ -1,4 +1,4 @@
-# warfarin.R
+# warfarin_details.R
 
 #' Make INR therapeutic ranges
 #'

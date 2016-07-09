@@ -17,22 +17,22 @@ test_that("returns default method warning", {
 })
 
 test_that("location tidying", {
-    x <- read_data(dir.sample, "locations")
+    x <- readRDS("locations.Rds")
     tmp <- tidy_data(x)
     expect_gt(nrow(tmp), 0)
     expect_equal(length(names(tmp)), 6)
 })
 
 test_that("medical services tidying", {
-    x <- read_data(dir.sample, "services")
+    x <- readRDS("services.Rds")
     tmp <- tidy_data(x)
     expect_gt(nrow(tmp), 0)
     expect_equal(length(names(tmp)), 5)
 })
 
 test_that("vent times tidying", {
-    visits <- read_data(dir.sample, "visits")
-    x <- read_data(dir.sample, "vent_times")
+    visits <- readRDS("visits.Rds")
+    x <- readRDS("vent_times.Rds")
     tmp <- tidy_data(x, dc = visits)
     expect_gt(nrow(tmp), 0)
     expect_equal(length(names(tmp)), 4)

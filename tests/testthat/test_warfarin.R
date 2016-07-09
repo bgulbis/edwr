@@ -1,11 +1,11 @@
 # tests for transforming warfarin details data
 
-dir.sample <- "../../data-raw/sample"
+# dir.sample <- "../../data-raw/sample"
 
 library(edwr)
 context("Check warfarin details data")
 
-warfarin <- read_data(dir.sample, "warfarin")
+# warfarin <- read_data(dir.sample, "warfarin")
 
 test_that("make INR ranges", {
     tmp <- make_inr_ranges(warfarin)

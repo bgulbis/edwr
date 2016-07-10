@@ -11,5 +11,7 @@
 #' csv files, and \code{\link{tidy_data}} for transforming the data into a tidy
 #' data set.
 #'
+#' @docType package
+#' @name edwr
 #' @importFrom magrittr %>%
-"_PACKAGE"
+NULL

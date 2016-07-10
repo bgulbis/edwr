@@ -17,8 +17,6 @@
 #'
 #' @export
 concat_encounters <- function(encounters, num.split = 900) {
-    # split the vector into groups then make a string of encounters, separated
-    # by a semi-colon
-    edw.pie <- split(encounters, ceiling(seq_along(encounters) / num.split)) %>%
+    split(encounters, ceiling(seq_along(encounters) / num.split)) %>%
         purrr:map(stringr::str_c, collapse = ";")
 }

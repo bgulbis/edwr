@@ -4,10 +4,12 @@
 \alias{lab_change}
 \title{Determine if a lab changed by a set amount within a specific time frame}
 \usage{
-lab_change(x, change.by, FUN, back = 2)
+lab_change(x, .lab, change.by, FUN, back = 2)
 }
 \arguments{
 \item{x}{A data frame with lab data}
+
+\item{.lab}{A character string indicating the name of the lab to evaluate}
 
 \item{change.by}{A numeric indicating the threshold for lab changes}
 
@@ -33,10 +35,9 @@ looking for an increase in lab value.
 \examples{
 # checks for a >= 2 decrease in the hemoglobin value within the past 2 days
 x <- tidy_data(labs)
-x <- dplyr::filter(x, lab == "hgb")
 
 print(head(
-  lab_change(x, -2, max, back = 2)
+  lab_change(x, "hgb", -2, max, back = 2)
 ))
 
 }

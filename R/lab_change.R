@@ -33,7 +33,8 @@ lab_change <- function(x, change.by, FUN, back = 2) {
         # the change from the running min/max to current value
         dplyr::mutate_(.dots = purrr::set_names(
             x = list(~count_rowsback(lab.datetime, back),
-                     ~zoo::rollapplyr(lab.result, rowsback, FUN, fill = NA, partial = TRUE),
+                     ~zoo::rollapplyr(lab.result, rowsback, FUN, fill = NA,
+                                      partial = TRUE),
                      ~lab.result - running),
             nm = list("rowsback", "running", "change")
         )) %>%

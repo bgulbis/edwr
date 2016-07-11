@@ -20,9 +20,13 @@
 #' @return A data frame
 #'
 #' @examples
-#' # checks for a >= 2 decrease in the lab value within the past 2 days
+#' # checks for a >= 2 decrease in the hemoglobin value within the past 2 days
 #' x <- tidy_data(labs)
-#' y <- lab_change(x, -2, max, back = 2)
+#' x <- dplyr::filter(x, lab == "hgb")
+#'
+#' print(head(
+#'   lab_change(x, -2, max, back = 2)
+#' ))
 #'
 #' @export
 lab_change <- function(x, change.by, FUN, back = 2) {

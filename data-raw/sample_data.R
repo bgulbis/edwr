@@ -24,11 +24,6 @@ demographics <- read_data(dir.sample, "demographics", "skip") %>%
 write_csv(demographics, "inst/extdata/demographics.csv")
 
 # get sample data for examples / tests
-# x <- read_data(dir.sample, "diagnosis")
-# diagnosis <- x %>%
-#     mutate(pie.id = as.character(as.numeric(pie.id) + rnum))
-# class(diagnosis) <- class(x)
-
 x <- read_data(dir.sample, "labs")
 labs <- x %>%
     filter(lab %in% c("hgb", "platelet", "wbc", "inr", "ptt")) %>%
@@ -103,6 +98,11 @@ visits <- x %>%
            nurse.unit.admit = str_replace_all(nurse.unit.admit, hosp))
 class(visits) <- class(x)
 
+x <- read_data(dir.sample, "diagnosis")
+diagnosis <- x %>%
+    mutate(pie.id = as.character(as.numeric(pie.id) + rnum))
+class(diagnosis) <- class(x)
+
 # save data for use in package
 devtools::use_data(labs, meds_cont, meds_home, meds_sched, warfarin,
                    overwrite = TRUE)
@@ -112,5 +112,6 @@ saveRDS(locations, paste(dir.tests, "locations.Rds", sep = "/"))
 saveRDS(services, paste(dir.tests, "services.Rds", sep = "/"))
 saveRDS(vent_times, paste(dir.tests, "vent_times.Rds", sep = "/"))
 saveRDS(visits, paste(dir.tests, "visits.Rds", sep = "/"))
+saveRDS(diagnosis, paste(dir.tests, "diagnosis.Rds", sep = "/"))
 
 rm(rnum, rdays)

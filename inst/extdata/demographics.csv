@@ -1,16 +1,16 @@
 PowerInsight Encounter Id,Age- Years (Visit),Sex,Race,Discharge Disposition,LOS (Actual),Encounter Type,Person ID,Person Location- Facility (Curr)
-113231047,70,Male,White/Caucasian,Long Term Care,16.5,Inpatient,71762145,Hospital
-113631298,63,Female,White/Caucasian,Home,12.9166666666667,Inpatient,68819538,Hospital
-116844899,27,Male,White/Caucasian,Skilled Nursing Facility,22.9583333333333,Inpatient,75519649,Hospital
-118305308,79,Female,Other,Intermediate Care,33.4166666666667,Inpatient,33772340,Hospital
-119065555,47,Male,African American,DC/DISC TO REHAB,26.7083333333333,Inpatient,36849482,Hospital
-119713217,42,Male,Other,DC/DISC TO REHAB,46.625,Inpatient,79164762,Hospital
-122022998,53,Female,African American,Home Care with Home Health,56,Inpatient,50897651,Hospital
-125267598,56,Male,African American,Skilled Nursing Facility,22.25,Inpatient,19822129,Hospital
-118502982,58,Male,White/Caucasian,Home,29.125,Inpatient,55034346,Hospital
-118840726,57,Male,White/Caucasian,DC/DISC TO REHAB,28.2083333333333,Inpatient,39571394,Hospital
-118840726,57,Male,White/Caucasian,DC/DISC TO REHAB,28.2083333333333,Inpatient,39571394,Hospital
-118533051,57,Male,White/Caucasian,Home,27,Inpatient,56948412,Hospital
-121656350,66,Male,African American,Home,49.125,Inpatient,81612113,Hospital
-120317400,41,Male,White/Caucasian,Skilled Nursing Facility,80.0416666666667,Inpatient,80050862,Hospital
-122556936,47,Female,African American,DC/DISC TO REHAB,44.7083333333333,Inpatient,31016453,Hospital
+113203204,70,Male,White/Caucasian,Long Term Care,16.5,Inpatient,71734302,Hospital
+113603455,63,Female,White/Caucasian,Home,12.9166666666667,Inpatient,68791695,Hospital
+116817056,27,Male,White/Caucasian,Skilled Nursing Facility,22.9583333333333,Inpatient,75491806,Hospital
+118277465,79,Female,Other,Intermediate Care,33.4166666666667,Inpatient,33744497,Hospital
+119037712,47,Male,African American,DC/DISC TO REHAB,26.7083333333333,Inpatient,36821639,Hospital
+119685374,42,Male,Other,DC/DISC TO REHAB,46.625,Inpatient,79136919,Hospital
+121995155,53,Female,African American,Home Care with Home Health,56,Inpatient,50869808,Hospital
+125239755,56,Male,African American,Skilled Nursing Facility,22.25,Inpatient,19794286,Hospital
+118475139,58,Male,White/Caucasian,Home,29.125,Inpatient,55006503,Hospital
+118812883,57,Male,White/Caucasian,DC/DISC TO REHAB,28.2083333333333,Inpatient,39543551,Hospital
+118812883,57,Male,White/Caucasian,DC/DISC TO REHAB,28.2083333333333,Inpatient,39543551,Hospital
+118505208,57,Male,White/Caucasian,Home,27,Inpatient,56920569,Hospital
+121628507,66,Male,African American,Home,49.125,Inpatient,81584270,Hospital
+120289557,41,Male,White/Caucasian,Skilled Nursing Facility,80.0416666666667,Inpatient,80023019,Hospital
+122529093,47,Female,African American,DC/DISC TO REHAB,44.7083333333333,Inpatient,30988610,Hospital

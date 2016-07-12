@@ -36,6 +36,8 @@ as.edwr <- function(x) {
 #' @export
 is.edwr <- function(x) inherits(x, "edwr")
 
+# create generic functions for dplyr verbs which maintain edwr class types
+
 #' @export
 filter.edwr <- function(.data, ...) {
     y <- NextMethod()

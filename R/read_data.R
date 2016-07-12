@@ -1,3 +1,5 @@
+# read_data.R
+
 #' Read data from csv files
 #'
 #' \code{read_data} takes a directory and file name and reads in all
@@ -7,41 +9,60 @@
 #' files and binds them together into a data frame using
 #' \code{\link[readr]{read_csv}} from the readr package.
 #'
-#' Valid options for type include:
+#' Valid options for \code{type} are listed below, along with the names of the
+#' EDW Standard Project Queries which correspond to each \code{type}.
 #'
-#' \itemize{
-#'   \item skip (read in columns without renaming)
-#'   \item blood (blood product administration)
-#'   \item charges (charges by CDM code)
-#'   \item demographics (patient demographics)
-#'   \item diagnosis (ICD-9/10-CM codes)
-#'   \item encounters (all encounters by person)
-#'   \item events (generic clinical events)
-#'   \item home_meds (home / discharge medication lists)
-#'   \item icu_assess (RASS, GCS, etc.)
-#'   \item id (encounter ID, FIN, person ID)
-#'   \item labs (lab results)
-#'   \item measures (height, weight)
-#'   \item meds_cont (continuous medication administration)
-#'   \item meds_sched (intermittent medication administration)
-#'   \item meds_freq (intermittent meds with order frequency)
-#'   \item mpp (MPP used to order medication)
-#'   \item mrn (medical record number)
-#'   \item order_by (ordering provider data)
-#'   \item order_detail (medication order data)
-#'   \item patients (patients identified by CDM, diagnosis codes, or unit admission)
-#'   \item problems (problem list from EMR)
-#'   \item procedures9 (ICD-9 procedure codes)
-#'   \item procedures10 (ICD-10 procedure codes)
-#'   \item radiology (radiology orders)
-#'   \item services (list of patient's primary medical services)
-#'   \item surgeries (list of surgeries from surgery database)
-#'   \item uop (urine output)
-#'   \item vent_settings (FIO2, PaO2, etc.)
-#'   \item vent_start (vent start/stop dates/times)
-#'   \item visits (arrival, admit, discharge data)
-#'   \item vitals (vital signs)
-#'   \item warfarin (warfarin duration, indication, goal)
+#' \tabular{lcl}{
+#'   \strong{type Argument} \tab --- \tab \strong{EDW Query Name}\cr
+#'   skip \tab \tab query independent; reads in columns without renaming\cr
+#'   blood \tab \tab Blood Products\cr
+#'   charges \tab \tab Charges - [All, Department Prompt]\cr
+#'   demographics \tab \tab Demographics\cr
+#'   diagnosis \tab \tab Diagnosis Codes (ICD-9/10-CM) - All\cr
+#'   encounters \tab \tab Encounters - by Person ID\cr
+#'   events \tab \tab Clinical Events - Prompt\cr
+#'   icu_assess \tab \tab ICU Assessments (CAM-ICU, GCS, RASS)\cr
+#'   id \tab \tab Identifiers - by FIN\cr
+#'   \tab \tab Identifiers - by MRN\cr
+#'   \tab \tab Identifiers - by PowerInsight Encounter Id\cr
+#'   labs \tab \tab Labs - ABG\cr
+#'   \tab \tab Labs - CBC\cr
+#'   \tab \tab Labs - Chemistry\cr
+#'   \tab \tab Labs - Coags\cr
+#'   \tab \tab Labs - HIT\cr
+#'   \tab \tab Labs - LFTs\cr
+#'   \tab \tab Labs - Pregnancy\cr
+#'   \tab \tab Labs - Renal\cr
+#'   \tab \tab Urine Drug Screen\cr
+#'   \tab \tab Vomiting Output\cr
+#'   locations \tab \tab Location History\cr
+#'   measures \tab \tab Measures (Height and Weight)\cr
+#'   meds_cont \tab \tab Medications - Inpatient Continuous - [All, Prompt]\cr
+#'   meds_freq \tab \tab Medications - Inpatient Intermittent with Frequency - [All,
+#'     Prompt]\cr
+#'   meds_home \tab \tab Medications - Home and Discharge - [All, Prompt]\cr
+#'   meds_sched \tab \tab Medications - Inpatient Intermittent - [All, Prompt]\cr
+#'   mpp \tab \tab MPP's Ordered - [All, Order Prompt]\cr
+#'   mrn \tab \tab Identifiers - Person by MRN\cr
+#'   order_by \tab \tab Orders - Prompt\cr
+#'   order_detail \tab \tab Orders - from Clinical Event Id - Prompt\cr
+#'   patients \tab \tab Patients - by CDM charge - HealthQuest - [Location Prompt,
+#'     System]\cr
+#'   \tab \tab Patients - by ICD-9/10-CM Diagnosis Code\cr
+#'   \tab \tab Patients - by Medication\cr
+#'   \tab \tab Patients - by Unit Admission\cr
+#'   problems \tab \tab Problem List\cr
+#'   procedures9 \tab \tab Procedure Codes (ICD-9-CM) - [All, Prompt]\cr
+#'   procedures10 \tab \tab Procedure Codes (ICD-10-PCS) - [All, Prompt]\cr
+#'   radiology \tab \tab Radiology Reports\cr
+#'   services \tab \tab Service History\cr
+#'   surgeries \tab \tab Surgeries\cr
+#'   uop \tab \tab Urine output\cr
+#'   vent_settings \tab \tab Ventilator Data - Settings\cr
+#'   vent_times \tab \tab Ventilator Data - Start and Stop\cr
+#'   visits \tab \tab Visit Data\cr
+#'   vitals \tab \tab Vitals\cr
+#'   warfarin \tab \tab Warfarin Information\cr
 #' }
 #'
 #' @param data.dir A character string with the name of the directory containing
@@ -62,7 +83,7 @@
 #' @examples
 #' x <- read_data(
 #'   data.dir = paste0(system.file(package = "edwr", "extdata")),
-#'   file.name = "test_demographics.csv",
+#'   file.name = "demographics.csv",
 #'   type = "demographics"
 #' )
 #'
@@ -198,7 +219,7 @@ read_data <- function(data.dir,
                nm <- "event"
            },
 
-           home_meds = {
+           meds_home = {
                col.raw <- c(raw.names$id,
                             "Order Catalog Short Description",
                             "Order Catalog Mnemonic",
@@ -207,7 +228,7 @@ read_data <- function(data.dir,
                               "med",
                               "order.name",
                               "med.type")
-               col.types <- readr::cols("c", "c", "c", "c")
+               col.types <- readr::cols_only("c", "c", "c", "c")
                dots <- list(~stringr::str_to_lower(med))
                nm <- "med"
            },
@@ -307,16 +328,19 @@ read_data <- function(data.dir,
                             "Dosage Amount",
                             "Dosage Unit",
                             "Route of Administration - Short",
+                            "Event Type Code",
                             "Event ID")
                col.names <- c(pt.id,
+                              "order.id",
                               "med.datetime",
                               "med",
                               "med.dose",
                               "med.dose.units",
                               "med.route",
+                              "event.type",
                               "event.id")
                col.types <- readr::cols_only("c", "c", col_dt, "c", "d", "c",
-                                             "c", "c")
+                                             "c", "c", "c")
                dots <- list(~stringr::str_to_lower(med))
                nm <- "med"
            },
@@ -529,7 +553,7 @@ read_data <- function(data.dir,
                nm <- "vent.event"
            },
 
-           vent_start = {
+           vent_times = {
                col.raw <- c(raw.names$id,
                             "Clinical Event Date Result",
                             raw.names$ev)

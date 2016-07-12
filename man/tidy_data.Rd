@@ -3,10 +3,13 @@
 \name{tidy_data}
 \alias{tidy_data}
 \alias{tidy_data.default}
-\alias{tidy_data.home_meds}
 \alias{tidy_data.labs}
+\alias{tidy_data.locations}
 \alias{tidy_data.meds_cont}
+\alias{tidy_data.meds_home}
 \alias{tidy_data.meds_sched}
+\alias{tidy_data.services}
+\alias{tidy_data.vent_times}
 \title{Tidy data}
 \usage{
 tidy_data(x, ...)
@@ -19,7 +22,13 @@ tidy_data(x, ...)
 
 \method{tidy_data}{meds_sched}(x, ref, ...)
 
-\method{tidy_data}{home_meds}(x, ref, pts = NULL, home = TRUE, ...)
+\method{tidy_data}{meds_home}(x, ref, pts = NULL, home = TRUE, ...)
+
+\method{tidy_data}{locations}(x, ...)
+
+\method{tidy_data}{services}(x, ...)
+
+\method{tidy_data}{vent_times}(x, dc, ...)
 }
 \arguments{
 \item{x}{A data frame with an edw class type}
@@ -29,7 +38,8 @@ tidy_data(x, ...)
 \item{censor}{A logical, if TRUE will add a column indicating the data was
 censored (default)}
 
-\item{ref}{A data frame with three columns: name, type, and group}
+\item{ref}{A data frame with three columns: name, type, and group. See
+details below.}
 
 \item{sched}{A data frame with intermittent medications}
 
@@ -37,7 +47,9 @@ censored (default)}
 in study}
 
 \item{home}{A logical, if TRUE (default) look for home medications,
-otherwise look for discharge medications}
+otherwise look for discharge prescriptions}
+
+\item{dc}{A data frame with discharge date/times}
 }
 \description{
 \code{tidy_data} transforms raw EDW data into a tidy format
@@ -48,24 +60,56 @@ This is an S3 generic function for tidying EDW data read in using
 the type of data being transformed (i.e., lab results, medication data,
 etc.).
 
-The data frame passed to \code{ref} should contain three columns: name, type,
-and group. The name column should contain either generic medication names or
-medication classes. The type column should specify whether the value in name
-is a "class" or "med". The group column should specify whether the medication
-is a continous ("cont") or scheduled ("sched") medication.
+The data frame passed to \code{ref} should contain three character columns:
+name, type, and group. The name column should contain either generic
+medication names or medication classes. The type column should specify
+whether the value in name is a "class" or "med". The group column should
+specify whether the medication is a continous ("cont") or scheduled ("sched")
+medication.
 }
 \examples{
-x <- read_data(
-  data.dir = paste0(system.file(package = "edwr", "extdata")),
-  file.name = "test_labs.csv",
-  type = "labs"
+# tidy lab data; non-numeric results will be converted to NA
+suppressWarnings(print(head(
+  tidy_data(labs)
+)))
+
+# tidy labs without marking censored data (will be converted to NA's)
+suppressWarnings(print(head(
+  tidy_data(labs, censor = FALSE)
+)))
+
+# make a reference data frame for tidying meds
+ref <- tibble::tibble(
+  name = c("heparin", "warfarin", "antiplatelet agents"),
+  type = c("med", "med", "class"),
+  group = c("cont", "sched", "sched")
 )
 
-suppressWarnings(
-  y <- tidy_data(x)
-)
+# tidy continuous medications; will keep only heparin drips
+print(head(
+  tidy_data(meds_cont, ref, meds_sched)
+))
 
-print(head(y))
+# tidy intermittent medications; will keep warfarin and antiplatelet agents
+print(head(
+  tidy_data(meds_sched, ref)
+))
+
+# tidy home medications
+print(head(
+  tidy_data(meds_home, ref)
+))
+
+# return all patients, even if they do not have any of the desired home meds
+pts <- dplyr::distinct(labs, pie.id)
+print(head(
+  tidy_data(meds_home, ref, pts = pts)
+))
+
+# return discharge prescriptions instead of home meds
+print(head(
+  tidy_data(meds_home, ref, pts = pts, home = FALSE)
+))
 
 }
 

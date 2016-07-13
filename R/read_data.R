@@ -643,3 +643,21 @@ read_data <- function(data.dir,
 
     read
 }
+
+#' @export
+read_data2 <- function(...) {
+    UseMethod("read_data2")
+}
+
+#' @export
+read_data2.default <- function(data.dir, file.name, ...) {
+    # if (is.null(type)) {
+    #     type <- file.name
+    # }
+    #
+    # get list of files is specified directory and matching file name
+    list.files(data.dir, pattern = file.name, full.names = TRUE) %>%
+        purrr::map_df(readr::read_csv, col_types = readr::cols(.default = "c")) %>%
+        as.edwr()
+
+}

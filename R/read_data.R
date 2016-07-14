@@ -7,14 +7,15 @@
 #'
 #' This function takes a directory and file name and reads in all matching csv
 #' files and binds them together into a data frame using
-#' \code{\link[readr]{read_csv}} from the readr package.
+#' \code{\link[readr]{read_csv}} from \package{readr}. The resulting data frame
+#' has a class of \code{edwr}, and can then be passed to one of the edwr-related
+#' class types for variable renaming and type setting (example: \code{as.labs}).
 #'
-#' Valid options for \code{type} are listed below, along with the names of the
-#' EDW Standard Project Queries which correspond to each \code{type}.
+#' The following table lists the edwr-related class which corresponds to each
+#' EDW Standard Project Queries.
 #'
 #' \tabular{lcl}{
-#'   \strong{type Argument} \tab --- \tab \strong{EDW Query Name}\cr
-#'   skip \tab \tab query independent; reads in columns without renaming\cr
+#'   \strong{edwr Class Name} \tab --- \tab \strong{EDW Query Name}\cr
 #'   blood \tab \tab Blood Products\cr
 #'   charges \tab \tab Charges - [All, Department Prompt]\cr
 #'   demographics \tab \tab Demographics\cr
@@ -69,28 +70,42 @@
 #'   the data files
 #' @param file.name A character string with name of data file or pattern to
 #'   match
-#' @param type An optional character string indicating type of data being
-#'   tidied; uses file.name if no value is provided
-#' @param check.distinct An optional logical, calls
-#'   \code{\link[dplyr]{distinct}} on the imported data if \code{TRUE}
-#' @param include.pts If not NULL, the returned data frame will be limited to
-#'   only the included patients
 #'
-#' @return A data frame, as an \code{edwr} class type if type is not skip
+#' @return A data frame of class \code{edwr}
 #'
 #' @seealso \code{\link[readr]{read_csv}}
 #'
 #' @examples
 #' x <- read_data(
 #'   data.dir = paste0(system.file(package = "edwr", "extdata")),
-#'   file.name = "demographics.csv",
-#'   type = "demographics"
+#'   file.name = "demographics.csv"
 #' )
 #'
 #' str(x)
+#' class(x)
+#'
+#' y <- as.demographics(x)
 #'
 #' @export
-read_data <- function(data.dir,
+read_data <- function(...) {
+    UseMethod("read_data")
+}
+
+#' @export
+read_data.default <- function(data.dir, file.name, ...) {
+    # get list of files in specified directory and matching file name
+    list.files(data.dir, pattern = file.name, full.names = TRUE) %>%
+        purrr::map_df(
+            readr::read_csv,
+            col_types = readr::cols(.default = "c"),
+            na = c("", "NA", "Unknown")
+        ) %>%
+        as.edwr()
+}
+
+
+
+read_data2 <- function(data.dir,
                           file.name,
                           type = NULL,
                           check.distinct = TRUE,
@@ -642,24 +657,4 @@ read_data <- function(data.dir,
     class(read) <- c(type, class(read))
 
     read
-}
-
-#' @export
-read_data2 <- function(...) {
-    UseMethod("read_data2")
-}
-
-#' @export
-read_data2.default <- function(data.dir, file.name, ...) {
-    # if (is.null(type)) {
-    #     type <- file.name
-    # }
-    #
-    # get list of files is specified directory and matching file name
-    list.files(data.dir, pattern = file.name, full.names = TRUE) %>%
-        purrr::map_df(readr::read_csv,
-                      col_types = readr::cols(.default = "c"),
-                      na = c("", "NA", "Unknown")) %>%
-        as.edwr()
-
 }

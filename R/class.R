@@ -96,10 +96,100 @@ as.labs <- function(x) {
 is.edwr <- function(x) inherits(x, "edwr")
 
 #' @export
+is.blood <- function(x) inherits(x, "blood")
+
+#' @export
+is.charges <- function(x) inherits(x, "charges")
+
+#' @export
 is.demographics <- function(x) inherits(x, "demographics")
 
 #' @export
+is.diagnosis <- function(x) inherits(x, "diagnosis")
+
+#' @export
+is.encounters <- function(x) inherits(x, "encounters")
+
+#' @export
+is.events <- function(x) inherits(x, "events")
+
+#' @export
+is.icu_assess <- function(x) inherits(x, "icu_assess")
+
+#' @export
+is.id <- function(x) inherits(x, "id")
+
+#' @export
 is.labs <- function(x) inherits(x, "labs")
+
+#' @export
+is.locations <- function(x) inherits(x, "locations")
+
+#' @export
+is.measures <- function(x) inherits(x, "measures")
+
+#' @export
+is.meds_cont <- function(x) inherits(x, "meds_cont")
+
+#' @export
+is.meds_freq <- function(x) inherits(x, "meds_freq")
+
+#' @export
+is.meds_home <- function(x) inherits(x, "meds_home")
+
+#' @export
+is.meds_sched <- function(x) inherits(x, "meds_sched")
+
+#' @export
+is.mpp <- function(x) inherits(x, "mpp")
+
+#' @export
+is.mrn <- function(x) inherits(x, "mrn")
+
+#' @export
+is.order_by <- function(x) inherits(x, "order_by")
+
+#' @export
+is.order_detail <- function(x) inherits(x, "order_detail")
+
+#' @export
+is.patients <- function(x) inherits(x, "patients")
+
+#' @export
+is.problems <- function(x) inherits(x, "problems")
+
+#' @export
+is.procedures9 <- function(x) inherits(x, "procedures9")
+
+#' @export
+is.procedures10 <- function(x) inherits(x, "procedures10")
+
+#' @export
+is.radiology <- function(x) inherits(x, "radiology")
+
+#' @export
+is.services <- function(x) inherits(x, "services")
+
+#' @export
+is.surgeries <- function(x) inherits(x, "surgeries")
+
+#' @export
+is.uop <- function(x) inherits(x, "uop")
+
+#' @export
+is.vent_settings <- function(x) inherits(x, "vent_settings")
+
+#' @export
+is.vent_times <- function(x) inherits(x, "vent_times")
+
+#' @export
+is.visits <- function(x) inherits(x, "visits")
+
+#' @export
+is.vitals <- function(x) inherits(x, "vitals")
+
+#' @export
+is.warfarin <- function(x) inherits(x, "warfarin")
 
 #' Set the default format for reading date/time variables
 #'

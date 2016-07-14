@@ -7,7 +7,7 @@
 #'
 #' This function takes a directory and file name and reads in all matching csv
 #' files and binds them together into a data frame using
-#' \code{\link[readr]{read_csv}} from \package{readr}. The resulting data frame
+#' \code{\link[readr]{read_csv}} from \code{readr}. The resulting data frame
 #' has a class of \code{edwr}, and can then be passed to one of the edwr-related
 #' class types for variable renaming and type setting (example: \code{as.labs}).
 #'

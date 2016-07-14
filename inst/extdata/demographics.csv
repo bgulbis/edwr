@@ -7,7 +7,7 @@ PowerInsight Encounter Id,Age- Years (Visit),Sex,Race,Discharge Disposition,LOS 
 119685374,42,Male,Other,DC/DISC TO REHAB,46.625,Inpatient,79136919,Hospital
 121995155,53,Female,African American,Home Care with Home Health,56,Inpatient,50869808,Hospital
 125239755,56,Male,African American,Skilled Nursing Facility,22.25,Inpatient,19794286,Hospital
-118475139,58,Male,White/Caucasian,Home,29.125,Inpatient,55006503,Hospital
+118475139,58,Male,Unknown,Home,29.125,Inpatient,55006503,Hospital
 118812883,57,Male,White/Caucasian,DC/DISC TO REHAB,28.2083333333333,Inpatient,39543551,Hospital
 118812883,57,Male,White/Caucasian,DC/DISC TO REHAB,28.2083333333333,Inpatient,39543551,Hospital
 118505208,57,Male,White/Caucasian,Home,27,Inpatient,56920569,Hospital

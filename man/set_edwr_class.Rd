@@ -12,9 +12,9 @@ edwr(x)
 
 as.edwr(x)
 
-as.labs(x)
-
 as.demographics(x)
+
+as.labs(x)
 }
 \arguments{
 \item{x}{object to set class \code{edwr}}

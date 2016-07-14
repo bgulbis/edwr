@@ -30,54 +30,62 @@ as.edwr <- function(x) {
 
 #' @rdname set_edwr_class
 #' @export
-as.labs <- function(x) {
-    if (missing(x)) x <- character()
-    if (is.labs(x)) return(x)
-    after <- match("labs", class(x), nomatch = 0L)
-    class(x) <- append(class(x), "labs", after = after)
-    x
-}
-
-#' @rdname set_edwr_class
-#' @export
 as.demographics <- function(x) {
     if (missing(x)) stop("Missing object")
     if (is.demographics(x)) return(x)
     if (!is.edwr(x)) x <- as.edwr(x)
 
-    df <- dplyr::rename_(
-        .data = x,
-        .dots = list(
-            "pie.id" = "`PowerInsight Encounter Id`",
-            "age" = "`Age- Years (Visit)`",
-            "race" = "Race",
-            "disposition" = "`Discharge Disposition`",
-            "length.stay" = "`LOS (Actual)`",
-            "visit.type" = "`Encounter Type`",
-            "person.id" = "`Person ID`",
-            "facility" = "`Person Location- Facility (Curr)`"
-        )
-    ) %>%
+    # rename variables to desired names, remove duplicate rows, and make sure
+    # variables have the desired types; any extra columns will be left as is
+    df <- dplyr::rename_(.data = x, .dots = list(
+        "pie.id" = "`PowerInsight Encounter Id`",
+        "age" = "`Age- Years (Visit)`",
+        "disposition" = "`Discharge Disposition`",
+        "length.stay" = "`LOS (Actual)`",
+        "visit.type" = "`Encounter Type`",
+        "person.id" = "`Person ID`",
+        "facility" = "`Person Location- Facility (Curr)`"
+    )) %>%
         dplyr::distinct_() %>%
-        readr::type_convert(
-            col_types = readr::cols(
-                pie.id = "c",
-                age = "i",
-                race = "c",
-                disposition = "c",
-                length.stay = "d",
-                visit.type = "c",
-                person.id = "c",
-                facility = "c"
-            ),
-            na = c("", "NA", "Unknown")
-        )
+        readr::type_convert(col_types = readr::cols(
+            pie.id = "c",
+            person.id = "c"
+        ))
+
+    names(df) <- stringr::str_to_lower(names(df))
 
     after <- match("demographics", class(x), nomatch = 0L)
     class(df) <- append(class(x), "demographics", after = after)
     df
 }
 
+#' @rdname set_edwr_class
+#' @export
+as.labs <- function(x) {
+    if (missing(x)) x <- character()
+    if (is.labs(x)) return(x)
+    if (!is.edwr(x)) x <- as.edwr(x)
+
+    # rename variables to desired names and remove duplicate rows; then convert
+    # all lab names to lower case to avoid matching errors and set date/time
+    # format; any extra columns will be left unchanged
+    df <- dplyr::rename_(.data = x, .dots = list(
+        "pie.id" = "`PowerInsight Encounter Id`",
+        "lab.datetime" = "`Clinical Event End Date/Time`",
+        "lab" = "`Clinical Event`",
+        "lab.result" = "`Clinical Event Result`"
+    )) %>%
+        dplyr::distinct_() %>%
+        dplyr::mutate_(.dots = purrr::set_names(
+            x = list(~stringr::str_to_lower(lab),
+                     ~format_dates(lab.datetime)),
+            nm = list("lab", "lab.datetime")
+        ))
+
+    after <- match("labs", class(x), nomatch = 0L)
+    class(df) <- append(class(x), "labs", after = after)
+    df
+}
 
 #' Test edwr-related classes
 #'
@@ -93,18 +101,15 @@ is.demographics <- function(x) inherits(x, "demographics")
 #' @export
 is.labs <- function(x) inherits(x, "labs")
 
-# create generic functions for dplyr verbs which maintain edwr class types
-
-#' @export
-filter.edwr <- function(.data, ...) {
-    y <- NextMethod()
-    class(y) <- class(.data)
-    y
-}
-
-#' @export
-filter_.edwr <- function(.data, ..., .dots) {
-    y <- NextMethod()
-    class(y) <- class(.data)
-    y
+#' Set the default format for reading date/time variables
+#'
+#' @return A readr::collector object
+#'
+#' @keywords internal
+format_dates <- function(x) {
+    readr::parse_datetime(
+        x = x,
+        format = "%Y/%m/%d %H:%M:%S",
+        locale = readr::locale(tz = "US/Central")
+    )
 }

@@ -657,7 +657,9 @@ read_data2.default <- function(data.dir, file.name, ...) {
     #
     # get list of files is specified directory and matching file name
     list.files(data.dir, pattern = file.name, full.names = TRUE) %>%
-        purrr::map_df(readr::read_csv, col_types = readr::cols(.default = "c")) %>%
+        purrr::map_df(readr::read_csv,
+                      col_types = readr::cols(.default = "c"),
+                      na = c("", "NA", "Unknown")) %>%
         as.edwr()
 
 }

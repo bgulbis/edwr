@@ -12,7 +12,7 @@ rnum <- sample.int(100000, 1)
 rdays <- sample.int(15, 1)
 
 # store sample demographics data as csv file to use for read_data tests
-demographics <- read_data(dir.sample, "demographics", "skip") %>%
+demographics <- read_data(dir.sample, "demographics") %>%
     # filter(`PowerInsight Encounter Id` %in% pts.sample$`PowerInsight Encounter Id`) %>%
     mutate(
         `PowerInsight Encounter Id` = as.character(
@@ -24,12 +24,12 @@ demographics <- read_data(dir.sample, "demographics", "skip") %>%
 write_csv(demographics, "inst/extdata/demographics.csv")
 
 # get sample data for examples / tests
-x <- read_data(dir.sample, "labs")
-labs <- x %>%
-    filter(lab %in% c("hgb", "platelet", "wbc", "inr", "ptt")) %>%
+labs <- read_data(dir.sample, "labs") %>%
+    as.labs() %>%
+    filter_(.dots = list(~lab %in% c("hgb", "platelet", "wbc", "inr", "ptt"))) %>%
+    # filter(lab %in% c("hgb", "platelet", "wbc", "inr", "ptt")) %>%
     mutate(pie.id = as.character(as.numeric(pie.id) + rnum),
            lab.datetime = lab.datetime + days(rdays))
-class(labs) <- class(x)
 
 x <- read_data(dir.sample, "meds_home")
 meds_home <- mutate(x, pie.id = as.character(as.numeric(pie.id) + rnum))

@@ -19,6 +19,14 @@ filter.edwr <- function(.data, ...) {
 }
 
 #' @export
+filter_.edwr <- function(.data, ..., .dots) {
+    y <- NextMethod()
+    class(y) <- class(.data)
+    y
+}
+
+
+#' @export
 mutate.edwr <- function(.data, ...) {
     y <- NextMethod()
     class(y) <- class(.data)

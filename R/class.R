@@ -36,6 +36,13 @@ as.edwr <- function(x) {
     x
 }
 
+# create "sub" classes of edwr; each class represents a different type of data
+# from EDW (labs, meds, demographics, etc.); in general, these functions will
+# rename variables to desired names, remove duplicate rows, convert names (of
+# labs, meds, etc.) to lower case (to avoid case-sensitive matching errors when
+# working with the data), parse date/time values into POSIXct vectors; any extra
+# columns contained in the csv file will be left unchanged
+
 #' @rdname set_edwr_class
 #' @export
 as.demographics <- function(x) {
@@ -43,8 +50,6 @@ as.demographics <- function(x) {
     if (is.demographics(x)) return(x)
     if (!is.edwr(x)) x <- as.edwr(x)
 
-    # rename variables to desired names, remove duplicate rows, and make sure
-    # variables have the desired types; any extra columns will be left as is
     df <- rename_(.data = x, .dots = c(val.pie, list(
         "age" = "`Age- Years (Visit)`",
         "disposition" = "`Discharge Disposition`",
@@ -73,9 +78,6 @@ as.labs <- function(x) {
     if (is.labs(x)) return(x)
     if (!is.edwr(x)) x <- as.edwr(x)
 
-    # rename variables to desired names and remove duplicate rows; then convert
-    # all lab names to lower case to avoid matching errors and set date/time
-    # format; any extra columns will be left unchanged
     df <- rename_(.data = x, .dots = c(val.pie, list(
         "lab.datetime" = val.dt,
         "lab" = val.ce,
@@ -100,9 +102,6 @@ as.locations <- function(x) {
     if (is.locations(x)) return(x)
     if (!is.edwr(x)) x <- as.edwr(x)
 
-    # rename variables to desired names and remove duplicate rows; then convert
-    # all lab names to lower case to avoid matching errors and set date/time
-    # format; any extra columns will be left unchanged
     df <- rename_(.data = x, .dots = c(val.pie, list(
         "arrive.datetime" = "`Location Arrival Date & Time`",
         "depart.datetime" = "`Location Depart Date & Time`",
@@ -131,9 +130,6 @@ as.meds_cont <- function(x) {
     if (is.meds_cont(x)) return(x)
     if (!is.edwr(x)) x <- as.edwr(x)
 
-    # rename variables to desired names and remove duplicate rows; then convert
-    # all med names to lower case to avoid matching errors and set date/time
-    # format; any extra columns will be left unchanged
     df <- rename_(.data = x, .dots = c(val.pie, list(
         "order.id" = "`Clinical Event Order ID`",
         "event.id" = "`Event ID`",
@@ -164,9 +160,6 @@ as.meds_home <- function(x) {
     if (is.meds_home(x)) return(x)
     if (!is.edwr(x)) x <- as.edwr(x)
 
-    # rename variables to desired names and remove duplicate rows; then convert
-    # all med names to lower case to avoid matching errors and set date/time
-    # format; any extra columns will be left unchanged
     df <- rename_(.data = x, .dots = c(val.pie, list(
         "med" = "`Order Catalog Short Description`",
         "order.name" = "`Order Catalog Mnemonic`",
@@ -190,9 +183,6 @@ as.meds_sched <- function(x) {
     if (is.meds_sched(x)) return(x)
     if (!is.edwr(x)) x <- as.edwr(x)
 
-    # rename variables to desired names and remove duplicate rows; then convert
-    # all med names to lower case to avoid matching errors and set date/time
-    # format; any extra columns will be left unchanged
     df <- rename_(.data = x, .dots = c(val.pie, list(
         "order.id" = "`Clinical Event Order ID`",
         "event.id" = "`Event ID`",
@@ -222,9 +212,6 @@ as.warfarin <- function(x) {
     if (is.warfarin(x)) return(x)
     if (!is.edwr(x)) x <- as.edwr(x)
 
-    # rename variables to desired names and remove duplicate rows; then convert
-    # all lab names to lower case to avoid matching errors and set date/time
-    # format; any extra columns will be left unchanged
     df <- rename_(.data = x, .dots = c(val.pie, list(
         "warfarin.datetime" = val.dt,
         "warfarin.event" = val.ce,
@@ -242,6 +229,33 @@ as.warfarin <- function(x) {
     df
 }
 
+#' @rdname set_edwr_class
+#' @export
+as.services <- function(x) {
+    if (missing(x)) x <- character()
+    if (is.services(x)) return(x)
+    if (!is.edwr(x)) x <- as.edwr(x)
+
+    df <- rename_(.data = x, .dots = c(val.pie, list(
+        "arrive.datetime" = "`Location Arrival Date & Time`",
+        "depart.datetime" = "`Location Depart Date & Time`",
+        "unit.to" = "`Person Location - Nurse Unit (To)`",
+        "unit.from" = "`Person Location - Nurse Unit (From)`"
+    ))) %>%
+        dplyr::distinct_() %>%
+        mutate_(.dots = set_names(
+            x = list(~format_dates(arrive.datetime),
+                     ~format_dates(depart.datetime),
+                     ~dplyr::na_if(unit.to, ""),
+                     ~dplyr::na_if(unit.from, "")),
+            nm = list("arrive.datetime", "depart.datetime", "unit.to",
+                      "unit.from")
+        ))
+
+    after <- match("services", class(x), nomatch = 0L)
+    class(df) <- append(class(x), "services", after = after)
+    df
+}
 
 # class test functions ---------------------------------
 

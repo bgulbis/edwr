@@ -23,31 +23,29 @@ demographics <- read_data(dir.sample, "demographics") %>%
 
 write_csv(demographics, "inst/extdata/demographics.csv")
 
-# get sample data for examples / tests
+# get sample data for examples and tests
 labs <- read_data(dir.sample, "labs") %>%
     as.labs() %>%
-    filter_(.dots = list(~lab %in% c("hgb", "platelet", "wbc", "inr", "ptt"))) %>%
-    # filter(lab %in% c("hgb", "platelet", "wbc", "inr", "ptt")) %>%
+    filter(lab %in% c("hgb", "platelet", "wbc", "inr", "ptt")) %>%
     mutate(pie.id = as.character(as.numeric(pie.id) + rnum),
            lab.datetime = lab.datetime + days(rdays))
 
-x <- read_data(dir.sample, "meds_home")
-meds_home <- mutate(x, pie.id = as.character(as.numeric(pie.id) + rnum))
-class(meds_home) <- class(x)
+meds_home <- read_data(dir.sample, "meds_home") %>%
+    mutate(pie.id = as.character(as.numeric(pie.id) + rnum))
 
 med.sample <- read_data(dir.sample, "meds_cont") %>%
+    as.meds_cont() %>%
     filter(med == "heparin") %>%
     distinct(pie.id) %>%
     sample_n(3)
 
-x <- read_data(dir.sample, "meds_cont")
-meds_cont <- x %>%
+meds_cont <- read_data(dir.sample, "meds_cont") %>%
+    as.meds_cont() %>%
     filter(pie.id %in% med.sample$pie.id) %>%
     mutate(pie.id = as.character(as.numeric(pie.id) + rnum),
            order.id = as.character(as.numeric(order.id) + rnum),
            event.id = as.character(as.numeric(event.id) + rnum),
            med.datetime = med.datetime + days(rdays))
-class(meds_cont) <- class(x)
 
 x <- read_data(dir.sample, "meds_sched")
 meds_sched <- x %>%

@@ -48,14 +48,13 @@ meds_cont <- read_data(dir.sample, "meds_cont") %>%
            event.id = as.character(as.numeric(event.id) + rnum),
            med.datetime = med.datetime + days(rdays))
 
-x <- read_data(dir.sample, "meds_sched")
-meds_sched <- x %>%
+meds_sched <- read_data(dir.sample, "meds_sched") %>%
+    as.meds_sched() %>%
     filter(pie.id %in% med.sample$pie.id) %>%
     mutate(pie.id = as.character(as.numeric(pie.id) + rnum),
            order.id = as.character(as.numeric(order.id) + rnum),
            event.id = as.character(as.numeric(event.id) + rnum),
            med.datetime = med.datetime + days(rdays))
-class(meds_sched) <- class(x)
 
 x <- read_data(dir.sample, "warfarin")
 warfarin <- x %>%

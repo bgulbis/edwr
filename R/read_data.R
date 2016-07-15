@@ -85,6 +85,7 @@
 #' class(x)
 #'
 #' y <- as.demographics(x)
+#' class(y)
 #'
 #' @export
 read_data <- function(...) {
@@ -260,31 +261,6 @@ read_data2 <- function(data.dir,
                               "measure.result",
                               "measure.units")
                col.types <- readr::cols("c", col_dt, "c", "d", "c")
-           },
-
-           meds_sched = {
-               col.raw <- c(raw.names$id,
-                            "Clinical Event Order ID",
-                            raw.names$dt,
-                            raw.names$ev,
-                            "Dosage Amount",
-                            "Dosage Unit",
-                            "Route of Administration - Short",
-                            "Event Type Code",
-                            "Event ID")
-               col.names <- c(pt.id,
-                              "order.id",
-                              "med.datetime",
-                              "med",
-                              "med.dose",
-                              "med.dose.units",
-                              "med.route",
-                              "event.type",
-                              "event.id")
-               col.types <- readr::cols_only("c", "c", col_dt, "c", "d", "c",
-                                             "c", "c", "c")
-               dots <- list(~stringr::str_to_lower(med))
-               nm <- "med"
            },
 
            meds_freq = {

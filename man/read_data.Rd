@@ -92,6 +92,7 @@ str(x)
 class(x)
 
 y <- as.demographics(x)
+class(y)
 
 }
 \seealso{

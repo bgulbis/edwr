@@ -69,8 +69,7 @@ EDW Standard Project Queries.
   \tab \tab Patients - by Medication\cr
   \tab \tab Patients - by Unit Admission\cr
   problems \tab \tab Problem List\cr
-  procedures9 \tab \tab Procedure Codes (ICD-9-CM) - [All, Prompt]\cr
-  procedures10 \tab \tab Procedure Codes (ICD-10-PCS) - [All, Prompt]\cr
+  procedures \tab \tab Procedure Codes (ICD-9-CM/ICD-10-PCS) - All\cr
   radiology \tab \tab Radiology Reports\cr
   services \tab \tab Service History\cr
   surgeries \tab \tab Surgeries\cr

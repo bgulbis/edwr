@@ -92,43 +92,39 @@ tidy_data.labs <- function(x, censor = TRUE, ...) {
     tidy <- x
     # create a column noting if data was censored
     if (censor == TRUE) {
-        tidy <- dplyr::mutate_(tidy, .dots = purrr::set_names(
+        tidy <- mutate_(tidy, .dots = set_names(
             x = list(~stringr::str_detect(lab.result, ">|<")),
             nm = "censored"
         ))
     }
 
     # convert lab results to numeric values
-    tidy <- dplyr::mutate_(tidy, .dots = purrr::set_names(
+    tidy <- mutate_(tidy, .dots = set_names(
         x = list(~as.numeric(lab.result)),
         nm = "lab.result"
     ))
-
-    # keep original class
-    class(tidy) <- class(x)
-    tidy
 }
 
 #' @export
 #' @rdname tidy_data
 tidy_data.meds_cont <- function(x, ref, sched, ...) {
     # for any med classes, lookup the meds included in the class
-    y <- dplyr::filter_(ref, .dots = list(~type == "class", ~group == "cont"))
+    y <- filter_(ref, .dots = list(~type == "class", ~group == "cont"))
     class.meds <- med_lookup(y$name)
 
     # join the list of meds with any indivdual meds included
-    y <- dplyr::filter_(ref, .dots = list(~type == "med", ~group == "cont"))
+    y <- filter_(ref, .dots = list(~type == "med", ~group == "cont"))
     lookup.meds <- c(y$name, class.meds$med.name)
 
     # remove any rows in continuous data which are actually scheduled doses,
     # then filter to meds in lookup, then sort by pie.id, med, med.datetime
-    tidy <- dplyr::anti_join(x, sched, by = "event.id") %>%
-        dplyr::filter_(.dots = list(~med %in% lookup.meds)) %>%
-        dplyr::arrange_(.dots = list("pie.id", "med", "med.datetime"))
+    tidy <- anti_join(x, sched, by = "event.id") %>%
+        filter_(.dots = list(~med %in% lookup.meds)) %>%
+        arrange_(.dots = list("pie.id", "med", "med.datetime"))
 
     # keep original class
-    class(tidy) <- class(x)
-    tidy
+    # class(tidy) <- class(x)
+    # tidy
 }
 
 #' @export

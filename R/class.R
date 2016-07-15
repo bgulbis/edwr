@@ -570,6 +570,28 @@ as.procedures <- function(x) {
 
 #' @rdname set_edwr_class
 #' @export
+as.radiology <- function(x) {
+    if (missing(x)) stop("Missing object")
+    if (is.radiology(x)) return(x)
+    if (!is.edwr(x)) x <- as.edwr(x)
+
+    df <- rename_(.data = x, .dots = c(val.pie, list(
+        "rad.datetime" = val.dt,
+        "rad.type" = val.ce
+    ))) %>%
+        dplyr::distinct_() %>%
+        mutate_(.dots = set_names(
+            x = list(~format_dates(rad.datetime)),
+            nm = "rad.datetime"
+        ))
+
+    after <- match("radiology", class(x), nomatch = 0L)
+    class(df) <- append(class(x), "radiology", after = after)
+    df
+}
+
+#' @rdname set_edwr_class
+#' @export
 as.services <- function(x) {
     if (missing(x)) x <- character()
     if (is.services(x)) return(x)

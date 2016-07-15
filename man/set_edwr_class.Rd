@@ -24,6 +24,7 @@
 \alias{as.patients}
 \alias{as.problems}
 \alias{as.procedures}
+\alias{as.radiology}
 \alias{as.services}
 \alias{as.uop}
 \alias{as.vent_settings}
@@ -82,6 +83,8 @@ as.patients(x)
 as.problems(x)
 
 as.procedures(x)
+
+as.radiology(x)
 
 as.services(x)
 

@@ -300,30 +300,6 @@ as.meds_sched <- function(x) {
 
 #' @rdname set_edwr_class
 #' @export
-as.warfarin <- function(x) {
-    if (missing(x)) x <- character()
-    if (is.warfarin(x)) return(x)
-    if (!is.edwr(x)) x <- as.edwr(x)
-
-    df <- rename_(.data = x, .dots = c(val.pie, list(
-        "warfarin.datetime" = val.dt,
-        "warfarin.event" = val.ce,
-        "warfarin.result" = val.res
-    ))) %>%
-        dplyr::distinct_() %>%
-        mutate_(.dots = set_names(
-            x = list(~stringr::str_to_lower(warfarin.event),
-                     ~format_dates(warfarin.datetime)),
-            nm = list("warfarin.event", "warfarin.datetime")
-        ))
-
-    after <- match("warfarin", class(x), nomatch = 0L)
-    class(df) <- append(class(x), "warfarin", after = after)
-    df
-}
-
-#' @rdname set_edwr_class
-#' @export
 as.services <- function(x) {
     if (missing(x)) x <- character()
     if (is.services(x)) return(x)
@@ -403,6 +379,29 @@ as.visits <- function(x) {
     df
 }
 
+#' @rdname set_edwr_class
+#' @export
+as.warfarin <- function(x) {
+    if (missing(x)) x <- character()
+    if (is.warfarin(x)) return(x)
+    if (!is.edwr(x)) x <- as.edwr(x)
+
+    df <- rename_(.data = x, .dots = c(val.pie, list(
+        "warfarin.datetime" = val.dt,
+        "warfarin.event" = val.ce,
+        "warfarin.result" = val.res
+    ))) %>%
+        dplyr::distinct_() %>%
+        mutate_(.dots = set_names(
+            x = list(~stringr::str_to_lower(warfarin.event),
+                     ~format_dates(warfarin.datetime)),
+            nm = list("warfarin.event", "warfarin.datetime")
+        ))
+
+    after <- match("warfarin", class(x), nomatch = 0L)
+    class(df) <- append(class(x), "warfarin", after = after)
+    df
+}
 
 # class test functions ---------------------------------
 

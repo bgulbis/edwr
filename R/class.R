@@ -214,6 +214,24 @@ as.icu_assess <- function(x) {
 
 #' @rdname set_edwr_class
 #' @export
+as.id <- function(x) {
+    if (missing(x)) stop("Missing object")
+    if (is.id(x)) return(x)
+    if (!is.edwr(x)) x <- as.edwr(x)
+
+    df <- rename_(.data = x, .dots = c(val.pie, list(
+        "fin" = "`Formatted Financial Nbr`",
+        "person.id" = "`Person ID`"
+    ))) %>%
+        dplyr::distinct_()
+
+    after <- match("id", class(x), nomatch = 0L)
+    class(df) <- append(class(x), "id", after = after)
+    df
+}
+
+#' @rdname set_edwr_class
+#' @export
 as.labs <- function(x) {
     if (missing(x)) x <- character()
     if (is.labs(x)) return(x)

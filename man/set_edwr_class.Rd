@@ -9,6 +9,7 @@
 \alias{as.encounters}
 \alias{as.events}
 \alias{as.icu_assess}
+\alias{as.id}
 \alias{as.labs}
 \alias{as.locations}
 \alias{as.meds_cont}
@@ -39,6 +40,8 @@ as.encounters(x)
 as.events(x)
 
 as.icu_assess(x)
+
+as.id(x)
 
 as.labs(x)
 

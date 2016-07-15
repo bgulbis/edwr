@@ -47,21 +47,22 @@ as.edwr <- function(x) {
 #' @rdname set_edwr_class
 #' @export
 as.blood <- function(x) {
+    # inherits from events class
     if (missing(x)) x <- character()
     if (is.blood(x)) return(x)
     if (!is.edwr(x)) x <- as.edwr(x)
+    if (!is.events(x)) x <- as.events(x)
 
     prods <- c("Cryo(.*)" = "cryo",
                "FFP(.*)" = "ffp",
                "(P)?RBC(.*)" = "prbc",
                "Platelet(.*)" = "platelet")
 
-    df <- rename_(.data = x, .dots = c(val.pie, list(
-        "blood.datetime" = val.dt,
-        "blood.prod" = val.ce,
-        "blood.type" = val.res
-    ))) %>%
-        dplyr::distinct_() %>%
+    df <- rename_(.data = x, .dots = list(
+        "blood.datetime" = "event.datetime",
+        "blood.prod" = "event",
+        "blood.type" = "event.result"
+    )) %>%
         mutate_(.dots = set_names(
             x = list(~stringr::str_replace_all(blood.prod, prods)),
             nm = "blood.prod"
@@ -192,21 +193,17 @@ as.events <- function(x) {
 #' @rdname set_edwr_class
 #' @export
 as.icu_assess <- function(x) {
+    # inherits from events class
     if (missing(x)) x <- character()
     if (is.icu_assess(x)) return(x)
     if (!is.edwr(x)) x <- as.edwr(x)
+    if (!is.events(x)) x <- as.events(x)
 
-    df <- rename_(.data = x, .dots = c(val.pie, list(
-        "assess.datetime" = val.dt,
-        "assessment" = val.ce,
-        "assess.result" = val.res
-    ))) %>%
-        dplyr::distinct_() %>%
-        mutate_(.dots = set_names(
-            x = list(~stringr::str_to_lower(assessment),
-                     ~format_dates(assess.datetime)),
-            nm = list("assessment", "assess.datetime")
-        ))
+    df <- rename_(.data = x, .dots = list(
+        "assess.datetime" = "event.datetime",
+        "assessment" = "event",
+        "assess.result" = "event.result"
+    ))
 
     after <- match("icu_assess", class(x), nomatch = 0L)
     class(df) <- append(class(x), "icu_assess", after = after)
@@ -234,21 +231,17 @@ as.id <- function(x) {
 #' @rdname set_edwr_class
 #' @export
 as.labs <- function(x) {
+    # inherits from events class
     if (missing(x)) x <- character()
     if (is.labs(x)) return(x)
     if (!is.edwr(x)) x <- as.edwr(x)
+    if (!is.events(x)) x <- as.events(x)
 
-    df <- rename_(.data = x, .dots = c(val.pie, list(
-        "lab.datetime" = val.dt,
-        "lab" = val.ce,
-        "lab.result" = val.res
-    ))) %>%
-        dplyr::distinct_() %>%
-        mutate_(.dots = set_names(
-            x = list(~stringr::str_to_lower(lab),
-                     ~format_dates(lab.datetime)),
-            nm = list("lab", "lab.datetime")
-        ))
+    df <- rename_(.data = x, .dots = list(
+        "lab.datetime" = "event.datetime",
+        "lab" = "event",
+        "lab.result" = "event.result"
+    ))
 
     after <- match("labs", class(x), nomatch = 0L)
     class(df) <- append(class(x), "labs", after = after)
@@ -286,22 +279,18 @@ as.locations <- function(x) {
 #' @rdname set_edwr_class
 #' @export
 as.measures <- function(x) {
+    # inherits from events class
     if (missing(x)) x <- character()
     if (is.measures(x)) return(x)
     if (!is.edwr(x)) x <- as.edwr(x)
+    if (!is.events(x)) x <- as.events(x)
 
-    df <- rename_(.data = x, .dots = c(val.pie, list(
-        "measure.datetime" = val.dt,
-        "measure" = val.ce,
-        "measure.result" = val.res,
+    df <- rename_(.data = x, .dots = list(
+        "measure.datetime" = "event.datetime",
+        "measure" = "event",
+        "measure.result" = "event.result",
         "measure.units" = "`Clinical Event Result Units`"
-    ))) %>%
-        dplyr::distinct_() %>%
-        mutate_(.dots = set_names(
-            x = list(~stringr::str_to_lower(measure),
-                     ~format_dates(measure.datetime)),
-            nm = list("measure", "measure.datetime")
-        ))
+    ))
 
     after <- match("measures", class(x), nomatch = 0L)
     class(df) <- append(class(x), "measures", after = after)
@@ -341,7 +330,7 @@ as.meds_cont <- function(x) {
 #' @rdname set_edwr_class
 #' @export
 as.meds_freq <- function(x) {
-    # inherits from meds_sched
+    # inherits from meds_sched class
     if (missing(x)) x <- character()
     if (is.meds_freq(x)) return(x)
     if (!is.edwr(x)) x <- as.edwr(x)
@@ -492,21 +481,17 @@ as.visits <- function(x) {
 #' @rdname set_edwr_class
 #' @export
 as.warfarin <- function(x) {
+    # inherits from events class
     if (missing(x)) x <- character()
     if (is.warfarin(x)) return(x)
     if (!is.edwr(x)) x <- as.edwr(x)
+    if (!is.events(x)) x <- as.events(x)
 
-    df <- rename_(.data = x, .dots = c(val.pie, list(
-        "warfarin.datetime" = val.dt,
-        "warfarin.event" = val.ce,
-        "warfarin.result" = val.res
-    ))) %>%
-        dplyr::distinct_() %>%
-        mutate_(.dots = set_names(
-            x = list(~stringr::str_to_lower(warfarin.event),
-                     ~format_dates(warfarin.datetime)),
-            nm = list("warfarin.event", "warfarin.datetime")
-        ))
+    df <- rename_(.data = x, .dots = list(
+        "warfarin.datetime" = "event.datetime",
+        "warfarin.event" = "event",
+        "warfarin.result" = "event.result"
+    ))
 
     after <- match("warfarin", class(x), nomatch = 0L)
     class(df) <- append(class(x), "warfarin", after = after)

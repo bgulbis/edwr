@@ -520,6 +520,26 @@ as.services <- function(x) {
 
 #' @rdname set_edwr_class
 #' @export
+as.uop <- function(x) {
+    # inherits from events class
+    if (missing(x)) x <- character()
+    if (is.uop(x)) return(x)
+    if (!is.edwr(x)) x <- as.edwr(x)
+    if (!is.events(x)) x <- as.events(x)
+
+    df <- rename_(.data = x, .dots = list(
+        "uop.datetime" = "event.datetime",
+        "uop" = "event",
+        "uop.result" = "event.result"
+    ))
+
+    after <- match("uop", class(x), nomatch = 0L)
+    class(df) <- append(class(x), "uop", after = after)
+    df
+}
+
+#' @rdname set_edwr_class
+#' @export
 as.vent_times <- function(x) {
     if (missing(x)) x <- character()
     if (is.vent_times(x)) return(x)

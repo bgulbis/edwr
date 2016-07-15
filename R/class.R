@@ -98,32 +98,6 @@ as.meds_cont <- function(x) {
     if (is.meds_cont(x)) return(x)
     if (!is.edwr(x)) x <- as.edwr(x)
 
-
-# meds_cont = {
-#     col.raw <- c(raw.names$id,
-#                  "Clinical Event Order ID",
-#                  "Event ID",
-#                  raw.names$dt,
-#                  raw.names$ev,
-#                  "Infusion Rate",
-#                  "Infusion Rate Unit",
-#                  "Route of Administration - Short",
-#                  "Event Tag")
-#     col.names <- c(pt.id,
-#                    "order.id",
-#                    "event.id",
-#                    "med.datetime",
-#                    "med",
-#                    "med.rate",
-#                    "med.rate.units",
-#                    "route",
-#                    "event.tag")
-#     col.types <- readr::cols("c", "c", "c", col_dt, "c", "d", "c",
-#                              "c", "c")
-#     dots <- list(~stringr::str_to_lower(med),
-#                  ~dplyr::na_if(med.rate.units, ""))
-#     nm <- list("med", "med.rate.units")
-#
     # rename variables to desired names and remove duplicate rows; then convert
     # all med names to lower case to avoid matching errors and set date/time
     # format; any extra columns will be left unchanged

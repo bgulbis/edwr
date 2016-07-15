@@ -463,6 +463,35 @@ as.order_by <- function(x) {
 
 #' @rdname set_edwr_class
 #' @export
+as.order_detail <- function(x) {
+    if (missing(x)) x <- character()
+    if (is.order_detail(x)) return(x)
+    if (!is.edwr(x)) x <- as.edwr(x)
+
+    df <- rename_(.data = x, .dots = c(val.pie, list(
+        "order.id" = "`Source Order ID`",
+        "order" = "`Order Catalog Mnemonic`",
+        "ingredient" = "`Ingredient Catalog Short Desc`",
+        "ingredient.dose" = "`Dose Strength - Order`",
+        "ingredient.unit" = "`Dose Strength - Unit`",
+        "ingredient.freetext" = "`Dose Freetext`",
+        "order.unit" = "`Person Location- Nurse Unit (Order)`",
+        "action.type" = "`Action Type`",
+        "action.datetime" = "`Order Action Date & Time`"
+    ))) %>%
+        dplyr::distinct_() %>%
+        mutate_(.dots = set_names(
+            x = list(~format_dates(action.datetime)),
+            nm = list("action.datetime")
+        ))
+
+    after <- match("order_detail", class(x), nomatch = 0L)
+    class(df) <- append(class(x), "order_detail", after = after)
+    df
+}
+
+#' @rdname set_edwr_class
+#' @export
 as.services <- function(x) {
     if (missing(x)) x <- character()
     if (is.services(x)) return(x)

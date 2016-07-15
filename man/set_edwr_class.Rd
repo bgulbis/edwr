@@ -20,6 +20,7 @@
 \alias{as.mpp}
 \alias{as.mrn}
 \alias{as.order_by}
+\alias{as.order_detail}
 \alias{as.services}
 \alias{as.vent_times}
 \alias{as.visits}
@@ -67,6 +68,8 @@ as.mrn(x)
 as.mpp(x)
 
 as.order_by(x)
+
+as.order_detail(x)
 
 as.services(x)
 

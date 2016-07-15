@@ -150,6 +150,39 @@ as.meds_home <- function(x) {
     df
 }
 
+#' @rdname set_edwr_class
+#' @export
+as.meds_sched <- function(x) {
+    if (missing(x)) x <- character()
+    if (is.meds_sched(x)) return(x)
+    if (!is.edwr(x)) x <- as.edwr(x)
+
+    # rename variables to desired names and remove duplicate rows; then convert
+    # all med names to lower case to avoid matching errors and set date/time
+    # format; any extra columns will be left unchanged
+    df <- rename_(.data = x, .dots = c(val.pie, list(
+        "order.id" = "`Clinical Event Order ID`",
+        "event.id" = "`Event ID`",
+        "med.datetime" = val.dt,
+        "med" = val.ce,
+        "med.dose" = "`Dosage Amount`",
+        "med.dose.units" = "`Dosage Unit`",
+        "route" = "`Route of Administration - Short`",
+        "event.type" = "`Event Type Code`"
+    ))) %>%
+        dplyr::distinct_() %>%
+        mutate_(.dots = set_names(
+            x = list(~stringr::str_to_lower(med),
+                     ~format_dates(med.datetime)),
+            nm = list("med", "med.datetime")
+        ))
+
+    after <- match("meds_sched", class(x), nomatch = 0L)
+    class(df) <- append(class(x), "meds_sched", after = after)
+    df
+}
+
+
 # class test functions ---------------------------------
 
 #' Test edwr-related classes

@@ -166,6 +166,30 @@ as.encounters <- function(x) {
 
 #' @rdname set_edwr_class
 #' @export
+as.events <- function(x) {
+    if (missing(x)) x <- character()
+    if (is.events(x)) return(x)
+    if (!is.edwr(x)) x <- as.edwr(x)
+
+    df <- rename_(.data = x, .dots = c(val.pie, list(
+        "event.datetime" = val.dt,
+        "event" = val.ce,
+        "event.result" = val.res
+    ))) %>%
+        dplyr::distinct_() %>%
+        mutate_(.dots = set_names(
+            x = list(~stringr::str_to_lower(event),
+                     ~format_dates(event.datetime)),
+            nm = list("event", "event.datetime")
+        ))
+
+    after <- match("events", class(x), nomatch = 0L)
+    class(df) <- append(class(x), "events", after = after)
+    df
+}
+
+#' @rdname set_edwr_class
+#' @export
 as.labs <- function(x) {
     if (missing(x)) x <- character()
     if (is.labs(x)) return(x)

@@ -7,6 +7,7 @@
 \alias{as.diagnosis}
 \alias{as.edwr}
 \alias{as.encounters}
+\alias{as.events}
 \alias{as.labs}
 \alias{as.locations}
 \alias{as.meds_cont}
@@ -34,6 +35,8 @@ as.diagnosis(x)
 
 as.encounters(x)
 
+as.events(x)
+
 as.labs(x)
 
 as.locations(x)
@@ -44,13 +47,13 @@ as.meds_home(x)
 
 as.meds_sched(x)
 
-as.warfarin(x)
-
 as.services(x)
 
 as.vent_times(x)
 
 as.visits(x)
+
+as.warfarin(x)
 }
 \arguments{
 \item{x}{object to set class \code{edwr}}

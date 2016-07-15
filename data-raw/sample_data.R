@@ -63,14 +63,13 @@ warfarin <- read_data(dir.sample, "warfarin") %>%
 
 hosp <- c("Jones" = "Smith", "Hermann" = "George", "HVI" = "HeartHosp",
           "Cullen" = "Roy", "PAHH" = "PACU")
-x <- read_data(dir.sample, "locations")
-locations <- x %>%
+locations <- read_data(dir.sample, "locations") %>%
+    as.locations() %>%
     mutate(pie.id = as.character(as.numeric(pie.id) + rnum),
            arrive.datetime = arrive.datetime + days(rdays),
            depart.datetime = depart.datetime + days(rdays),
            unit.from = str_replace_all(unit.from, hosp),
            unit.to = str_replace_all(unit.to, hosp))
-class(locations) <- class(x)
 
 x <- read_data(dir.sample, "services")
 services <- x %>%

@@ -4,6 +4,7 @@
 \alias{as.demographics}
 \alias{as.edwr}
 \alias{as.labs}
+\alias{as.locations}
 \alias{as.meds_cont}
 \alias{as.meds_home}
 \alias{as.meds_sched}
@@ -19,6 +20,8 @@ as.edwr(x)
 as.demographics(x)
 
 as.labs(x)
+
+as.locations(x)
 
 as.meds_cont(x)
 

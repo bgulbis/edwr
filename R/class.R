@@ -95,6 +95,37 @@ as.labs <- function(x) {
 
 #' @rdname set_edwr_class
 #' @export
+as.locations <- function(x) {
+    if (missing(x)) x <- character()
+    if (is.locations(x)) return(x)
+    if (!is.edwr(x)) x <- as.edwr(x)
+
+    # rename variables to desired names and remove duplicate rows; then convert
+    # all lab names to lower case to avoid matching errors and set date/time
+    # format; any extra columns will be left unchanged
+    df <- rename_(.data = x, .dots = c(val.pie, list(
+        "arrive.datetime" = "`Location Arrival Date & Time`",
+        "depart.datetime" = "`Location Depart Date & Time`",
+        "unit.to" = "`Person Location - Nurse Unit (To)`",
+        "unit.from" = "`Person Location - Nurse Unit (From)`"
+    ))) %>%
+        dplyr::distinct_() %>%
+        mutate_(.dots = set_names(
+            x = list(~format_dates(arrive.datetime),
+                     ~format_dates(depart.datetime),
+                     ~dplyr::na_if(unit.to, ""),
+                     ~dplyr::na_if(unit.from, "")),
+            nm = list("arrive.datetime", "depart.datetime", "unit.to",
+                      "unit.from")
+        ))
+
+    after <- match("locations", class(x), nomatch = 0L)
+    class(df) <- append(class(x), "locations", after = after)
+    df
+}
+
+#' @rdname set_edwr_class
+#' @export
 as.meds_cont <- function(x) {
     if (missing(x)) x <- character()
     if (is.meds_cont(x)) return(x)

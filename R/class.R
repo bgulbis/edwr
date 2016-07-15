@@ -45,6 +45,34 @@ as.edwr <- function(x) {
 
 #' @rdname set_edwr_class
 #' @export
+as.blood <- function(x) {
+    if (missing(x)) x <- character()
+    if (is.blood(x)) return(x)
+    if (!is.edwr(x)) x <- as.edwr(x)
+
+    prods <- c("Cryo(.*)" = "cryo",
+               "FFP(.*)" = "ffp",
+               "(P)?RBC(.*)" = "prbc",
+               "Platelet(.*)" = "platelet")
+
+    df <- rename_(.data = x, .dots = c(val.pie, list(
+        "blood.datetime" = val.dt,
+        "blood.prod" = val.ce,
+        "blood.type" = val.res
+    ))) %>%
+        dplyr::distinct_() %>%
+        mutate_(.dots = set_names(
+            x = list(~stringr::str_replace_all(blood.prod, prods)),
+            nm = "blood.prod"
+        ))
+
+    after <- match("blood", class(x), nomatch = 0L)
+    class(df) <- append(class(x), "blood", after = after)
+    df
+}
+
+#' @rdname set_edwr_class
+#' @export
 as.demographics <- function(x) {
     if (missing(x)) stop("Missing object")
     if (is.demographics(x)) return(x)

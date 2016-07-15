@@ -10,6 +10,7 @@
 \alias{as.meds_sched}
 \alias{as.services}
 \alias{as.vent_times}
+\alias{as.visits}
 \alias{as.warfarin}
 \alias{edwr}
 \alias{set_edwr_class}
@@ -36,6 +37,8 @@ as.warfarin(x)
 as.services(x)
 
 as.vent_times(x)
+
+as.visits(x)
 }
 \arguments{
 \item{x}{object to set class \code{edwr}}

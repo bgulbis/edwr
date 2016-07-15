@@ -280,6 +280,37 @@ as.vent_times <- function(x) {
     df
 }
 
+#' @rdname set_edwr_class
+#' @export
+as.visits <- function(x) {
+    if (missing(x)) x <- character()
+    if (is.visits(x)) return(x)
+    if (!is.edwr(x)) x <- as.edwr(x)
+
+    df <- rename_(.data = x, .dots = c(val.pie, list(
+        "arrival.datetime" = "`Arrival Date & Time`",
+        "admit.datetime" = "`Admit Date & Time`",
+        "discharge.datetime" = "`Discharge Date & Time`",
+        "visit.type" = "`Encounter Type`",
+        "admit.source" = "`Admit Source`",
+        "admit.type" = "`Admit Type`",
+        "facility" = "`Person Location- Facility (Curr)`",
+        "nurse.unit.admit" = "`Person Location- Nurse Unit (Admit)`"
+    ))) %>%
+        dplyr::distinct_() %>%
+        mutate_(.dots = set_names(
+            x = list(~format_dates(arrival.datetime),
+                     ~format_dates(admit.datetime),
+                     ~format_dates(discharge.datetime)),
+            nm = list("arrival.datetime", "admit.datetime", "discharge.datetime")
+        ))
+
+    after <- match("visits", class(x), nomatch = 0L)
+    class(df) <- append(class(x), "visits", after = after)
+    df
+}
+
+
 # class test functions ---------------------------------
 
 #' Test edwr-related classes

@@ -47,30 +47,30 @@ summarise_.edwr <- function(.data, ..., .dots) {
 
 #' @export
 anti_join.edwr <- function(x, y, by = NULL, copy = FALSE, ...) {
-    y <- NextMethod()
-    class(y) <- class(.data)
-    y
+    z <- NextMethod()
+    class(z) <- class(x)
+    z
 }
 
 #' @export
 full_join.edwr <- function(x, y, by = NULL, copy = FALSE,
                            suffix = c(".x", ".y"), ...) {
-    y <- NextMethod()
-    class(y) <- class(.data)
-    y
+    z <- NextMethod()
+    class(z) <- class(x)
+    z
 }
 
 #' @export
 inner_join.edwr <- function(x, y, by = NULL, copy = FALSE,
                             suffix = c(".x", ".y"), ...) {
-    y <- NextMethod()
-    class(y) <- class(.data)
-    y
+    z <- NextMethod()
+    class(z) <- class(x)
+    z
 }
 
 #' @export
 semi_join.edwr <- function(x, y, by = NULL, copy = FALSE, ...) {
-    y <- NextMethod()
-    class(y) <- class(.data)
-    y
+    z <- NextMethod()
+    class(z) <- class(x)
+    z
 }

@@ -190,6 +190,30 @@ as.events <- function(x) {
 
 #' @rdname set_edwr_class
 #' @export
+as.icu_assess <- function(x) {
+    if (missing(x)) x <- character()
+    if (is.icu_assess(x)) return(x)
+    if (!is.edwr(x)) x <- as.edwr(x)
+
+    df <- rename_(.data = x, .dots = c(val.pie, list(
+        "assess.datetime" = val.dt,
+        "assessment" = val.ce,
+        "assess.result" = val.res
+    ))) %>%
+        dplyr::distinct_() %>%
+        mutate_(.dots = set_names(
+            x = list(~stringr::str_to_lower(assessment),
+                     ~format_dates(assess.datetime)),
+            nm = list("assessment", "assess.datetime")
+        ))
+
+    after <- match("icu_assess", class(x), nomatch = 0L)
+    class(df) <- append(class(x), "icu_assess", after = after)
+    df
+}
+
+#' @rdname set_edwr_class
+#' @export
 as.labs <- function(x) {
     if (missing(x)) x <- character()
     if (is.labs(x)) return(x)

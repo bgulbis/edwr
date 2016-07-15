@@ -8,6 +8,7 @@
 \alias{as.edwr}
 \alias{as.encounters}
 \alias{as.events}
+\alias{as.icu_assess}
 \alias{as.labs}
 \alias{as.locations}
 \alias{as.meds_cont}
@@ -36,6 +37,8 @@ as.diagnosis(x)
 as.encounters(x)
 
 as.events(x)
+
+as.icu_assess(x)
 
 as.labs(x)
 

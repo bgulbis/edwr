@@ -257,6 +257,29 @@ as.services <- function(x) {
     df
 }
 
+#' @rdname set_edwr_class
+#' @export
+as.vent_times <- function(x) {
+    if (missing(x)) x <- character()
+    if (is.vent_times(x)) return(x)
+    if (!is.edwr(x)) x <- as.edwr(x)
+
+    df <- rename_(.data = x, .dots = c(val.pie, list(
+        "vent.datetime" = "`Clinical Event Date Result`",
+        "vent.event" = val.ce
+    ))) %>%
+        dplyr::distinct_() %>%
+        mutate_(.dots = set_names(
+            x = list(~stringr::str_to_lower(vent.event),
+                     ~format_dates(vent.datetime)),
+            nm = list("vent.event", "vent.datetime")
+        ))
+
+    after <- match("vent_times", class(x), nomatch = 0L)
+    class(df) <- append(class(x), "vent_times", after = after)
+    df
+}
+
 # class test functions ---------------------------------
 
 #' Test edwr-related classes

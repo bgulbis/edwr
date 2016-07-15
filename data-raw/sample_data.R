@@ -56,11 +56,10 @@ meds_sched <- read_data(dir.sample, "meds_sched") %>%
            event.id = as.character(as.numeric(event.id) + rnum),
            med.datetime = med.datetime + days(rdays))
 
-x <- read_data(dir.sample, "warfarin")
-warfarin <- x %>%
+warfarin <- read_data(dir.sample, "warfarin") %>%
+    as.warfarin() %>%
     mutate(pie.id = as.character(as.numeric(pie.id) + rnum),
            warfarin.datetime = warfarin.datetime + days(rdays))
-class(warfarin) <- class(x)
 
 hosp <- c("Jones" = "Smith", "Hermann" = "George", "HVI" = "HeartHosp",
           "Cullen" = "Roy", "PAHH" = "PACU")

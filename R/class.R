@@ -3,11 +3,13 @@
 # get and set class types used in edwr
 #
 
-# Set default values
+# default values ---------------------------------------
 val.pie <- list("pie.id" = "`PowerInsight Encounter Id`")
 val.dt <- "`Clinical Event End Date/Time`"
 val.ce <- "`Clinical Event`"
 val.res <- "`Clinical Event Result`"
+
+# constructor functions --------------------------------
 
 #' Construct edwr data types
 #'
@@ -179,6 +181,33 @@ as.meds_sched <- function(x) {
 
     after <- match("meds_sched", class(x), nomatch = 0L)
     class(df) <- append(class(x), "meds_sched", after = after)
+    df
+}
+
+#' @rdname set_edwr_class
+#' @export
+as.warfarin <- function(x) {
+    if (missing(x)) x <- character()
+    if (is.warfarin(x)) return(x)
+    if (!is.edwr(x)) x <- as.edwr(x)
+
+    # rename variables to desired names and remove duplicate rows; then convert
+    # all lab names to lower case to avoid matching errors and set date/time
+    # format; any extra columns will be left unchanged
+    df <- rename_(.data = x, .dots = c(val.pie, list(
+        "warfarin.datetime" = val.dt,
+        "warfarin.event" = val.ce,
+        "warfarin.result" = val.res
+    ))) %>%
+        dplyr::distinct_() %>%
+        mutate_(.dots = set_names(
+            x = list(~stringr::str_to_lower(warfarin.event),
+                     ~format_dates(warfarin.datetime)),
+            nm = list("warfarin.event", "warfarin.datetime")
+        ))
+
+    after <- match("warfarin", class(x), nomatch = 0L)
+    class(df) <- append(class(x), "warfarin", after = after)
     df
 }
 

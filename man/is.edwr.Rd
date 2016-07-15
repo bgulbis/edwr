@@ -23,8 +23,7 @@
 \alias{is.order_detail}
 \alias{is.patients}
 \alias{is.problems}
-\alias{is.procedures10}
-\alias{is.procedures9}
+\alias{is.procedures}
 \alias{is.radiology}
 \alias{is.services}
 \alias{is.surgeries}
@@ -80,9 +79,7 @@ is.patients(x)
 
 is.problems(x)
 
-is.procedures9(x)
-
-is.procedures10(x)
+is.procedures(x)
 
 is.radiology(x)
 

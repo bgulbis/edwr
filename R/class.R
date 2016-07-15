@@ -547,14 +547,15 @@ as.problems <- function(x) {
 
 #' @rdname set_edwr_class
 #' @export
-as.procedures9 <- function(x) {
+as.procedures <- function(x) {
     if (missing(x)) stop("Missing object")
-    if (is.procedures9(x)) return(x)
+    if (is.procedures(x)) return(x)
     if (!is.edwr(x)) x <- as.edwr(x)
 
     df <- rename_(.data = x, .dots = c(val.pie, list(
         "proc.date" = "`Procedure Date and Time`",
-        "proc.code" = "`ICD9 Procedure Code`"
+        "proc.code" = "`Procedure Code`",
+        "proc.source" = "`Procedure Code Source Vocabulary`"
     ))) %>%
         dplyr::distinct_() %>%
         mutate_(.dots = set_names(
@@ -562,30 +563,8 @@ as.procedures9 <- function(x) {
             nm = "proc.date"
         ))
 
-    after <- match("procedures9", class(x), nomatch = 0L)
-    class(df) <- append(class(x), "procedures9", after = after)
-    df
-}
-
-#' @rdname set_edwr_class
-#' @export
-as.procedures10 <- function(x) {
-    if (missing(x)) stop("Missing object")
-    if (is.procedures10(x)) return(x)
-    if (!is.edwr(x)) x <- as.edwr(x)
-
-    df <- rename_(.data = x, .dots = c(val.pie, list(
-        "proc.date" = "`Procedure Date and Time`",
-        "proc.code" = "`ICD10 Procedure Code`"
-    ))) %>%
-        dplyr::distinct_() %>%
-        mutate_(.dots = set_names(
-            x = list(~format_dates(proc.date)),
-            nm = "proc.date"
-        ))
-
-    after <- match("procedures10", class(x), nomatch = 0L)
-    class(df) <- append(class(x), "procedures10", after = after)
+    after <- match("procedures", class(x), nomatch = 0L)
+    class(df) <- append(class(x), "procedures", after = after)
     df
 }
 
@@ -846,11 +825,7 @@ is.problems <- function(x) inherits(x, "problems")
 
 #' @rdname is.edwr
 #' @export
-is.procedures9 <- function(x) inherits(x, "procedures9")
-
-#' @rdname is.edwr
-#' @export
-is.procedures10 <- function(x) inherits(x, "procedures10")
+is.procedures <- function(x) inherits(x, "procedures")
 
 #' @rdname is.edwr
 #' @export

@@ -23,8 +23,7 @@
 \alias{as.order_detail}
 \alias{as.patients}
 \alias{as.problems}
-\alias{as.procedures10}
-\alias{as.procedures9}
+\alias{as.procedures}
 \alias{as.services}
 \alias{as.uop}
 \alias{as.vent_settings}
@@ -82,9 +81,7 @@ as.patients(x)
 
 as.problems(x)
 
-as.procedures9(x)
-
-as.procedures10(x)
+as.procedures(x)
 
 as.services(x)
 

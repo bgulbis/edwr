@@ -540,6 +540,26 @@ as.uop <- function(x) {
 
 #' @rdname set_edwr_class
 #' @export
+as.vent_settings <- function(x) {
+    # inherits from events class
+    if (missing(x)) x <- character()
+    if (is.vent_settings(x)) return(x)
+    if (!is.edwr(x)) x <- as.edwr(x)
+    if (!is.events(x)) x <- as.events(x)
+
+    df <- rename_(.data = x, .dots = list(
+        "vent.datetime" = "event.datetime",
+        "vent.event" = "event",
+        "vent.result" = "event.result"
+    ))
+
+    after <- match("vent_settings", class(x), nomatch = 0L)
+    class(df) <- append(class(x), "vent_settings", after = after)
+    df
+}
+
+#' @rdname set_edwr_class
+#' @export
 as.vent_times <- function(x) {
     if (missing(x)) x <- character()
     if (is.vent_times(x)) return(x)

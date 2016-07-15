@@ -23,6 +23,7 @@
 \alias{as.order_detail}
 \alias{as.services}
 \alias{as.uop}
+\alias{as.vent_settings}
 \alias{as.vent_times}
 \alias{as.visits}
 \alias{as.warfarin}
@@ -75,6 +76,8 @@ as.order_detail(x)
 as.services(x)
 
 as.uop(x)
+
+as.vent_settings(x)
 
 as.vent_times(x)
 

@@ -31,6 +31,7 @@ labs <- read_data(dir.sample, "labs") %>%
            lab.datetime = lab.datetime + days(rdays))
 
 meds_home <- read_data(dir.sample, "meds_home") %>%
+    as.meds_home() %>%
     mutate(pie.id = as.character(as.numeric(pie.id) + rnum))
 
 med.sample <- read_data(dir.sample, "meds_cont") %>%

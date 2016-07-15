@@ -21,6 +21,7 @@
 \alias{as.mrn}
 \alias{as.order_by}
 \alias{as.order_detail}
+\alias{as.patients}
 \alias{as.services}
 \alias{as.uop}
 \alias{as.vent_settings}
@@ -73,6 +74,8 @@ as.mpp(x)
 as.order_by(x)
 
 as.order_detail(x)
+
+as.patients(x)
 
 as.services(x)
 

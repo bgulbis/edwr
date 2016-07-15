@@ -492,6 +492,33 @@ as.order_detail <- function(x) {
 
 #' @rdname set_edwr_class
 #' @export
+as.patients <- function(x) {
+    if (missing(x)) stop("Missing object")
+    if (is.patients(x)) return(x)
+    if (!is.edwr(x)) x <- as.edwr(x)
+
+    df <- rename_(.data = x, .dots = c(val.pie, list(
+        "age" = "`Age- Years (Visit)`",
+        "discharge.datetime" = "`Discharge Date & Time`",
+        "visit.type" = "`Encounter Type`",
+        "facility" = "`Person Location- Facility (Curr)`"
+    ))) %>%
+        dplyr::distinct_() %>%
+        readr::type_convert(col_types = readr::cols(pie.id = "c")) %>%
+        mutate_(.dots = set_names(
+            x = list(~format_dates(discharge.datetime)),
+            nm = list("discharge.datetime")
+        ))
+
+    names(df) <- stringr::str_to_lower(names(df))
+
+    after <- match("patients", class(x), nomatch = 0L)
+    class(df) <- append(class(x), "patients", after = after)
+    df
+}
+
+#' @rdname set_edwr_class
+#' @export
 as.services <- function(x) {
     if (missing(x)) x <- character()
     if (is.services(x)) return(x)

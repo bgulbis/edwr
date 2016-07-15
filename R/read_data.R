@@ -169,29 +169,6 @@ read_data2 <- function(data.dir,
                col.types <- readr::cols_only("c", "c", col_dt, "c")
            },
 
-           demographics = {
-               col.raw <- c(raw.names$id,
-                            "Age- Years (Visit)",
-                            "Sex",
-                            "Race",
-                            "Discharge Disposition",
-                            "LOS (Actual)",
-                            "Encounter Type",
-                            "Person ID",
-                            "Person Location- Facility (Curr)")
-               col.names <- c(pt.id,
-                              "age",
-                              "sex",
-                              "race",
-                              "disposition",
-                              "length.stay",
-                              "visit.type",
-                              "person.id",
-                              "facility")
-               col.types <- readr::cols("c", "i", "c", "c", "c", "d", "c",
-                                        "c", "c")
-           },
-
            diagnosis = {
                col.raw <- c(raw.names$id,
                             "Diagnosis Code",
@@ -268,16 +245,6 @@ read_data2 <- function(data.dir,
                col.types <- readr::cols("c", "c", "c")
            },
 
-           labs = {
-               # use default columns
-               col.names <- c(pt.id,
-                              "lab.datetime",
-                              "lab",
-                              "lab.result")
-               dots <- list(~stringr::str_to_lower(lab))
-               nm <- "lab"
-           },
-
            locations = {
                col.raw <- c(raw.names$id,
                             "Location Arrival Date & Time",
@@ -307,32 +274,6 @@ read_data2 <- function(data.dir,
                               "measure.result",
                               "measure.units")
                col.types <- readr::cols("c", col_dt, "c", "d", "c")
-           },
-
-           meds_cont = {
-               col.raw <- c(raw.names$id,
-                            "Clinical Event Order ID",
-                            "Event ID",
-                            raw.names$dt,
-                            raw.names$ev,
-                            "Infusion Rate",
-                            "Infusion Rate Unit",
-                            "Route of Administration - Short",
-                            "Event Tag")
-               col.names <- c(pt.id,
-                              "order.id",
-                              "event.id",
-                              "med.datetime",
-                              "med",
-                              "med.rate",
-                              "med.rate.units",
-                              "route",
-                              "event.tag")
-               col.types <- readr::cols("c", "c", "c", col_dt, "c", "d", "c",
-                                        "c", "c")
-               dots <- list(~stringr::str_to_lower(med),
-                            ~dplyr::na_if(med.rate.units, ""))
-               nm <- list("med", "med.rate.units")
            },
 
            meds_sched = {

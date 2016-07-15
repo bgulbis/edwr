@@ -399,6 +399,24 @@ as.meds_sched <- function(x) {
 
 #' @rdname set_edwr_class
 #' @export
+as.mrn <- function(x) {
+    if (missing(x)) stop("Missing object")
+    if (is.mrn(x)) return(x)
+    if (!is.edwr(x)) x <- as.edwr(x)
+
+    df <- rename_(.data = x, .dots = list(
+        "mrn" = "`MRN- Organization`",
+        "person.id" = "`Person ID`"
+    )) %>%
+        dplyr::distinct_()
+
+    after <- match("mrn", class(x), nomatch = 0L)
+    class(df) <- append(class(x), "mrn", after = after)
+    df
+}
+
+#' @rdname set_edwr_class
+#' @export
 as.mpp <- function(x) {
     if (missing(x)) stop("Missing object")
     if (is.mpp(x)) return(x)

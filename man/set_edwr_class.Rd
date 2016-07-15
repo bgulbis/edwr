@@ -4,6 +4,7 @@
 \alias{as.demographics}
 \alias{as.edwr}
 \alias{as.labs}
+\alias{as.meds_cont}
 \alias{edwr}
 \alias{set_edwr_class}
 \title{Construct edwr data types}
@@ -15,6 +16,8 @@ as.edwr(x)
 as.demographics(x)
 
 as.labs(x)
+
+as.meds_cont(x)
 }
 \arguments{
 \item{x}{object to set class \code{edwr}}

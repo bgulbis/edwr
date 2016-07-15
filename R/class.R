@@ -3,6 +3,12 @@
 # get and set class types used in edwr
 #
 
+# Set default values
+val.pie <- list("pie.id" = "`PowerInsight Encounter Id`")
+val.dt <- "`Clinical Event End Date/Time`"
+val.ce <- "`Clinical Event`"
+val.res <- "`Clinical Event Result`"
+
 #' Construct edwr data types
 #'
 #' Takes an R object and sets class to an edwr type.
@@ -37,15 +43,14 @@ as.demographics <- function(x) {
 
     # rename variables to desired names, remove duplicate rows, and make sure
     # variables have the desired types; any extra columns will be left as is
-    df <- dplyr::rename_(.data = x, .dots = list(
-        "pie.id" = "`PowerInsight Encounter Id`",
+    df <- rename_(.data = x, .dots = c(val.pie, list(
         "age" = "`Age- Years (Visit)`",
         "disposition" = "`Discharge Disposition`",
         "length.stay" = "`LOS (Actual)`",
         "visit.type" = "`Encounter Type`",
         "person.id" = "`Person ID`",
         "facility" = "`Person Location- Facility (Curr)`"
-    )) %>%
+    ))) %>%
         dplyr::distinct_() %>%
         readr::type_convert(col_types = readr::cols(
             pie.id = "c",
@@ -69,14 +74,13 @@ as.labs <- function(x) {
     # rename variables to desired names and remove duplicate rows; then convert
     # all lab names to lower case to avoid matching errors and set date/time
     # format; any extra columns will be left unchanged
-    df <- dplyr::rename_(.data = x, .dots = list(
-        "pie.id" = "`PowerInsight Encounter Id`",
-        "lab.datetime" = "`Clinical Event End Date/Time`",
-        "lab" = "`Clinical Event`",
-        "lab.result" = "`Clinical Event Result`"
-    )) %>%
+    df <- rename_(.data = x, .dots = c(val.pie, list(
+        "lab.datetime" = val.dt,
+        "lab" = val.ce,
+        "lab.result" = val.res
+    ))) %>%
         dplyr::distinct_() %>%
-        dplyr::mutate_(.dots = purrr::set_names(
+        mutate_(.dots = set_names(
             x = list(~stringr::str_to_lower(lab),
                      ~format_dates(lab.datetime)),
             nm = list("lab", "lab.datetime")
@@ -84,6 +88,65 @@ as.labs <- function(x) {
 
     after <- match("labs", class(x), nomatch = 0L)
     class(df) <- append(class(x), "labs", after = after)
+    df
+}
+
+#' @rdname set_edwr_class
+#' @export
+as.meds_cont <- function(x) {
+    if (missing(x)) x <- character()
+    if (is.meds_cont(x)) return(x)
+    if (!is.edwr(x)) x <- as.edwr(x)
+
+
+# meds_cont = {
+#     col.raw <- c(raw.names$id,
+#                  "Clinical Event Order ID",
+#                  "Event ID",
+#                  raw.names$dt,
+#                  raw.names$ev,
+#                  "Infusion Rate",
+#                  "Infusion Rate Unit",
+#                  "Route of Administration - Short",
+#                  "Event Tag")
+#     col.names <- c(pt.id,
+#                    "order.id",
+#                    "event.id",
+#                    "med.datetime",
+#                    "med",
+#                    "med.rate",
+#                    "med.rate.units",
+#                    "route",
+#                    "event.tag")
+#     col.types <- readr::cols("c", "c", "c", col_dt, "c", "d", "c",
+#                              "c", "c")
+#     dots <- list(~stringr::str_to_lower(med),
+#                  ~dplyr::na_if(med.rate.units, ""))
+#     nm <- list("med", "med.rate.units")
+#
+    # rename variables to desired names and remove duplicate rows; then convert
+    # all med names to lower case to avoid matching errors and set date/time
+    # format; any extra columns will be left unchanged
+    df <- rename_(.data = x, .dots = c(val.pie, list(
+        "order.id" = "`Clinical Event Order ID`",
+        "event.id" = "`Event ID`",
+        "med.datetime" = val.dt,
+        "med" = val.ce,
+        "med.rate" = "`Infusion Rate`",
+        "med.rate.units" = "`Infusion Rate Unit`",
+        "route" = "`Route of Administration - Short`",
+        "event.tag" = "`Event Tag`"
+    ))) %>%
+        dplyr::distinct_() %>%
+        mutate_(.dots = set_names(
+            x = list(~stringr::str_to_lower(med),
+                     ~format_dates(med.datetime),
+                     ~dplyr::na_if(med.rate.units, "")),
+            nm = list("med", "med.datetime", "med.rate.units")
+        ))
+
+    after <- match("meds_cont", class(x), nomatch = 0L)
+    class(df) <- append(class(x), "meds_cont", after = after)
     df
 }
 
@@ -193,8 +256,8 @@ is.warfarin <- function(x) inherits(x, "warfarin")
 
 #' Set the default format for reading date/time variables
 #'
-#' @return A readr::collector object
-#'
+#' @param x character vector of date/time data
+#' @return A readr::collector object#'
 #' @keywords internal
 format_dates <- function(x) {
     readr::parse_datetime(

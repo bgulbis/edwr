@@ -6,8 +6,11 @@
 \usage{
 format_dates(x)
 }
+\arguments{
+\item{x}{character vector of date/time data}
+}
 \value{
-A readr::collector object
+A readr::collector object#'
 }
 \description{
 Set the default format for reading date/time variables

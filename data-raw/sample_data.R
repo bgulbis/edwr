@@ -71,33 +71,29 @@ locations <- read_data(dir.sample, "locations") %>%
            unit.from = str_replace_all(unit.from, hosp),
            unit.to = str_replace_all(unit.to, hosp))
 
-x <- read_data(dir.sample, "services")
-services <- x %>%
+services <- read_data(dir.sample, "services") %>%
+    as.services() %>%
     mutate(pie.id = as.character(as.numeric(pie.id) + rnum),
            start.datetime = start.datetime + days(rdays),
            end.datetime = end.datetime + days(rdays))
-class(services) <- class(x)
 
-x <- read_data(dir.sample, "vent_times")
-vent_times <- x %>%
+vent_times <- read_data(dir.sample, "vent_times") %>%
+    as.vent_times() %>%
     mutate(pie.id = as.character(as.numeric(pie.id) + rnum),
            vent.datetime = vent.datetime + days(rdays))
-class(vent_times) <- class(x)
 
-x <- read_data(dir.sample, "visits")
-visits <- x %>%
+visits <- read_data(dir.sample, "visits") %>%
+    as.visits() %>%
     mutate(pie.id = as.character(as.numeric(pie.id) + rnum),
            arrival.datetime = arrival.datetime + days(rdays),
            admit.datetime = admit.datetime + days(rdays),
            discharge.datetime = discharge.datetime + days(rdays),
            facility = "Hospital",
            nurse.unit.admit = str_replace_all(nurse.unit.admit, hosp))
-class(visits) <- class(x)
 
-x <- read_data(dir.sample, "diagnosis")
-diagnosis <- x %>%
+diagnosis <- read_data(dir.sample, "diagnosis") %>%
+    as.diagnosis() %>%
     mutate(pie.id = as.character(as.numeric(pie.id) + rnum))
-class(diagnosis) <- class(x)
 
 # save data for use in package
 devtools::use_data(labs, meds_cont, meds_home, meds_sched, warfarin,

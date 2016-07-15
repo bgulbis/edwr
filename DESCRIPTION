@@ -11,16 +11,16 @@ Description: This package provides standardized functions for reading, tidying,
 License: GPL-3
 LazyData: TRUE
 Imports:
-    readr,
     dplyr (>= 0.5.0),
+    lazyeval,
+    lubridate,
+    magrittr,
+    MESS,
+    purrr,
+    readr,
+    stringr,
     tibble (>= 1.1),
     tidyr,
-    purrr,
-    stringr,
-    lubridate,
-    lazyeval,
-    zoo,
-    MESS,
-    magrittr
+    zoo
 RoxygenNote: 5.0.1
 Suggests: testthat

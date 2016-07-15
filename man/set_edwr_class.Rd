@@ -19,6 +19,7 @@
 \alias{as.meds_sched}
 \alias{as.mpp}
 \alias{as.mrn}
+\alias{as.order_by}
 \alias{as.services}
 \alias{as.vent_times}
 \alias{as.visits}
@@ -64,6 +65,8 @@ as.meds_sched(x)
 as.mrn(x)
 
 as.mpp(x)
+
+as.order_by(x)
 
 as.services(x)
 

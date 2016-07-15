@@ -434,6 +434,35 @@ as.mpp <- function(x) {
 
 #' @rdname set_edwr_class
 #' @export
+as.order_by <- function(x) {
+    if (missing(x)) x <- character()
+    if (is.order_by(x)) return(x)
+    if (!is.edwr(x)) x <- as.edwr(x)
+
+    df <- rename_(.data = x, .dots = c(val.pie, list(
+        "order" = "`Order Catalog Mnemonic`",
+        "order.unit" = "`Person Location- Nurse Unit (Order)`",
+        "provider" = "`Action Provider`",
+        "provider.role" = "`Action Provider Position`",
+        "action.datetime" = "`Order Action Date & Time`",
+        "action.type" = "`Action Type`",
+        "action.provider" = "`Action Personnel`",
+        "action.provider.role" = "`Action Personnel Position`",
+        "action.comm" = "`Action Communication Type`"
+    ))) %>%
+        dplyr::distinct_() %>%
+        mutate_(.dots = set_names(
+            x = list(~format_dates(action.datetime)),
+            nm = list("action.datetime")
+        ))
+
+    after <- match("order_by", class(x), nomatch = 0L)
+    class(df) <- append(class(x), "order_by", after = after)
+    df
+}
+
+#' @rdname set_edwr_class
+#' @export
 as.services <- function(x) {
     if (missing(x)) x <- character()
     if (is.services(x)) return(x)

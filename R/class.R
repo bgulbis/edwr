@@ -620,6 +620,38 @@ as.services <- function(x) {
 
 #' @rdname set_edwr_class
 #' @export
+as.surgeries <- function(x) {
+    if (missing(x)) stop("Missing object")
+    if (is.surgeries(x)) return(x)
+    if (!is.edwr(x)) x <- as.edwr(x)
+
+    df <- rename_(.data = x, .dots = c(val.pie, list(
+        "asa.class" = "`ASA Class Description`",
+        "add.on" = "`Add On Indicator`",
+        "surgery" = "Procedure",
+        "primary.proc" = "`Primary Procedure Indicator`",
+        "surg.start.datetime" = "`Start Date/Time`",
+        "surg.stop.datetime" = "`Stop Date/Time`"
+    ))) %>%
+        dplyr::distinct_() %>%
+        mutate_(.dots = set_names(
+            x = list(~format_dates(surg.start.datetime),
+                     ~format_dates(surg.stop.datetime),
+                     ~dplyr::if_else(add.on == 1, TRUE, FALSE),
+                     ~dplyr::if_else(primary.proc == 1, TRUE, FALSE)),
+            nm = list("surg.start.datetime", "surg.stop.datetime", "add.on",
+                      "primary.proc")
+        ))
+
+    names(df) <- stringr::str_to_lower(names(df))
+
+    after <- match("surgeries", class(x), nomatch = 0L)
+    class(df) <- append(class(x), "surgeries", after = after)
+    df
+}
+
+#' @rdname set_edwr_class
+#' @export
 as.uop <- function(x) {
     # inherits from events class
     if (missing(x)) x <- character()

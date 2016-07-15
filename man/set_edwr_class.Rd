@@ -26,6 +26,7 @@
 \alias{as.vent_settings}
 \alias{as.vent_times}
 \alias{as.visits}
+\alias{as.vitals}
 \alias{as.warfarin}
 \alias{edwr}
 \alias{set_edwr_class}
@@ -82,6 +83,8 @@ as.vent_settings(x)
 as.vent_times(x)
 
 as.visits(x)
+
+as.vitals(x)
 
 as.warfarin(x)
 }

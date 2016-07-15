@@ -613,6 +613,26 @@ as.visits <- function(x) {
 
 #' @rdname set_edwr_class
 #' @export
+as.vitals <- function(x) {
+    # inherits from events class
+    if (missing(x)) x <- character()
+    if (is.vitals(x)) return(x)
+    if (!is.edwr(x)) x <- as.edwr(x)
+    if (!is.events(x)) x <- as.events(x)
+
+    df <- rename_(.data = x, .dots = list(
+        "vital.datetime" = "event.datetime",
+        "vital" = "event",
+        "vital.result" = "event.result"
+    ))
+
+    after <- match("vitals", class(x), nomatch = 0L)
+    class(df) <- append(class(x), "vitals", after = after)
+    df
+}
+
+#' @rdname set_edwr_class
+#' @export
 as.warfarin <- function(x) {
     # inherits from events class
     if (missing(x)) x <- character()

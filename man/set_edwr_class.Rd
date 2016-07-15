@@ -6,6 +6,7 @@
 \alias{as.demographics}
 \alias{as.diagnosis}
 \alias{as.edwr}
+\alias{as.encounters}
 \alias{as.labs}
 \alias{as.locations}
 \alias{as.meds_cont}
@@ -30,6 +31,8 @@ as.charges(x)
 as.demographics(x)
 
 as.diagnosis(x)
+
+as.encounters(x)
 
 as.labs(x)
 

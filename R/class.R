@@ -141,6 +141,31 @@ as.diagnosis <- function(x) {
 
 #' @rdname set_edwr_class
 #' @export
+as.encounters <- function(x) {
+    if (missing(x)) stop("Missing object")
+    if (is.encounters(x)) return(x)
+    if (!is.edwr(x)) x <- as.edwr(x)
+
+    df <- rename_(.data = x, .dots = c(val.pie, list(
+        "person.id" = "`Person ID`",
+        "admit.datetime" = "`Admit Date & Time`",
+        "visit.type" = "`Encounter Type`",
+        "facility" = "`Person Location- Facility (Curr)`",
+        "disposition" = "`Discharge Disposition`"
+    ))) %>%
+        dplyr::distinct_() %>%
+        mutate_(.dots = set_names(
+            x = list(~format_dates(admit.datetime)),
+            nm = "admit.datetime"
+        ))
+
+    after <- match("encounters", class(x), nomatch = 0L)
+    class(df) <- append(class(x), "encounters", after = after)
+    df
+}
+
+#' @rdname set_edwr_class
+#' @export
 as.labs <- function(x) {
     if (missing(x)) x <- character()
     if (is.labs(x)) return(x)

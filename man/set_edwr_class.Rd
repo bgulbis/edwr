@@ -8,6 +8,7 @@
 \alias{as.meds_cont}
 \alias{as.meds_home}
 \alias{as.meds_sched}
+\alias{as.services}
 \alias{as.warfarin}
 \alias{edwr}
 \alias{set_edwr_class}
@@ -30,6 +31,8 @@ as.meds_home(x)
 as.meds_sched(x)
 
 as.warfarin(x)
+
+as.services(x)
 }
 \arguments{
 \item{x}{object to set class \code{edwr}}

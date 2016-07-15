@@ -237,19 +237,19 @@ as.services <- function(x) {
     if (!is.edwr(x)) x <- as.edwr(x)
 
     df <- rename_(.data = x, .dots = c(val.pie, list(
-        "arrive.datetime" = "`Location Arrival Date & Time`",
-        "depart.datetime" = "`Location Depart Date & Time`",
-        "unit.to" = "`Person Location - Nurse Unit (To)`",
-        "unit.from" = "`Person Location - Nurse Unit (From)`"
+        "start.datetime" = "`Medical Service Begin Date & Time`",
+        "end.datetime" = "`Medical Service End Date & Time`",
+        "service" = "`Medical Service`",
+        "service.from" = "`Previous Medical Service`"
     ))) %>%
         dplyr::distinct_() %>%
         mutate_(.dots = set_names(
-            x = list(~format_dates(arrive.datetime),
-                     ~format_dates(depart.datetime),
-                     ~dplyr::na_if(unit.to, ""),
-                     ~dplyr::na_if(unit.from, "")),
-            nm = list("arrive.datetime", "depart.datetime", "unit.to",
-                      "unit.from")
+            x = list(~format_dates(start.datetime),
+                     ~format_dates(end.datetime),
+                     ~dplyr::na_if(service, ""),
+                     ~dplyr::na_if(service.from, "")),
+            nm = list("start.datetime", "end.datetime", "service",
+                      "service.from")
         ))
 
     after <- match("services", class(x), nomatch = 0L)

@@ -1,18 +1,9 @@
 # dplyr_verbs.R
 
-# create generic functions for dplyr verbs and joins which maintain edwr class
-# types; for use in scripts and interactive programming only, use in functions
-# should still call dplyr::_ (SE) functions
+# create generic functions for dplyr verbs and joins which maintain edwr classes
 
 #' @export
-arrange.edwr <- function(.data, ...) {
-    y <- NextMethod()
-    class(y) <- class(.data)
-    y
-}
-
-#' @export
-filter.edwr <- function(.data, ...) {
+arrange_.edwr <- function(.data, ..., .dots) {
     y <- NextMethod()
     class(y) <- class(.data)
     y
@@ -25,23 +16,30 @@ filter_.edwr <- function(.data, ..., .dots) {
     y
 }
 
-
 #' @export
-mutate.edwr <- function(.data, ...) {
+mutate_.edwr <- function(.data, ..., .dots) {
     y <- NextMethod()
     class(y) <- class(.data)
     y
 }
 
 #' @export
-select.edwr <- function(.data, ...) {
+rename_.edwr <- function(.data, ..., .dots) {
+    y <- NextMethod()
+    class(y) <- class(.data)
+    y
+}
+
+
+#' @export
+select_.edwr <- function(.data, ..., .dots) {
     y <- NextMethod()
     class(y) <- class(.data)
     y
 }
 
 #' @export
-summarize.edwr <- function(.data, ...) {
+summarise_.edwr <- function(.data, ..., .dots) {
     y <- NextMethod()
     class(y) <- class(.data)
     y

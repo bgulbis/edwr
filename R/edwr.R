@@ -14,4 +14,15 @@
 #' @docType package
 #' @name edwr
 #' @importFrom magrittr %>%
+#' @importFrom dplyr arrange_
+#' @importFrom dplyr filter_
+#' @importFrom dplyr mutate_
+#' @importFrom dplyr rename_
+#' @importFrom dplyr select_
+#' @importFrom dplyr summarise_
+#' @importFrom dplyr anti_join
+#' @importFrom dplyr inner_join
+#' @importFrom dplyr full_join
+#' @importFrom dplyr semi_join
+#' @importFrom purrr set_names
 NULL

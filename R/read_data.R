@@ -232,23 +232,6 @@ read_data2 <- function(data.dir,
                col.types <- readr::cols("c", "c", "c")
            },
 
-           locations = {
-               col.raw <- c(raw.names$id,
-                            "Location Arrival Date & Time",
-                            "Location Depart Date & Time",
-                            "Person Location - Nurse Unit (To)",
-                            "Person Location - Nurse Unit (From)")
-               col.names <- c(pt.id,
-                              "arrive.datetime",
-                              "depart.datetime",
-                              "unit.to",
-                              "unit.from")
-               col.types <- readr::cols("c", col_dt, col_dt, "c", "c")
-               dots <- list(~dplyr::na_if(unit.to, ""),
-                            ~dplyr::na_if(unit.from, ""))
-               nm <- list("unit.to", "unit.from")
-           },
-
            measures = {
                col.raw <- c(raw.names$id,
                             raw.names$dt,
@@ -514,16 +497,6 @@ read_data2 <- function(data.dir,
                               "vital.result")
                dots <- list(~stringr::str_to_lower(vital))
                nm <- "vital"
-           },
-
-           warfarin = {
-               # use default columns
-               col.names <- c(pt.id,
-                              "warfarin.datetime",
-                              "warfarin.event",
-                              "warfarin.result")
-               dots <- list(~stringr::str_to_lower(warfarin.event))
-               nm <- "warfarin.event"
            },
 
            stop("Invalid type")

@@ -36,12 +36,13 @@ as.edwr <- function(x) {
     x
 }
 
-# create "sub" classes of edwr; each class represents a different type of data
-# from EDW (labs, meds, demographics, etc.); in general, these functions will
-# rename variables to desired names, remove duplicate rows, convert names (of
-# labs, meds, etc.) to lower case (to avoid case-sensitive matching errors when
-# working with the data), parse date/time values into POSIXct vectors; any extra
-# columns contained in the csv file will be left unchanged
+# create classes which are children of edwr class; each class represents a
+# different type of data from EDW (labs, meds, demographics, etc.); in general,
+# these functions will rename variables to desired names, remove duplicate rows,
+# convert names (of labs, meds, etc.) to lower case (to avoid case-sensitive
+# matching errors when working with the data), parse date/time values into
+# POSIXct vectors; any extra columns contained in the csv file will be left
+# unchanged
 
 #' @rdname set_edwr_class
 #' @export
@@ -334,6 +335,24 @@ as.meds_cont <- function(x) {
 
     after <- match("meds_cont", class(x), nomatch = 0L)
     class(df) <- append(class(x), "meds_cont", after = after)
+    df
+}
+
+#' @rdname set_edwr_class
+#' @export
+as.meds_freq <- function(x) {
+    # inherits from meds_sched
+    if (missing(x)) x <- character()
+    if (is.meds_freq(x)) return(x)
+    if (!is.edwr(x)) x <- as.edwr(x)
+    if (!is.meds_sched(x)) x <- as.meds_sched(x)
+
+    df <- rename_(.data = x, .dots = list(
+        "freq" = "`Parent Order Frequency Description`"
+    ))
+
+    after <- match("meds_freq", class(x), nomatch = 0L)
+    class(df) <- append(class(x), "meds_freq", after = after)
     df
 }
 

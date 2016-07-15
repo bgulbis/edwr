@@ -14,6 +14,7 @@
 \alias{as.locations}
 \alias{as.measures}
 \alias{as.meds_cont}
+\alias{as.meds_freq}
 \alias{as.meds_home}
 \alias{as.meds_sched}
 \alias{as.services}
@@ -51,6 +52,8 @@ as.locations(x)
 as.measures(x)
 
 as.meds_cont(x)
+
+as.meds_freq(x)
 
 as.meds_home(x)
 

@@ -73,6 +73,27 @@ as.demographics <- function(x) {
 
 #' @rdname set_edwr_class
 #' @export
+as.diagnosis <- function(x) {
+    if (missing(x)) stop("Missing object")
+    if (is.diagnosis(x)) return(x)
+    if (!is.edwr(x)) x <- as.edwr(x)
+
+    df <- rename_(.data = x, .dots = c(val.pie, list(
+        "diag.code" = "`Diagnosis Code`",
+        "code.source" = "`Diagnosis Code Source Vocabulary`",
+        "diag.type" = "`Diagnosis Type`",
+        "diag.seq" = "`Diagnosis Code Sequence`",
+        "present.admit" = "`Present on Admission`"
+    ))) %>%
+        dplyr::distinct_()
+
+    after <- match("diagnosis", class(x), nomatch = 0L)
+    class(df) <- append(class(x), "diagnosis", after = after)
+    df
+}
+
+#' @rdname set_edwr_class
+#' @export
 as.labs <- function(x) {
     if (missing(x)) x <- character()
     if (is.labs(x)) return(x)

@@ -2,6 +2,7 @@
 % Please edit documentation in R/class.R
 \name{set_edwr_class}
 \alias{as.demographics}
+\alias{as.diagnosis}
 \alias{as.edwr}
 \alias{as.labs}
 \alias{as.locations}
@@ -21,6 +22,8 @@ edwr(x)
 as.edwr(x)
 
 as.demographics(x)
+
+as.diagnosis(x)
 
 as.labs(x)
 

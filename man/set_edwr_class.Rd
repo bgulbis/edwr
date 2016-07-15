@@ -17,6 +17,7 @@
 \alias{as.meds_freq}
 \alias{as.meds_home}
 \alias{as.meds_sched}
+\alias{as.mpp}
 \alias{as.services}
 \alias{as.vent_times}
 \alias{as.visits}
@@ -58,6 +59,8 @@ as.meds_freq(x)
 as.meds_home(x)
 
 as.meds_sched(x)
+
+as.mpp(x)
 
 as.services(x)
 

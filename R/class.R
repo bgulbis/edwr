@@ -399,6 +399,23 @@ as.meds_sched <- function(x) {
 
 #' @rdname set_edwr_class
 #' @export
+as.mpp <- function(x) {
+    if (missing(x)) stop("Missing object")
+    if (is.mpp(x)) return(x)
+    if (!is.edwr(x)) x <- as.edwr(x)
+
+    df <- rename_(.data = x, .dots = c(val.pie, list(
+        "mpp" = "`MPP (which generated order)`"
+    ))) %>%
+        dplyr::distinct_()
+
+    after <- match("mpp", class(x), nomatch = 0L)
+    class(df) <- append(class(x), "mpp", after = after)
+    df
+}
+
+#' @rdname set_edwr_class
+#' @export
 as.services <- function(x) {
     if (missing(x)) x <- character()
     if (is.services(x)) return(x)

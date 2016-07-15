@@ -87,12 +87,7 @@
 #' class(y)
 #'
 #' @export
-read_data <- function(...) {
-    UseMethod("read_data")
-}
-
-#' @export
-read_data.default <- function(data.dir, file.name, ...) {
+read_data <- function(data.dir, file.name) {
     # get list of files in specified directory and matching file name
     list.files(data.dir, pattern = file.name, full.names = TRUE) %>%
         purrr::map_df(

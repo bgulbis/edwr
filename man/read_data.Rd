@@ -4,7 +4,7 @@
 \alias{read_data}
 \title{Read data from csv files}
 \usage{
-read_data(...)
+read_data(data.dir, file.name)
 }
 \arguments{
 \item{data.dir}{A character string with the name of the directory containing

@@ -510,10 +510,38 @@ as.patients <- function(x) {
             nm = list("discharge.datetime")
         ))
 
-    names(df) <- stringr::str_to_lower(names(df))
-
     after <- match("patients", class(x), nomatch = 0L)
     class(df) <- append(class(x), "patients", after = after)
+    df
+}
+
+#' @rdname set_edwr_class
+#' @export
+as.problems <- function(x) {
+    if (missing(x)) stop("Missing object")
+    if (is.problems(x)) return(x)
+    if (!is.edwr(x)) x <- as.edwr(x)
+
+    df <- rename_(.data = x, .dots = c(val.pie, list(
+        "problem" = "`Problem - Description`",
+        "classification" = "`Problem Classification`",
+        "confirm" = "`Problem Confirmation Status`",
+        "free.text" = "`Problem Free Text`",
+        "severity" = "`Problem Severity`",
+        "active" = "`Problem Source Active Indicator`",
+        "onset.datetime" = "`Problem Onset Date & Time`",
+        "life.cycle.datetime" = "`Problem Life Cycle Date & Time`",
+        "life.cycle" = "`Problem Life Cycle`"
+    ))) %>%
+        dplyr::distinct_() %>%
+        mutate_(.dots = set_names(
+            x = list(~format_dates(onset.datetime),
+                     ~format_dates(life.cycle.datetime)),
+            nm = list("onset.datetime", "life.cycle.datetime")
+        ))
+
+    after <- match("problems", class(x), nomatch = 0L)
+    class(df) <- append(class(x), "problems", after = after)
     df
 }
 

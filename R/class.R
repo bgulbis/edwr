@@ -543,98 +543,130 @@ as.warfarin <- function(x) {
 #' @export
 is.edwr <- function(x) inherits(x, "edwr")
 
+#' @rdname is.edwr
 #' @export
 is.blood <- function(x) inherits(x, "blood")
 
+#' @rdname is.edwr
 #' @export
 is.charges <- function(x) inherits(x, "charges")
 
+#' @rdname is.edwr
 #' @export
 is.demographics <- function(x) inherits(x, "demographics")
 
+#' @rdname is.edwr
 #' @export
 is.diagnosis <- function(x) inherits(x, "diagnosis")
 
+#' @rdname is.edwr
 #' @export
 is.encounters <- function(x) inherits(x, "encounters")
 
+#' @rdname is.edwr
 #' @export
 is.events <- function(x) inherits(x, "events")
 
+#' @rdname is.edwr
 #' @export
 is.icu_assess <- function(x) inherits(x, "icu_assess")
 
+#' @rdname is.edwr
 #' @export
 is.id <- function(x) inherits(x, "id")
 
+#' @rdname is.edwr
 #' @export
 is.labs <- function(x) inherits(x, "labs")
 
+#' @rdname is.edwr
 #' @export
 is.locations <- function(x) inherits(x, "locations")
 
+#' @rdname is.edwr
 #' @export
 is.measures <- function(x) inherits(x, "measures")
 
+#' @rdname is.edwr
 #' @export
 is.meds_cont <- function(x) inherits(x, "meds_cont")
 
+#' @rdname is.edwr
 #' @export
 is.meds_freq <- function(x) inherits(x, "meds_freq")
 
+#' @rdname is.edwr
 #' @export
 is.meds_home <- function(x) inherits(x, "meds_home")
 
+#' @rdname is.edwr
 #' @export
 is.meds_sched <- function(x) inherits(x, "meds_sched")
 
+#' @rdname is.edwr
 #' @export
 is.mpp <- function(x) inherits(x, "mpp")
 
+#' @rdname is.edwr
 #' @export
 is.mrn <- function(x) inherits(x, "mrn")
 
+#' @rdname is.edwr
 #' @export
 is.order_by <- function(x) inherits(x, "order_by")
 
+#' @rdname is.edwr
 #' @export
 is.order_detail <- function(x) inherits(x, "order_detail")
 
+#' @rdname is.edwr
 #' @export
 is.patients <- function(x) inherits(x, "patients")
 
+#' @rdname is.edwr
 #' @export
 is.problems <- function(x) inherits(x, "problems")
 
+#' @rdname is.edwr
 #' @export
 is.procedures9 <- function(x) inherits(x, "procedures9")
 
+#' @rdname is.edwr
 #' @export
 is.procedures10 <- function(x) inherits(x, "procedures10")
 
+#' @rdname is.edwr
 #' @export
 is.radiology <- function(x) inherits(x, "radiology")
 
+#' @rdname is.edwr
 #' @export
 is.services <- function(x) inherits(x, "services")
 
+#' @rdname is.edwr
 #' @export
 is.surgeries <- function(x) inherits(x, "surgeries")
 
+#' @rdname is.edwr
 #' @export
 is.uop <- function(x) inherits(x, "uop")
 
+#' @rdname is.edwr
 #' @export
 is.vent_settings <- function(x) inherits(x, "vent_settings")
 
+#' @rdname is.edwr
 #' @export
 is.vent_times <- function(x) inherits(x, "vent_times")
 
+#' @rdname is.edwr
 #' @export
 is.visits <- function(x) inherits(x, "visits")
 
+#' @rdname is.edwr
 #' @export
 is.vitals <- function(x) inherits(x, "vitals")
 
+#' @rdname is.edwr
 #' @export
 is.warfarin <- function(x) inherits(x, "warfarin")

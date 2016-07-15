@@ -284,6 +284,31 @@ as.locations <- function(x) {
 
 #' @rdname set_edwr_class
 #' @export
+as.measures <- function(x) {
+    if (missing(x)) x <- character()
+    if (is.measures(x)) return(x)
+    if (!is.edwr(x)) x <- as.edwr(x)
+
+    df <- rename_(.data = x, .dots = c(val.pie, list(
+        "measure.datetime" = val.dt,
+        "measure" = val.ce,
+        "measure.result" = val.res,
+        "measure.units" = "`Clinical Event Result Units`"
+    ))) %>%
+        dplyr::distinct_() %>%
+        mutate_(.dots = set_names(
+            x = list(~stringr::str_to_lower(measure),
+                     ~format_dates(measure.datetime)),
+            nm = list("measure", "measure.datetime")
+        ))
+
+    after <- match("measures", class(x), nomatch = 0L)
+    class(df) <- append(class(x), "measures", after = after)
+    df
+}
+
+#' @rdname set_edwr_class
+#' @export
 as.meds_cont <- function(x) {
     if (missing(x)) x <- character()
     if (is.meds_cont(x)) return(x)

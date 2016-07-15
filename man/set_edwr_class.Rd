@@ -12,6 +12,7 @@
 \alias{as.id}
 \alias{as.labs}
 \alias{as.locations}
+\alias{as.measures}
 \alias{as.meds_cont}
 \alias{as.meds_home}
 \alias{as.meds_sched}
@@ -46,6 +47,8 @@ as.id(x)
 as.labs(x)
 
 as.locations(x)
+
+as.measures(x)
 
 as.meds_cont(x)
 

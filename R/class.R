@@ -547,6 +547,50 @@ as.problems <- function(x) {
 
 #' @rdname set_edwr_class
 #' @export
+as.procedures9 <- function(x) {
+    if (missing(x)) stop("Missing object")
+    if (is.procedures9(x)) return(x)
+    if (!is.edwr(x)) x <- as.edwr(x)
+
+    df <- rename_(.data = x, .dots = c(val.pie, list(
+        "proc.date" = "`Procedure Date and Time`",
+        "proc.code" = "`ICD9 Procedure Code`"
+    ))) %>%
+        dplyr::distinct_() %>%
+        mutate_(.dots = set_names(
+            x = list(~format_dates(proc.date)),
+            nm = "proc.date"
+        ))
+
+    after <- match("procedures9", class(x), nomatch = 0L)
+    class(df) <- append(class(x), "procedures9", after = after)
+    df
+}
+
+#' @rdname set_edwr_class
+#' @export
+as.procedures10 <- function(x) {
+    if (missing(x)) stop("Missing object")
+    if (is.procedures10(x)) return(x)
+    if (!is.edwr(x)) x <- as.edwr(x)
+
+    df <- rename_(.data = x, .dots = c(val.pie, list(
+        "proc.date" = "`Procedure Date and Time`",
+        "proc.code" = "`ICD10 Procedure Code`"
+    ))) %>%
+        dplyr::distinct_() %>%
+        mutate_(.dots = set_names(
+            x = list(~format_dates(proc.date)),
+            nm = "proc.date"
+        ))
+
+    after <- match("procedures10", class(x), nomatch = 0L)
+    class(df) <- append(class(x), "procedures10", after = after)
+    df
+}
+
+#' @rdname set_edwr_class
+#' @export
 as.services <- function(x) {
     if (missing(x)) x <- character()
     if (is.services(x)) return(x)

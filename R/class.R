@@ -124,6 +124,34 @@ as.meds_cont <- function(x) {
     df
 }
 
+#' @rdname set_edwr_class
+#' @export
+as.meds_home <- function(x) {
+    if (missing(x)) x <- character()
+    if (is.meds_home(x)) return(x)
+    if (!is.edwr(x)) x <- as.edwr(x)
+
+    # rename variables to desired names and remove duplicate rows; then convert
+    # all med names to lower case to avoid matching errors and set date/time
+    # format; any extra columns will be left unchanged
+    df <- rename_(.data = x, .dots = c(val.pie, list(
+        "med" = "`Order Catalog Short Description`",
+        "order.name" = "`Order Catalog Mnemonic`",
+        "med.type" = "`Orig Orderable Type-Flag Desc`"
+    ))) %>%
+        dplyr::distinct_() %>%
+        mutate_(.dots = set_names(
+            x = list(~stringr::str_to_lower(med)),
+            nm = "med"
+        ))
+
+    after <- match("meds_home", class(x), nomatch = 0L)
+    class(df) <- append(class(x), "meds_home", after = after)
+    df
+}
+
+# class test functions ---------------------------------
+
 #' Test edwr-related classes
 #'
 #' Takes an R object and checks for an edwr class type.
@@ -227,16 +255,3 @@ is.vitals <- function(x) inherits(x, "vitals")
 
 #' @export
 is.warfarin <- function(x) inherits(x, "warfarin")
-
-#' Set the default format for reading date/time variables
-#'
-#' @param x character vector of date/time data
-#' @return A readr::collector object#'
-#' @keywords internal
-format_dates <- function(x) {
-    readr::parse_datetime(
-        x = x,
-        format = "%Y/%m/%d %H:%M:%S",
-        locale = readr::locale(tz = "US/Central")
-    )
-}

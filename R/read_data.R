@@ -211,20 +211,6 @@ read_data2 <- function(data.dir,
                nm <- "event"
            },
 
-           meds_home = {
-               col.raw <- c(raw.names$id,
-                            "Order Catalog Short Description",
-                            "Order Catalog Mnemonic",
-                            "Orig Orderable Type-Flag Desc")
-               col.names <- c(pt.id,
-                              "med",
-                              "order.name",
-                              "med.type")
-               col.types <- readr::cols_only("c", "c", "c", "c")
-               dots <- list(~stringr::str_to_lower(med))
-               nm <- "med"
-           },
-
            icu_assess = {
                # use default columns
                col.names <- c(pt.id,

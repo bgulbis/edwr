@@ -2,6 +2,7 @@
 % Please edit documentation in R/class.R
 \name{set_edwr_class}
 \alias{as.blood}
+\alias{as.charges}
 \alias{as.demographics}
 \alias{as.diagnosis}
 \alias{as.edwr}
@@ -23,6 +24,8 @@ edwr(x)
 as.edwr(x)
 
 as.blood(x)
+
+as.charges(x)
 
 as.demographics(x)
 

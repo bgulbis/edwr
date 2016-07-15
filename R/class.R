@@ -73,6 +73,25 @@ as.blood <- function(x) {
 
 #' @rdname set_edwr_class
 #' @export
+as.charges <- function(x) {
+    if (missing(x)) stop("Missing object")
+    if (is.charges(x)) return(x)
+    if (!is.edwr(x)) x <- as.edwr(x)
+
+    df <- rename_(.data = x, .dots = c(val.pie, list(
+        "cdm.code" = "`Cdm Code`",
+        "service.date" = "`Service Date`",
+        "institution" = "`Institution Desc`"
+    ))) %>%
+        dplyr::distinct_()
+
+    after <- match("charges", class(x), nomatch = 0L)
+    class(df) <- append(class(x), "charges", after = after)
+    df
+}
+
+#' @rdname set_edwr_class
+#' @export
 as.demographics <- function(x) {
     if (missing(x)) stop("Missing object")
     if (is.demographics(x)) return(x)

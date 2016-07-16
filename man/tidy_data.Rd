@@ -6,7 +6,6 @@
 \alias{tidy_data.labs}
 \alias{tidy_data.locations}
 \alias{tidy_data.meds_cont}
-\alias{tidy_data.meds_home}
 \alias{tidy_data.meds_sched}
 \alias{tidy_data.services}
 \alias{tidy_data.vent_times}
@@ -18,13 +17,11 @@ tidy_data(x, ...)
 
 \method{tidy_data}{labs}(x, censor = TRUE, ...)
 
+\method{tidy_data}{locations}(x, ...)
+
 \method{tidy_data}{meds_cont}(x, ref, sched, ...)
 
 \method{tidy_data}{meds_sched}(x, ref, ...)
-
-\method{tidy_data}{meds_home}(x, ref, pts = NULL, home = TRUE, ...)
-
-\method{tidy_data}{locations}(x, ...)
 
 \method{tidy_data}{services}(x, ...)
 
@@ -43,16 +40,23 @@ details below.}
 
 \item{sched}{A data frame with intermittent medications}
 
-\item{pts}{An optional data frame with a column pie.id including all patients
-in study}
-
-\item{home}{A logical, if TRUE (default) look for home medications,
-otherwise look for discharge prescriptions}
-
 \item{dc}{A data frame with discharge date/times}
 }
 \description{
 \code{tidy_data} transforms raw EDW data into a tidy format
+
+For locations, this function accounts for incorrect departure
+  time from raw EDW data by calculating the departure time using the arrival
+  time of the next unit (unless it was the patient's last unit during the
+  hospitalization in which case the recorded departure time is used). It also
+  combines multiple rows of data when the patient did not actually leave that
+  unit.
+
+For services, this function accounts for incorrect end times
+  from raw EDW data by calculating the end time using the start time of the
+  next service (unless  it was the patient's last service during the
+  hospitalization). It also  combines multiple rows of data when the patient
+  did not actually leave  that service.
 }
 \details{
 This is an S3 generic function for tidying EDW data read in using

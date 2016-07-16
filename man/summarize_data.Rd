@@ -5,6 +5,7 @@
 \alias{summarize_data.default}
 \alias{summarize_data.labs}
 \alias{summarize_data.meds_cont}
+\alias{summarize_data.meds_home}
 \alias{summarize_data.meds_sched}
 \title{Summary calculations for serial measurement data}
 \usage{
@@ -13,6 +14,8 @@ summarize_data(x, ...)
 \method{summarize_data}{default}(x, ...)
 
 \method{summarize_data}{meds_cont}(x, units = "hours", ...)
+
+\method{summarize_data}{meds_home}(x, ref, pts = NULL, home = TRUE, ...)
 
 \method{summarize_data}{meds_sched}(x, units = "hours", ...)
 
@@ -25,6 +28,15 @@ summarize_data(x, ...)
 
 \item{units}{An optional character string specifying the time units to use in
 calculations, default is hours}
+
+\item{ref}{A data frame with three columns: name, type, and group. See
+details below.}
+
+\item{pts}{An optional data frame with a column pie.id including all patients
+in study}
+
+\item{home}{A logical, if TRUE (default) look for home medications,
+otherwise look for discharge prescriptions}
 }
 \value{
 A data frame

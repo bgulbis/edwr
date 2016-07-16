@@ -89,20 +89,15 @@ tidy_data.default <- function(x, ...) {
 #' @export
 #' @rdname tidy_data
 tidy_data.labs <- function(x, censor = TRUE, ...) {
-    tidy <- x
     # create a column noting if data was censored
     if (censor == TRUE) {
-        tidy <- mutate_(tidy, .dots = set_names(
-            x = list(~stringr::str_detect(lab.result, ">|<")),
-            nm = "censored"
-        ))
+        x[["censor.low"]] <- stringr::str_detect(x[["lab.result"]], "<")
+        x[["censor.high"]] <- stringr::str_detect(x[["lab.result"]], ">")
     }
 
     # convert lab results to numeric values
-    tidy <- mutate_(tidy, .dots = set_names(
-        x = list(~as.numeric(lab.result)),
-        nm = "lab.result"
-    ))
+    x[["lab.result"]] <- as.numeric(x[["lab.result"]])
+    x
 }
 
 #' @export

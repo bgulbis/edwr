@@ -36,7 +36,7 @@ as.edwr <- function(x) {
     x
 }
 
-# create classes which are children of edwr class; each class represents a
+# create classes which inherit from edwr class; each class represents a
 # different type of data from EDW (labs, meds, demographics, etc.); in general,
 # these functions will rename variables to desired names, remove duplicate rows,
 # convert names (of labs, meds, etc.) to lower case (to avoid case-sensitive

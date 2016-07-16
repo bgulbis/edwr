@@ -44,19 +44,6 @@ details below.}
 }
 \description{
 \code{tidy_data} transforms raw EDW data into a tidy format
-
-For locations, this function accounts for incorrect departure
-  time from raw EDW data by calculating the departure time using the arrival
-  time of the next unit (unless it was the patient's last unit during the
-  hospitalization in which case the recorded departure time is used). It also
-  combines multiple rows of data when the patient did not actually leave that
-  unit.
-
-For services, this function accounts for incorrect end times
-  from raw EDW data by calculating the end time using the start time of the
-  next service (unless  it was the patient's last service during the
-  hospitalization). It also  combines multiple rows of data when the patient
-  did not actually leave  that service.
 }
 \details{
 This is an S3 generic function for tidying EDW data read in using
@@ -70,6 +57,19 @@ medication names or medication classes. The type column should specify
 whether the value in name is a "class" or "med". The group column should
 specify whether the medication is a continous ("cont") or scheduled ("sched")
 medication.
+
+For locations, this function accounts for incorrect departure
+  time from raw EDW data by calculating the departure time using the arrival
+  time of the next unit (unless it was the patient's last unit during the
+  hospitalization in which case the recorded departure time is used). It also
+  combines multiple rows of data when the patient did not actually leave that
+  unit.
+
+For services, this function accounts for incorrect end times
+  from raw EDW data by calculating the end time using the start time of the
+  next service (unless  it was the patient's last service during the
+  hospitalization). It also  combines multiple rows of data when the patient
+  did not actually leave  that service.
 }
 \examples{
 # tidy lab data; non-numeric results will be converted to NA

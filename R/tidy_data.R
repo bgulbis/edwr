@@ -96,7 +96,7 @@ tidy_data.labs <- function(x, censor = TRUE, ...) {
     x
 }
 
-#' @description For locations, this function accounts for incorrect departure
+#' @details For locations, this function accounts for incorrect departure
 #'   time from raw EDW data by calculating the departure time using the arrival
 #'   time of the next unit (unless it was the patient's last unit during the
 #'   hospitalization in which case the recorded departure time is used). It also
@@ -185,7 +185,7 @@ tidy_data.meds_sched <- function(x, ref, ...) {
     tidy
 }
 
-#' @description For services, this function accounts for incorrect end times
+#' @details For services, this function accounts for incorrect end times
 #'   from raw EDW data by calculating the end time using the start time of the
 #'   next service (unless  it was the patient's last service during the
 #'   hospitalization). It also  combines multiple rows of data when the patient

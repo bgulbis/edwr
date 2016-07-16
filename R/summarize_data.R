@@ -101,6 +101,13 @@ summarize_data.meds_cont <- function(x, units = "hours", ...) {
     cont
 }
 
+#' @details The data frame passed to \code{ref} should contain three character
+#'   columns: name, type, and group. The name column should contain either
+#'   generic medication names or medication classes. The type column should
+#'   specify whether the value in name is a "class" or "med". The group column
+#'   should specify whether the medication is a continous ("cont") or scheduled
+#'   ("sched") medication.
+#'
 #' @export
 #' @rdname summarize_data
 summarize_data.meds_home <- function(x, ref, pts = NULL, home = TRUE, ...) {

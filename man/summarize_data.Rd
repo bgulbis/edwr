@@ -55,6 +55,13 @@ duration, total infusion running time, and cumulative dose.
 
 For labs and intermittent medications, the calculations include: first, last,
 median, maximum, minimum, AUC, and time-weighted average result.
+
+The data frame passed to \code{ref} should contain three character
+  columns: name, type, and group. The name column should contain either
+  generic medication names or medication classes. The type column should
+  specify whether the value in name is a "class" or "med". The group column
+  should specify whether the medication is a continous ("cont") or scheduled
+  ("sched") medication.
 }
 \examples{
 # make a reference data frame for tidying meds

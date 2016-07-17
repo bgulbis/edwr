@@ -33,11 +33,7 @@ add_patients <- function(tidy, patients) {
 #'
 #' @keywords internal
 count_rowsback <- function(x, back = 2) {
-    curr_val <- function(y) {
-        sum(x >= y - lubridate::days(back) & x <= y)
-    }
-
-    purrr::map_int(x, curr_val)
+    purrr::map_int(x, function(y) sum(x >= y - lubridate::days(back) & x <= y))
 }
 
 #' Set the default format for reading date/time variables

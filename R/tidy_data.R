@@ -129,6 +129,7 @@ tidy_data.locations <- function(x, ...) {
         # use the arrival time for the next unit to calculate a depart time; if
         # there is no arrival time for the next unit then used the depart
         # date/time from EDW
+        group_by_(.dots = "pie.id") %>%
         mutate_(.dots = set_names(
             x = list(~dplyr::lead(arrive.datetime),
                      ~dplyr::coalesce(depart.datetime, depart.recorded)),

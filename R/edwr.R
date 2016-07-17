@@ -26,6 +26,7 @@
 #' @importFrom dplyr anti_join
 #' @importFrom dplyr inner_join
 #' @importFrom dplyr full_join
+#' @importFrom dplyr left_join
 #' @importFrom dplyr semi_join
 #' @importFrom purrr set_names
 NULL

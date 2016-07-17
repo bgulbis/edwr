@@ -175,8 +175,8 @@ summarize_data.meds_sched <- function(x, units = "hours", ...) {
     # turn off scientific notation
     options(scipen = 999)
 
-    cont <- dplyr::group_by_(x, .dots = list("pie.id", "med")) %>%
-        dplyr::summarize_(.dots = purrr::set_names(
+    group_by_(x, .dots = list("pie.id", "med")) %>%
+        dplyr::summarize_(.dots = set_names(
             x = list(~dplyr::first(med.datetime),
                      ~dplyr::last(med.datetime),
                      ~dplyr::first(med.dose),
@@ -186,7 +186,7 @@ summarize_data.meds_sched <- function(x, units = "hours", ...) {
                      ~min(med.dose, na.rm = TRUE),
                      ~MESS::auc(run.time, med.dose),
                      ~dplyr::last(run.time)),
-            nm = c("first.datetime",
+            nm = list("first.datetime",
                    "last.datetime",
                    "first.result",
                    "last.result",
@@ -196,15 +196,14 @@ summarize_data.meds_sched <- function(x, units = "hours", ...) {
                    "auc",
                    "duration")
         )) %>%
+
         # calculate the time-weighted average
-        dplyr::mutate_(.dots = purrr::set_names(
+        group_by_(.dots = list("pie.id", "med")) %>%
+        mutate_(.dots = set_names(
             x = list(~auc/duration),
             nm = "time.wt.avg"
-        ))
-
-    # keep original class
-    class(cont) <- class(x)
-    cont
+        )) %>%
+        ungroup()
 }
 
 #' @export
@@ -213,8 +212,8 @@ summarize_data.labs <- function(x, units = "hours", ...) {
     # turn off scientific notation
     options(scipen = 999)
 
-    cont <- dplyr::group_by_(x, .dots = list("pie.id", "lab")) %>%
-        dplyr::summarize_(.dots = purrr::set_names(
+    group_by_(x, .dots = list("pie.id", "lab")) %>%
+        summarize_(.dots = set_names(
             x = list(~dplyr::first(lab.datetime),
                      ~dplyr::last(lab.datetime),
                      ~dplyr::first(lab.result),
@@ -224,7 +223,7 @@ summarize_data.labs <- function(x, units = "hours", ...) {
                      ~min(lab.result, na.rm = TRUE),
                      ~MESS::auc(run.time, lab.result),
                      ~dplyr::last(run.time)),
-            nm = c("first.datetime",
+            nm = list("first.datetime",
                    "last.datetime",
                    "first.result",
                    "last.result",
@@ -234,13 +233,12 @@ summarize_data.labs <- function(x, units = "hours", ...) {
                    "auc",
                    "duration")
         )) %>%
+
         # calculate the time-weighted average and interval
-        dplyr::mutate_(.dots = purrr::set_names(
+        group_by_(.dots = list("pie.id", "lab")) %>%
+        mutate_(.dots = set_names(
             x = list(~auc/duration),
             nm = "time.wt.avg"
-        ))
-
-    # keep original class
-    class(cont) <- class(x)
-    cont
+        )) %>%
+        ungroup()
 }

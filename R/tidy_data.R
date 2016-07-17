@@ -215,51 +215,56 @@ tidy_data.services <- function(x, ...) {
                                     quote(-end.calculated)))
 }
 
+#' @details For vent_times, this function accounts for incorrect start and stop
+#'   times from raw EDW data. If there is not a recorded stop time then the
+#'   discharge time will be used as the stop time.
+#'
 #' @export
 #' @rdname tidy_data
 tidy_data.vent_times <- function(x, dc, ...) {
-    tidy <- dplyr::filter_(x, .dots = list(~!is.na(vent.datetime))) %>%
-        # remove any missing data
-        dplyr::group_by_(.dots = "pie.id") %>%
-        dplyr::arrange_(.dots = "vent.datetime") %>%
+    # remove any missing data
+    filter_(x, .dots = list(~!is.na(vent.datetime))) %>%
+        arrange_("vent.datetime") %>%
+        group_by_("pie.id") %>%
+
         # if it's the first event or the next event is a stop, then count as a
         # new vent event
-        dplyr::mutate_(.dots = purrr::set_names(
+        mutate_(.dots = set_names(
             x = list(~is.na(dplyr::lag(vent.event)) |
                          vent.event != lag(vent.event),
                      ~cumsum(diff.event)),
             nm = c("diff.event", "event.count")
         )) %>%
-        dplyr::group_by_(.dots = list("pie.id", "event.count")) %>%
+
         # for each event count, get the first and last date/time
-        dplyr::summarize_(.dots = purrr::set_names(
+        group_by_(.dots = list("pie.id", "event.count")) %>%
+        summarize_(.dots = set_names(
             x = list(~dplyr::first(vent.event),
                      ~dplyr::first(vent.datetime),
                      ~dplyr::last(vent.datetime)),
             nm = c("event", "first.event.datetime", "last.event.datetime")
         )) %>%
-        dplyr::group_by_(.dots = "pie.id") %>%
-        dplyr::left_join(dc[c("pie.id", "discharge.datetime")], by = "pie.id") %>%
+
+        group_by_("pie.id") %>%
+        left_join(dc[c("pie.id", "discharge.datetime")], by = "pie.id") %>%
+
         # use the last date/time of the next event as stop date/time; this would
         # be the last stop event if there are multiple stop events in a row. if
         # there isn't a stop date/time because there was start with no stop, use
         # the discharge date/time as stop date/time
-        dplyr::mutate_(.dots = purrr::set_names(
+        mutate_(.dots = set_names(
             x = list(~dplyr::lead(last.event.datetime),
                      ~dplyr::coalesce(stop.datetime, discharge.datetime)),
             nm = c("stop.datetime", "stop.datetime")
         )) %>%
-        dplyr::filter_(.dots = list(~event == "vent start time")) %>%
-        dplyr::select_(.dots = list("pie.id",
-                                    "start.datetime" = "first.event.datetime",
-                                    "stop.datetime")) %>%
-        dplyr::ungroup() %>%
-        dplyr::mutate_(.dots = purrr::set_names(
+
+        filter_(.dots = list(~event == "vent start time")) %>%
+        select_(.dots = list("pie.id",
+                             "start.datetime" = "first.event.datetime",
+                             "stop.datetime")) %>%
+        ungroup() %>%
+        mutate_(.dots = set_names(
             x = list(~difftime(stop.datetime, start.datetime, units = "hours")),
             nm = "vent.duration"
         ))
-
-    # keep original class
-    class(tidy) <- class(x)
-    tidy
 }

@@ -70,6 +70,10 @@ For services, this function accounts for incorrect end times
   next service (unless  it was the patient's last service during the
   hospitalization). It also  combines multiple rows of data when the patient
   did not actually leave  that service.
+
+For vent_times, this function accounts for incorrect start and stop
+  times from raw EDW data. If there is not a recorded stop time then the
+  discharge time will be used as the stop time.
 }
 \examples{
 # tidy lab data; non-numeric results will be converted to NA

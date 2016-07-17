@@ -5,14 +5,8 @@ dir <- system.file(package = "edwr", "extdata")
 library(edwr)
 context("Check read_data")
 
-test_that("invalid type returns error", {
-    expect_error(
-        read_data(dir, "demographics.csv", "demograph"), "Invalid type"
-    )
-})
-
 test_that("returns proper class", {
     expect_s3_class(
-        read_data(dir, "demographics.csv", "demographics"), "demographics"
+        read_data(dir, "demographics.csv"), "edwr"
     )
 })

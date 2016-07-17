@@ -158,7 +158,8 @@ calc_runtime.meds_cont <- function(x, drip.off = 12, no.doc = 24,
         )) %>%
         ungroup()
 
-    # bind the rows with drip end data and arrange by date/time
+    # bind the rows with drip end data and arrange by date/time; need to ungroup
+    # first for bind_rows to keep edwr class assigment
     ungroup(cont) %>%
         dplyr::bind_rows(drip.end) %>%
         arrange_(.dots = list("pie.id", "med", "drip.count", "rate.start"))

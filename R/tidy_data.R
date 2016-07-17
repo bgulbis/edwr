@@ -102,7 +102,7 @@ tidy_data.locations <- function(x, ...) {
 
         # use the count to group multiple rows of the same unit together
         group_by_(.dots = list("pie.id", "unit.count")) %>%
-        summarize_(.dots = set_names(
+        summarise_(.dots = set_names(
             x = list(~dplyr::first(unit.to),
                      ~dplyr::first(arrive.datetime),
                      ~dplyr::last(depart.datetime)),
@@ -195,7 +195,7 @@ tidy_data.services <- function(x, ...) {
         # use the service.count to group multiple rows of the same service
         # together and combine data
         group_by_(.dots = list("pie.id", "service.count")) %>%
-        summarize_(.dots = set_names(
+        summarise_(.dots = set_names(
             x = list(~dplyr::first(service),
                      ~dplyr::first(start.datetime),
                      ~dplyr::last(end.datetime)),
@@ -245,7 +245,7 @@ tidy_data.vent_times <- function(x, dc, ...) {
 
         # for each event count, get the first and last date/time
         group_by_(.dots = list("pie.id", "event.count")) %>%
-        summarize_(.dots = set_names(
+        summarise_(.dots = set_names(
             x = list(~dplyr::first(vent.event),
                      ~dplyr::first(vent.datetime),
                      ~dplyr::last(vent.datetime)),

@@ -70,7 +70,7 @@
 #' @param file.name A character string with name of data file or pattern to
 #'   match
 #'
-#' @return A data frame of class \code{edwr}
+#' @return A data frame of class \code{tbl_edwr}
 #'
 #' @seealso \code{\link[readr]{read_csv}}
 #'
@@ -95,5 +95,5 @@ read_data <- function(data.dir, file.name) {
             col_types = readr::cols(.default = "c"),
             na = c("", "NA", "Unknown")
         ) %>%
-        as.edwr()
+        as.tbl_edwr()
 }

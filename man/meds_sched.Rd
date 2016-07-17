@@ -14,7 +14,7 @@
   \item{med}{name of medication}
   \item{med.dose}{infusion rate}
   \item{med.dose.units}{dosage units (e.g., mg, units)}
-  \item{med.route}{route of administration}
+  \item{route}{route of administration}
   \item{event.type}{administration event (e.g., Administered)}
   \item{event.id}{id for the administration event}
 }}

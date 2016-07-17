@@ -77,13 +77,13 @@ perctime <- function(x, thrshld, vars) {
 
     # find all values within threshold and calculate the total time at goal
     goal <- filter_(cont, .dots = thrshld) %>%
-        summarize_(.dots = set_names(
+        summarise_(.dots = set_names(
             x = list(~sum(duration, na.rm = TRUE)),
             nm = "time.goal"
         ))
 
     # get the total duration of data
-    cont <- summarize_(cont, .dots = set_names(
+    cont <- summarise_(cont, .dots = set_names(
         x = list(~dplyr::last(run.time)),
         nm = "total.dur"
     )) %>%

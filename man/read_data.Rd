@@ -14,7 +14,7 @@ the data files}
 match}
 }
 \value{
-A data frame of class \code{edwr}
+A data frame of class \code{tbl_edwr}
 }
 \description{
 \code{read_data} takes a directory and file name and reads in all

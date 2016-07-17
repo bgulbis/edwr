@@ -7,7 +7,7 @@
 keep_class(x, y)
 }
 \arguments{
-\item{x}{tibble with edwr class(es)}
+\item{x}{tibble with tbl_edwr class(es)}
 
 \item{y}{tibble as returned by dplyr manipulation function}
 }

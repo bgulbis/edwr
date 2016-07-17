@@ -5,7 +5,6 @@
 \alias{as.charges}
 \alias{as.demographics}
 \alias{as.diagnosis}
-\alias{as.edwr}
 \alias{as.encounters}
 \alias{as.events}
 \alias{as.icu_assess}
@@ -27,19 +26,20 @@
 \alias{as.radiology}
 \alias{as.services}
 \alias{as.surgeries}
+\alias{as.tbl_edwr}
 \alias{as.uop}
 \alias{as.vent_settings}
 \alias{as.vent_times}
 \alias{as.visits}
 \alias{as.vitals}
 \alias{as.warfarin}
-\alias{edwr}
 \alias{set_edwr_class}
+\alias{tbl_edwr}
 \title{Construct edwr data types}
 \usage{
-edwr(x)
+tbl_edwr(x)
 
-as.edwr(x)
+as.tbl_edwr(x)
 
 as.blood(x)
 
@@ -104,7 +104,7 @@ as.vitals(x)
 as.warfarin(x)
 }
 \arguments{
-\item{x}{object to set class \code{edwr}}
+\item{x}{object to set class \code{tbl_edwr}}
 }
 \description{
 Takes an R object and sets class to an edwr type.

@@ -15,28 +15,28 @@ val.res <- "`Clinical Event Result`"
 #'
 #' Takes an R object and sets class to an edwr type.
 #'
-#' @param x object to set class \code{edwr}
+#' @param x object to set class \code{tbl_edwr}
 #'
 #' @name set_edwr_class
 #' @keywords internal
-edwr <- function(x) {
+tbl_edwr <- function(x) {
     cl <- class(x)
-    if ("edwr" %in% cl) return (x)
-    class(x) <- c("edwr", cl)
+    if ("tbl_edwr" %in% cl) return (x)
+    class(x) <- c("tbl_edwr", cl)
     x
 }
 
 #' @rdname set_edwr_class
 #' @export
-as.edwr <- function(x) {
+as.tbl_edwr <- function(x) {
     if (missing(x)) x <- character()
-    if (is.edwr(x)) return(x)
-    after <- match("edwr", class(x), nomatch = 0L)
-    class(x) <- append(class(x), "edwr", after = after)
+    if (is.tbl_edwr(x)) return(x)
+    after <- match("tbl_edwr", class(x), nomatch = 0L)
+    class(x) <- append(class(x), "tbl_edwr", after = after)
     x
 }
 
-# create classes which inherit from edwr class; each class represents a
+# create classes which inherit from tbl_edwr class; each class represents a
 # different type of data from EDW (labs, meds, demographics, etc.); in general,
 # these functions will rename variables to desired names, remove duplicate rows,
 # convert names (of labs, meds, etc.) to lower case (to avoid case-sensitive
@@ -50,7 +50,7 @@ as.blood <- function(x) {
     # inherits from events class
     if (missing(x)) x <- character()
     if (is.blood(x)) return(x)
-    if (!is.edwr(x)) x <- as.edwr(x)
+    if (!is.tbl_edwr(x)) x <- as.tbl_edwr(x)
     if (!is.events(x)) x <- as.events(x)
 
     prods <- c("Cryo(.*)" = "cryo",
@@ -78,7 +78,7 @@ as.blood <- function(x) {
 as.charges <- function(x) {
     if (missing(x)) stop("Missing object")
     if (is.charges(x)) return(x)
-    if (!is.edwr(x)) x <- as.edwr(x)
+    if (!is.tbl_edwr(x)) x <- as.tbl_edwr(x)
 
     df <- rename_(.data = x, .dots = c(val.pie, list(
         "cdm.code" = "`Cdm Code`",
@@ -97,7 +97,7 @@ as.charges <- function(x) {
 as.demographics <- function(x) {
     if (missing(x)) stop("Missing object")
     if (is.demographics(x)) return(x)
-    if (!is.edwr(x)) x <- as.edwr(x)
+    if (!is.tbl_edwr(x)) x <- as.tbl_edwr(x)
 
     df <- rename_(.data = x, .dots = c(val.pie, list(
         "age" = "`Age- Years (Visit)`",
@@ -125,7 +125,7 @@ as.demographics <- function(x) {
 as.diagnosis <- function(x) {
     if (missing(x)) stop("Missing object")
     if (is.diagnosis(x)) return(x)
-    if (!is.edwr(x)) x <- as.edwr(x)
+    if (!is.tbl_edwr(x)) x <- as.tbl_edwr(x)
 
     df <- rename_(.data = x, .dots = c(val.pie, list(
         "diag.code" = "`Diagnosis Code`",
@@ -146,7 +146,7 @@ as.diagnosis <- function(x) {
 as.encounters <- function(x) {
     if (missing(x)) stop("Missing object")
     if (is.encounters(x)) return(x)
-    if (!is.edwr(x)) x <- as.edwr(x)
+    if (!is.tbl_edwr(x)) x <- as.tbl_edwr(x)
 
     df <- rename_(.data = x, .dots = c(val.pie, list(
         "person.id" = "`Person ID`",
@@ -171,7 +171,7 @@ as.encounters <- function(x) {
 as.events <- function(x) {
     if (missing(x)) x <- character()
     if (is.events(x)) return(x)
-    if (!is.edwr(x)) x <- as.edwr(x)
+    if (!is.tbl_edwr(x)) x <- as.tbl_edwr(x)
 
     df <- rename_(.data = x, .dots = c(val.pie, list(
         "event.datetime" = val.dt,
@@ -196,7 +196,7 @@ as.icu_assess <- function(x) {
     # inherits from events class
     if (missing(x)) x <- character()
     if (is.icu_assess(x)) return(x)
-    if (!is.edwr(x)) x <- as.edwr(x)
+    if (!is.tbl_edwr(x)) x <- as.tbl_edwr(x)
     if (!is.events(x)) x <- as.events(x)
 
     df <- rename_(.data = x, .dots = list(
@@ -215,7 +215,7 @@ as.icu_assess <- function(x) {
 as.id <- function(x) {
     if (missing(x)) stop("Missing object")
     if (is.id(x)) return(x)
-    if (!is.edwr(x)) x <- as.edwr(x)
+    if (!is.tbl_edwr(x)) x <- as.tbl_edwr(x)
 
     df <- rename_(.data = x, .dots = c(val.pie, list(
         "fin" = "`Formatted Financial Nbr`",
@@ -234,7 +234,7 @@ as.labs <- function(x) {
     # inherits from events class
     if (missing(x)) x <- character()
     if (is.labs(x)) return(x)
-    if (!is.edwr(x)) x <- as.edwr(x)
+    if (!is.tbl_edwr(x)) x <- as.tbl_edwr(x)
     if (!is.events(x)) x <- as.events(x)
 
     df <- rename_(.data = x, .dots = list(
@@ -253,7 +253,7 @@ as.labs <- function(x) {
 as.locations <- function(x) {
     if (missing(x)) x <- character()
     if (is.locations(x)) return(x)
-    if (!is.edwr(x)) x <- as.edwr(x)
+    if (!is.tbl_edwr(x)) x <- as.tbl_edwr(x)
 
     df <- rename_(.data = x, .dots = c(val.pie, list(
         "arrive.datetime" = "`Location Arrival Date & Time`",
@@ -282,7 +282,7 @@ as.measures <- function(x) {
     # inherits from events class
     if (missing(x)) x <- character()
     if (is.measures(x)) return(x)
-    if (!is.edwr(x)) x <- as.edwr(x)
+    if (!is.tbl_edwr(x)) x <- as.tbl_edwr(x)
     if (!is.events(x)) x <- as.events(x)
 
     df <- rename_(.data = x, .dots = list(
@@ -302,7 +302,7 @@ as.measures <- function(x) {
 as.meds_cont <- function(x) {
     if (missing(x)) x <- character()
     if (is.meds_cont(x)) return(x)
-    if (!is.edwr(x)) x <- as.edwr(x)
+    if (!is.tbl_edwr(x)) x <- as.tbl_edwr(x)
 
     df <- rename_(.data = x, .dots = c(val.pie, list(
         "order.id" = "`Clinical Event Order ID`",
@@ -333,7 +333,7 @@ as.meds_freq <- function(x) {
     # inherits from meds_sched class
     if (missing(x)) x <- character()
     if (is.meds_freq(x)) return(x)
-    if (!is.edwr(x)) x <- as.edwr(x)
+    if (!is.tbl_edwr(x)) x <- as.tbl_edwr(x)
     if (!is.meds_sched(x)) x <- as.meds_sched(x)
 
     df <- rename_(.data = x, .dots = list(
@@ -350,7 +350,7 @@ as.meds_freq <- function(x) {
 as.meds_home <- function(x) {
     if (missing(x)) x <- character()
     if (is.meds_home(x)) return(x)
-    if (!is.edwr(x)) x <- as.edwr(x)
+    if (!is.tbl_edwr(x)) x <- as.tbl_edwr(x)
 
     df <- rename_(.data = x, .dots = c(val.pie, list(
         "med" = "`Order Catalog Short Description`",
@@ -373,7 +373,7 @@ as.meds_home <- function(x) {
 as.meds_sched <- function(x) {
     if (missing(x)) x <- character()
     if (is.meds_sched(x)) return(x)
-    if (!is.edwr(x)) x <- as.edwr(x)
+    if (!is.tbl_edwr(x)) x <- as.tbl_edwr(x)
 
     df <- rename_(.data = x, .dots = c(val.pie, list(
         "order.id" = "`Clinical Event Order ID`",
@@ -402,7 +402,7 @@ as.meds_sched <- function(x) {
 as.mrn <- function(x) {
     if (missing(x)) stop("Missing object")
     if (is.mrn(x)) return(x)
-    if (!is.edwr(x)) x <- as.edwr(x)
+    if (!is.tbl_edwr(x)) x <- as.tbl_edwr(x)
 
     df <- rename_(.data = x, .dots = list(
         "mrn" = "`MRN- Organization`",
@@ -420,7 +420,7 @@ as.mrn <- function(x) {
 as.mpp <- function(x) {
     if (missing(x)) stop("Missing object")
     if (is.mpp(x)) return(x)
-    if (!is.edwr(x)) x <- as.edwr(x)
+    if (!is.tbl_edwr(x)) x <- as.tbl_edwr(x)
 
     df <- rename_(.data = x, .dots = c(val.pie, list(
         "mpp" = "`MPP (which generated order)`"
@@ -437,7 +437,7 @@ as.mpp <- function(x) {
 as.order_by <- function(x) {
     if (missing(x)) x <- character()
     if (is.order_by(x)) return(x)
-    if (!is.edwr(x)) x <- as.edwr(x)
+    if (!is.tbl_edwr(x)) x <- as.tbl_edwr(x)
 
     df <- rename_(.data = x, .dots = c(val.pie, list(
         "order" = "`Order Catalog Mnemonic`",
@@ -466,7 +466,7 @@ as.order_by <- function(x) {
 as.order_detail <- function(x) {
     if (missing(x)) x <- character()
     if (is.order_detail(x)) return(x)
-    if (!is.edwr(x)) x <- as.edwr(x)
+    if (!is.tbl_edwr(x)) x <- as.tbl_edwr(x)
 
     df <- rename_(.data = x, .dots = c(val.pie, list(
         "order.id" = "`Source Order ID`",
@@ -495,7 +495,7 @@ as.order_detail <- function(x) {
 as.patients <- function(x) {
     if (missing(x)) stop("Missing object")
     if (is.patients(x)) return(x)
-    if (!is.edwr(x)) x <- as.edwr(x)
+    if (!is.tbl_edwr(x)) x <- as.tbl_edwr(x)
 
     df <- rename_(.data = x, .dots = c(val.pie, list(
         "age" = "`Age- Years (Visit)`",
@@ -520,7 +520,7 @@ as.patients <- function(x) {
 as.problems <- function(x) {
     if (missing(x)) stop("Missing object")
     if (is.problems(x)) return(x)
-    if (!is.edwr(x)) x <- as.edwr(x)
+    if (!is.tbl_edwr(x)) x <- as.tbl_edwr(x)
 
     df <- rename_(.data = x, .dots = c(val.pie, list(
         "problem" = "`Problem - Description`",
@@ -550,7 +550,7 @@ as.problems <- function(x) {
 as.procedures <- function(x) {
     if (missing(x)) stop("Missing object")
     if (is.procedures(x)) return(x)
-    if (!is.edwr(x)) x <- as.edwr(x)
+    if (!is.tbl_edwr(x)) x <- as.tbl_edwr(x)
 
     df <- rename_(.data = x, .dots = c(val.pie, list(
         "proc.date" = "`Procedure Date and Time`",
@@ -573,7 +573,7 @@ as.procedures <- function(x) {
 as.radiology <- function(x) {
     if (missing(x)) stop("Missing object")
     if (is.radiology(x)) return(x)
-    if (!is.edwr(x)) x <- as.edwr(x)
+    if (!is.tbl_edwr(x)) x <- as.tbl_edwr(x)
 
     df <- rename_(.data = x, .dots = c(val.pie, list(
         "rad.datetime" = val.dt,
@@ -595,7 +595,7 @@ as.radiology <- function(x) {
 as.services <- function(x) {
     if (missing(x)) x <- character()
     if (is.services(x)) return(x)
-    if (!is.edwr(x)) x <- as.edwr(x)
+    if (!is.tbl_edwr(x)) x <- as.tbl_edwr(x)
 
     df <- rename_(.data = x, .dots = c(val.pie, list(
         "start.datetime" = "`Medical Service Begin Date & Time`",
@@ -623,7 +623,7 @@ as.services <- function(x) {
 as.surgeries <- function(x) {
     if (missing(x)) stop("Missing object")
     if (is.surgeries(x)) return(x)
-    if (!is.edwr(x)) x <- as.edwr(x)
+    if (!is.tbl_edwr(x)) x <- as.tbl_edwr(x)
 
     df <- rename_(.data = x, .dots = c(val.pie, list(
         "asa.class" = "`ASA Class Description`",
@@ -656,7 +656,7 @@ as.uop <- function(x) {
     # inherits from events class
     if (missing(x)) x <- character()
     if (is.uop(x)) return(x)
-    if (!is.edwr(x)) x <- as.edwr(x)
+    if (!is.tbl_edwr(x)) x <- as.tbl_edwr(x)
     if (!is.events(x)) x <- as.events(x)
 
     df <- rename_(.data = x, .dots = list(
@@ -676,7 +676,7 @@ as.vent_settings <- function(x) {
     # inherits from events class
     if (missing(x)) x <- character()
     if (is.vent_settings(x)) return(x)
-    if (!is.edwr(x)) x <- as.edwr(x)
+    if (!is.tbl_edwr(x)) x <- as.tbl_edwr(x)
     if (!is.events(x)) x <- as.events(x)
 
     df <- rename_(.data = x, .dots = list(
@@ -695,7 +695,7 @@ as.vent_settings <- function(x) {
 as.vent_times <- function(x) {
     if (missing(x)) x <- character()
     if (is.vent_times(x)) return(x)
-    if (!is.edwr(x)) x <- as.edwr(x)
+    if (!is.tbl_edwr(x)) x <- as.tbl_edwr(x)
 
     df <- rename_(.data = x, .dots = c(val.pie, list(
         "vent.datetime" = "`Clinical Event Date Result`",
@@ -718,7 +718,7 @@ as.vent_times <- function(x) {
 as.visits <- function(x) {
     if (missing(x)) x <- character()
     if (is.visits(x)) return(x)
-    if (!is.edwr(x)) x <- as.edwr(x)
+    if (!is.tbl_edwr(x)) x <- as.tbl_edwr(x)
 
     df <- rename_(.data = x, .dots = c(val.pie, list(
         "arrival.datetime" = "`Arrival Date & Time`",
@@ -749,7 +749,7 @@ as.vitals <- function(x) {
     # inherits from events class
     if (missing(x)) x <- character()
     if (is.vitals(x)) return(x)
-    if (!is.edwr(x)) x <- as.edwr(x)
+    if (!is.tbl_edwr(x)) x <- as.tbl_edwr(x)
     if (!is.events(x)) x <- as.events(x)
 
     df <- rename_(.data = x, .dots = list(
@@ -769,7 +769,7 @@ as.warfarin <- function(x) {
     # inherits from events class
     if (missing(x)) x <- character()
     if (is.warfarin(x)) return(x)
-    if (!is.edwr(x)) x <- as.edwr(x)
+    if (!is.tbl_edwr(x)) x <- as.tbl_edwr(x)
     if (!is.events(x)) x <- as.events(x)
 
     df <- rename_(.data = x, .dots = list(
@@ -787,132 +787,132 @@ as.warfarin <- function(x) {
 
 #' Test edwr-related classes
 #'
-#' Takes an R object and checks for an edwr class type.
+#' Takes an R object and checks for a tbl_edwr class type.
 #'
-#' @param x object which may have an edwr class type
+#' @param x object which may have a tbl_edwr class type
 #' @keywords internal
-is.edwr <- function(x) inherits(x, "edwr")
+is.tbl_edwr <- function(x) inherits(x, "tbl_edwr")
 
-#' @rdname is.edwr
+#' @rdname is.tbl_edwr
 #' @export
 is.blood <- function(x) inherits(x, "blood")
 
-#' @rdname is.edwr
+#' @rdname is.tbl_edwr
 #' @export
 is.charges <- function(x) inherits(x, "charges")
 
-#' @rdname is.edwr
+#' @rdname is.tbl_edwr
 #' @export
 is.demographics <- function(x) inherits(x, "demographics")
 
-#' @rdname is.edwr
+#' @rdname is.tbl_edwr
 #' @export
 is.diagnosis <- function(x) inherits(x, "diagnosis")
 
-#' @rdname is.edwr
+#' @rdname is.tbl_edwr
 #' @export
 is.encounters <- function(x) inherits(x, "encounters")
 
-#' @rdname is.edwr
+#' @rdname is.tbl_edwr
 #' @export
 is.events <- function(x) inherits(x, "events")
 
-#' @rdname is.edwr
+#' @rdname is.tbl_edwr
 #' @export
 is.icu_assess <- function(x) inherits(x, "icu_assess")
 
-#' @rdname is.edwr
+#' @rdname is.tbl_edwr
 #' @export
 is.id <- function(x) inherits(x, "id")
 
-#' @rdname is.edwr
+#' @rdname is.tbl_edwr
 #' @export
 is.labs <- function(x) inherits(x, "labs")
 
-#' @rdname is.edwr
+#' @rdname is.tbl_edwr
 #' @export
 is.locations <- function(x) inherits(x, "locations")
 
-#' @rdname is.edwr
+#' @rdname is.tbl_edwr
 #' @export
 is.measures <- function(x) inherits(x, "measures")
 
-#' @rdname is.edwr
+#' @rdname is.tbl_edwr
 #' @export
 is.meds_cont <- function(x) inherits(x, "meds_cont")
 
-#' @rdname is.edwr
+#' @rdname is.tbl_edwr
 #' @export
 is.meds_freq <- function(x) inherits(x, "meds_freq")
 
-#' @rdname is.edwr
+#' @rdname is.tbl_edwr
 #' @export
 is.meds_home <- function(x) inherits(x, "meds_home")
 
-#' @rdname is.edwr
+#' @rdname is.tbl_edwr
 #' @export
 is.meds_sched <- function(x) inherits(x, "meds_sched")
 
-#' @rdname is.edwr
+#' @rdname is.tbl_edwr
 #' @export
 is.mpp <- function(x) inherits(x, "mpp")
 
-#' @rdname is.edwr
+#' @rdname is.tbl_edwr
 #' @export
 is.mrn <- function(x) inherits(x, "mrn")
 
-#' @rdname is.edwr
+#' @rdname is.tbl_edwr
 #' @export
 is.order_by <- function(x) inherits(x, "order_by")
 
-#' @rdname is.edwr
+#' @rdname is.tbl_edwr
 #' @export
 is.order_detail <- function(x) inherits(x, "order_detail")
 
-#' @rdname is.edwr
+#' @rdname is.tbl_edwr
 #' @export
 is.patients <- function(x) inherits(x, "patients")
 
-#' @rdname is.edwr
+#' @rdname is.tbl_edwr
 #' @export
 is.problems <- function(x) inherits(x, "problems")
 
-#' @rdname is.edwr
+#' @rdname is.tbl_edwr
 #' @export
 is.procedures <- function(x) inherits(x, "procedures")
 
-#' @rdname is.edwr
+#' @rdname is.tbl_edwr
 #' @export
 is.radiology <- function(x) inherits(x, "radiology")
 
-#' @rdname is.edwr
+#' @rdname is.tbl_edwr
 #' @export
 is.services <- function(x) inherits(x, "services")
 
-#' @rdname is.edwr
+#' @rdname is.tbl_edwr
 #' @export
 is.surgeries <- function(x) inherits(x, "surgeries")
 
-#' @rdname is.edwr
+#' @rdname is.tbl_edwr
 #' @export
 is.uop <- function(x) inherits(x, "uop")
 
-#' @rdname is.edwr
+#' @rdname is.tbl_edwr
 #' @export
 is.vent_settings <- function(x) inherits(x, "vent_settings")
 
-#' @rdname is.edwr
+#' @rdname is.tbl_edwr
 #' @export
 is.vent_times <- function(x) inherits(x, "vent_times")
 
-#' @rdname is.edwr
+#' @rdname is.tbl_edwr
 #' @export
 is.visits <- function(x) inherits(x, "visits")
 
-#' @rdname is.edwr
+#' @rdname is.tbl_edwr
 #' @export
 is.vitals <- function(x) inherits(x, "vitals")
 
-#' @rdname is.edwr
+#' @rdname is.tbl_edwr
 #' @export
 is.warfarin <- function(x) inherits(x, "warfarin")

@@ -90,7 +90,7 @@ summarize_data.meds_cont <- function(x, units = "hours", ...) {
 
     # get last and min non-zero rate
     nz.rate <- filter_(cont, .dots = ~(med.rate > 0)) %>%
-        summarize_(.dots = set_names(
+        summarise_(.dots = set_names(
             x = list(~dplyr::last(med.rate),
                      ~min(med.rate, na.rm = TRUE),
                      ~sum(duration, na.rm = TRUE)),
@@ -98,7 +98,7 @@ summarize_data.meds_cont <- function(x, units = "hours", ...) {
         ))
 
     # get first and max rates and AUC
-    summarize_(cont, .dots = set_names(
+    summarise_(cont, .dots = set_names(
         x = list(~dplyr::first(rate.start),
                  ~dplyr::last(rate.stop),
                  ~sum(med.rate * duration, na.rm = TRUE),
@@ -177,7 +177,7 @@ summarize_data.meds_sched <- function(x, units = "hours", ...) {
     options(scipen = 999)
 
     group_by_(x, .dots = list("pie.id", "med")) %>%
-        dplyr::summarize_(.dots = set_names(
+        dplyr::summarise_(.dots = set_names(
             x = list(~dplyr::first(med.datetime),
                      ~dplyr::last(med.datetime),
                      ~dplyr::first(med.dose),
@@ -214,7 +214,7 @@ summarize_data.labs <- function(x, units = "hours", ...) {
     options(scipen = 999)
 
     group_by_(x, .dots = list("pie.id", "lab")) %>%
-        summarize_(.dots = set_names(
+        summarise_(.dots = set_names(
             x = list(~dplyr::first(lab.datetime),
                      ~dplyr::last(lab.datetime),
                      ~dplyr::first(lab.result),

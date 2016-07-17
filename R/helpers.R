@@ -49,3 +49,19 @@ format_dates <- function(x) {
         locale = readr::locale(tz = "US/Central")
     )
 }
+
+#' Keep edwr class assignments
+#'
+#' @param x tibble with edwr class(es)
+#' @param y tibble as returned by dplyr manipulation function
+#'
+#' @return tibble
+#'
+#' @keywords internal
+keep_class <- function(x, y) {
+    if(is.edwr(y)) return(y)
+
+    cls <- match("edwr", class(x), nomatch = 0L)
+    class(y) <- c(class(x)[1:cls], class(y))
+    y
+}

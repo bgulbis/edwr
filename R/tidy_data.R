@@ -141,33 +141,25 @@ tidy_data.meds_cont <- function(x, ref, sched, ...) {
 
     # remove any rows in continuous data which are actually scheduled doses,
     # then filter to meds in lookup, then sort by pie.id, med, med.datetime
-    tidy <- anti_join(x, sched, by = "event.id") %>%
+    anti_join(x, sched, by = "event.id") %>%
         filter_(.dots = list(~med %in% lookup.meds)) %>%
         arrange_(.dots = list("pie.id", "med", "med.datetime"))
-
-    # keep original class
-    # class(tidy) <- class(x)
-    # tidy
 }
 
 #' @export
 #' @rdname tidy_data
 tidy_data.meds_sched <- function(x, ref, ...) {
     # for any med classes, lookup the meds included in the class
-    y <- dplyr::filter_(ref, .dots = list(~type == "class", ~group == "sched"))
+    y <- filter_(ref, .dots = list(~type == "class", ~group == "sched"))
     class.meds <- med_lookup(y$name)
 
     # join the list of meds with any indivdual meds included
-    y <- dplyr::filter_(ref, .dots = list(~type == "med", ~group == "sched"))
+    y <- filter_(ref, .dots = list(~type == "med", ~group == "sched"))
     lookup.meds <- c(y$name, class.meds$med.name)
 
     # filter to keep only meds in lookup
-    tidy <- dplyr::filter_(x, .dots = list(~med %in% lookup.meds)) %>%
-        dplyr::arrange_(.dots = list("pie.id", "med", "med.datetime"))
-
-    # keep original class
-    class(tidy) <- class(x)
-    tidy
+    filter_(x, .dots = list(~med %in% lookup.meds)) %>%
+        arrange_(.dots = list("pie.id", "med", "med.datetime"))
 }
 
 #' @details For services, this function accounts for incorrect end times
@@ -179,11 +171,12 @@ tidy_data.meds_sched <- function(x, ref, ...) {
 #' @export
 #' @rdname tidy_data
 tidy_data.services <- function(x, ...) {
-    tidy <- dplyr::group_by_(x, "pie.id") %>%
-        dplyr::arrange_("start.datetime") %>%
+    arrange_(x, "start.datetime") %>%
+        group_by_("pie.id") %>%
+
         # determine if they went to a different service, then make a count of
         # different services
-        dplyr::mutate_(.dots = purrr::set_names(
+        mutate_(.dots = set_names(
             x = list(~dplyr::if_else(is.na(service) |
                                          is.na(dplyr::lag(service)) |
                                          service != dplyr::lag(service),
@@ -191,34 +184,35 @@ tidy_data.services <- function(x, ...) {
                      ~cumsum(diff.service)),
             nm = list("diff.service", "service.count")
         )) %>%
+
         # use the service.count to group multiple rows of the same service
         # together and combine data
-        dplyr::group_by_(.dots = list("pie.id", "service.count")) %>%
-        dplyr::summarize_(.dots = purrr::set_names(
+        group_by_(.dots = list("pie.id", "service.count")) %>%
+        summarize_(.dots = set_names(
             x = list(~dplyr::first(service),
                      ~dplyr::first(start.datetime),
                      ~dplyr::last(end.datetime)),
             nm = list("service", "start.datetime", "end.recorded")
         )) %>%
-        # use the start time for the next service to calculate an end time
-        dplyr::mutate_(.dots = purrr::set_names(
-            x = list(~dplyr::lead(start.datetime)),
-            nm = "end.calculated"
-        )) %>%
-        dplyr::mutate_(.dots = purrr::set_names(
-            x = list(~dplyr::if_else(
-                is.na(end.calculated),
-                difftime(end.recorded, start.datetime, units = "days"),
-                difftime(end.calculated, start.datetime, units = "days")
-            )),
-            nm = "service.duration"
-        )) %>%
-        dplyr::select_(.dots = list(quote(-end.recorded),
-                                    quote(-end.calculated)))
 
-    # keep original class
-    class(tidy) <- class(x)
-    tidy
+        # use the start time for the next service to calculate an end time
+        group_by_("pie.id") %>%
+        mutate_(.dots = set_names(
+            x = list(~dplyr::lead(start.datetime),
+                     ~dplyr::if_else(is.na(end.calculated),
+                                     difftime(end.recorded,
+                                              start.datetime,
+                                              units = "days"),
+                                     difftime(end.calculated,
+                                              start.datetime,
+                                              units = "days")
+                     )),
+            nm = list("end.calculated", "service.duration")
+        )) %>%
+
+        ungroup() %>%
+        select_(.dots = list(quote(-end.recorded),
+                                    quote(-end.calculated)))
 }
 
 #' @export

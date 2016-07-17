@@ -102,45 +102,45 @@ tidy_data.labs <- function(x, censor = TRUE, ...) {
 #'   hospitalization in which case the recorded departure time is used). It also
 #'   combines multiple rows of data when the patient did not actually leave that
 #'   unit.
-
+#'
 #' @export
 #' @rdname tidy_data
 tidy_data.locations <- function(x, ...) {
-    tidy <- dplyr::group_by_(x, "pie.id") %>%
-        dplyr::arrange_("arrive.datetime") %>%
+    arrange_(x, "arrive.datetime") %>%
+        group_by_("pie.id") %>%
+
         # determine if pt went to different unit, count num of different units
-        dplyr::mutate_(.dots = purrr::set_names(
+        mutate_(.dots = set_names(
             x = list(~is.na(unit.to) | is.na(dplyr::lag(unit.to)) |
                          unit.to != dplyr::lag(unit.to),
                      ~cumsum(diff.unit)),
             nm = list("diff.unit", "unit.count")
         )) %>%
+
         # use the count to group multiple rows of the same unit together
-        dplyr::group_by_(.dots = list("pie.id", "unit.count")) %>%
-        dplyr::summarize_(.dots = purrr::set_names(
+        group_by_(.dots = list("pie.id", "unit.count")) %>%
+        summarize_(.dots = set_names(
             x = list(~dplyr::first(unit.to),
                      ~dplyr::first(arrive.datetime),
                      ~dplyr::last(depart.datetime)),
             nm = list("location", "arrive.datetime", "depart.recorded")
         )) %>%
+
         # use the arrival time for the next unit to calculate a depart time; if
         # there is no arrival time for the next unit then used the depart
         # date/time from EDW
-        dplyr::mutate_(.dots = purrr::set_names(
+        mutate_(.dots = set_names(
             x = list(~dplyr::lead(arrive.datetime),
                      ~dplyr::coalesce(depart.datetime, depart.recorded)),
             nm = list("depart.datetime", "depart.datetime")
         )) %>%
-        dplyr::ungroup() %>%
-        dplyr::mutate_(.dots = purrr::set_names(
+
+        ungroup() %>%
+        mutate_(.dots = set_names(
             x = list(~difftime(depart.datetime, arrive.datetime, units = "days")),
             nm = "unit.length.stay"
         )) %>%
-        dplyr::select_(.dots = list(quote(-depart.recorded)))
-
-    # keep original class
-    class(tidy) <- class(x)
-    tidy
+        select_(.dots = list(quote(-depart.recorded)))
 }
 
 #' @export

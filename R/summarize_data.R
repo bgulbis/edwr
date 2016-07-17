@@ -76,7 +76,7 @@ summarize_data <- function(x, ...) {
 #' @export
 #' @rdname summarize_data
 summarize_data.default <- function(x, ...) {
-    warning(paste("No summarize_data method available for class", class(x)))
+    warning("No summarize_data methods available for objects of this class")
     x
 }
 
@@ -132,11 +132,11 @@ summarize_data.meds_cont <- function(x, units = "hours", ...) {
 #' @rdname summarize_data
 summarize_data.meds_home <- function(x, ref, pts = NULL, home = TRUE, ...) {
     # for any med classes, lookup the meds included in the class
-    y <- dplyr::filter_(ref, .dots = list(~type == "class"))
+    y <- filter_(ref, .dots = list(~type == "class"))
     meds <- med_lookup(y$name)
 
     # join the list of meds with any indivdual meds included
-    y <- dplyr::filter_(ref, .dots = list(~type == "med"))
+    y <- filter_(ref, .dots = list(~type == "med"))
     lookup.meds <- c(y$name, meds$med.name)
 
     # filter to either home medications or discharge medications, then use the
@@ -148,15 +148,18 @@ summarize_data.meds_home <- function(x, ref, pts = NULL, home = TRUE, ...) {
         dots <- list(~med.type == "Prescription / Discharge Order")
     }
 
-    tidy <- dplyr::filter_(x, .dots = c(dots, list(~med %in% lookup.meds))) %>%
-        dplyr::left_join(meds, by = c("med" = "med.name")) %>%
-        dplyr::mutate_(.dots = purrr::set_names(
+    tidy <- filter_(x, .dots = c(dots, list(~med %in% lookup.meds))) %>%
+        left_join(meds, by = c("med" = "med.name")) %>%
+        mutate_(.dots = set_names(
             x = list(~dplyr::if_else(is.na(med.class), med, med.class),
                      lazyeval::interp("y", y = TRUE)),
             nm = c("group", "value")
         )) %>%
-        dplyr::distinct_(.dots = list("pie.id", "group", "value")) %>%
+        distinct_(.dots = list("pie.id", "group", "value")) %>%
         tidyr::spread_("group", "value", fill = FALSE, drop = FALSE)
+
+    # keep original class (needed due to use of tidyr::spread function)
+    class(tidy) <- class(x)
 
     # join with list of all patients, fill in values of FALSE for any patients
     # not in the data set
@@ -164,8 +167,6 @@ summarize_data.meds_home <- function(x, ref, pts = NULL, home = TRUE, ...) {
         tidy <- add_patients(tidy, pts)
     }
 
-    # keep original class
-    class(tidy) <- class(x)
     tidy
 }
 

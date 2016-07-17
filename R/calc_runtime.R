@@ -168,39 +168,33 @@ calc_runtime.meds_cont <- function(x, drip.off = 12, no.doc = 24,
 #' @export
 #' @rdname calc_runtime
 calc_runtime.meds_sched <- function(x, units = "hours", ...) {
-    cont <- dplyr::group_by_(x, .dots = c("pie.id", "med")) %>%
-        dplyr::arrange_(.dots = list("pie.id", "med", "med.datetime")) %>%
-        dplyr::mutate_(.dots = purrr::set_names(
+    arrange_(x, .dots = list("pie.id", "med", "med.datetime")) %>%
+        group_by_(.dots = c("pie.id", "med")) %>%
+        dplyr::mutate_(.dots = set_names(
             x = list(~difftime(med.datetime, dplyr::lag(med.datetime),
                                units = units),
                      ~dplyr::coalesce(duration, 0),
                      ~difftime(med.datetime, dplyr::first(med.datetime),
                                units = units)
             ),
-            nm = c("duration", "duration", "run.time")
-        ))
-
-    # keep original class
-    class(cont) <- class(x)
-    cont
+            nm = list("duration", "duration", "run.time")
+        )) %>%
+        ungroup()
 }
 
 #' @export
 #' @rdname calc_runtime
 calc_runtime.labs <- function(x, units = "hours", ...) {
-    cont <- dplyr::group_by_(x, .dots = c("pie.id", "lab")) %>%
-        dplyr::arrange_(.dots = list("pie.id", "lab", "lab.datetime")) %>%
-        dplyr::mutate_(.dots = purrr::set_names(
+    arrange_(x, .dots = list("pie.id", "lab", "lab.datetime")) %>%
+        group_by_(.dots = c("pie.id", "lab")) %>%
+        mutate_(.dots = set_names(
             x = list(~difftime(lab.datetime, dplyr::lag(lab.datetime),
                                units = units),
                      ~dplyr::coalesce(duration, 0),
                      ~difftime(lab.datetime, dplyr::first(lab.datetime),
                                units = units)
             ),
-            nm = c("duration", "duration", "run.time")
-        ))
-
-    # keep original class
-    class(cont) <- class(x)
-    cont
+            nm = list("duration", "duration", "run.time")
+        )) %>%
+        ungroup()
 }

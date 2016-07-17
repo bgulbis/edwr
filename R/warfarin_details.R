@@ -21,8 +21,8 @@
 #' @export
 make_inr_ranges <- function(x) {
     # make sure we are only working with INR range data, remove and empty values
-    tidy <- dplyr::filter_(x, .dots = list(~warfarin.event == "inr range",
-                                           ~warfarin.result != ""))
+    tidy <- filter_(x, .dots = list(~warfarin.event == "inr range",
+                                    ~warfarin.result != ""))
 
     fix_ranges <- function(y, z) {
         tidy <<- purrr::dmap_at(.d = tidy,
@@ -65,8 +65,8 @@ make_inr_ranges <- function(x) {
                             remove = FALSE, convert = TRUE) %>%
         purrr::dmap_at(.at = c("goal.low", "goal.high"), .f = fix_div, n = 100) %>%
         purrr::dmap_at(.at = c("goal.low", "goal.high"), .f = fix_div, n = 10) %>%
-        dplyr::select_(.dots = list(quote(-warfarin.result),
-                                    quote(-warfarin.event)))
+        select_(.dots = list(quote(-warfarin.result),
+                             quote(-warfarin.event)))
 
     # keep original class
     class(tidy) <- class(x)
@@ -94,10 +94,8 @@ make_inr_ranges <- function(x) {
 make_indications <- function(x) {
     # make sure we are only working with warfarin indication data, remove and
     # empty values
-    tidy <- dplyr::filter_(x, .dots = list(
-        ~warfarin.event == "warfarin indication",
-        ~warfarin.result != ""
-    ))
+    tidy <- filter_(x, .dots = list(~warfarin.event == "warfarin indication",
+                                    ~warfarin.result != ""))
 
     # detect the matching pattern
     find_string <- function(x) {
@@ -127,17 +125,20 @@ make_indications <- function(x) {
                            .f = stringr::str_replace_all,
                            pattern = "Deep vein thrombosis",
                            replacement = "D-V-T") %>%
+
         purrr::dmap_at(.at = "warfarin.result",
                        .f = stringr::str_replace_all,
                        pattern = "Pulmonary embolism",
                        replacement = "P-E") %>%
-        dplyr::mutate_(.dots = purrr::set_names(
+
+        mutate_(.dots = set_names(
             x = purrr::map(find, find_string),
             nm = c("afib", "dvt", "pe", "valve", "stroke", "vad", "thrombus",
                    "hypercoag", "prophylaxis")
         )) %>%
+
         # if none of the other indications were found, use "other"
-        dplyr::mutate_(.dots = purrr::set_names(
+        dplyr::mutate_(.dots = set_names(
             x = list(~dplyr::if_else(afib == FALSE &
                                          dvt == FALSE &
                                          pe == FALSE &
@@ -150,8 +151,9 @@ make_indications <- function(x) {
                                      TRUE, FALSE)),
             nm = "other"
         )) %>%
-        dplyr::select_(.dots = list(quote(-warfarin.result),
-                                    quote(-warfarin.event)))
+
+        select_(.dots = list(quote(-warfarin.result),
+                             quote(-warfarin.event)))
 
     # keep original class
     class(tidy) <- class(x)

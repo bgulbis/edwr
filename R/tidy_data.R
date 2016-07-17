@@ -61,7 +61,7 @@ tidy_data <- function(x, ...) {
 #' @export
 #' @rdname tidy_data
 tidy_data.default <- function(x, ...) {
-    warning(paste("No tidy_data method available for class", class(x)))
+    warning("No method available for objects of this class")
     x
 }
 

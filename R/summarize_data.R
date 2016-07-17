@@ -76,7 +76,7 @@ summarize_data <- function(x, ...) {
 #' @export
 #' @rdname summarize_data
 summarize_data.default <- function(x, ...) {
-    warning("No summarize_data methods available for objects of this class")
+    warning("No method available for objects of this class")
     x
 }
 

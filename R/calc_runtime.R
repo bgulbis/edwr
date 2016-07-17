@@ -49,7 +49,7 @@ calc_runtime <- function(x, ...) {
 #' @export
 #' @rdname calc_runtime
 calc_runtime.default <- function(x, ...) {
-    warning(paste("No calc_runtime method available for class", class(x)))
+    warning("No method available for objects of this class")
     x
 }
 

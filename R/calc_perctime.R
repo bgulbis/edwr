@@ -44,7 +44,7 @@ calc_perctime <- function(x, ...) {
 #' @export
 #' @rdname calc_perctime
 calc_perctime.default <- function(x, ...) {
-    warning(paste("No calc_perctime method available for class", class(x)))
+    warning("No method available for objects of this class")
     x
 }
 

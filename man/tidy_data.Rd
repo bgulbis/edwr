@@ -9,7 +9,7 @@
 \alias{tidy_data.meds_sched}
 \alias{tidy_data.services}
 \alias{tidy_data.vent_times}
-\title{Tidy data}
+\title{Transform to a tidy data set}
 \usage{
 tidy_data(x, ...)
 

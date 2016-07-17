@@ -1,7 +1,6 @@
 # Tidy EDW data
 
-
-#' Tidy data
+#' Transform to a tidy data set
 #'
 #' \code{tidy_data} transforms raw EDW data into a tidy format
 #'
@@ -233,7 +232,7 @@ tidy_data.vent_times <- function(x, dc, ...) {
             x = list(~is.na(dplyr::lag(vent.event)) |
                          vent.event != lag(vent.event),
                      ~cumsum(diff.event)),
-            nm = c("diff.event", "event.count")
+            nm = list("diff.event", "event.count")
         )) %>%
 
         # for each event count, get the first and last date/time
@@ -242,7 +241,7 @@ tidy_data.vent_times <- function(x, dc, ...) {
             x = list(~dplyr::first(vent.event),
                      ~dplyr::first(vent.datetime),
                      ~dplyr::last(vent.datetime)),
-            nm = c("event", "first.event.datetime", "last.event.datetime")
+            nm = list("event", "first.event.datetime", "last.event.datetime")
         )) %>%
 
         # use the last date/time of the next event as stop date/time; this would
@@ -254,7 +253,7 @@ tidy_data.vent_times <- function(x, dc, ...) {
         mutate_(.dots = set_names(
             x = list(~dplyr::lead(last.event.datetime),
                      ~dplyr::coalesce(stop.datetime, discharge.datetime)),
-            nm = c("stop.datetime", "stop.datetime")
+            nm = list("stop.datetime", "stop.datetime")
         )) %>%
 
         filter_(.dots = list(~event == "vent start time")) %>%

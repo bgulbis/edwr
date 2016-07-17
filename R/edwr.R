@@ -24,9 +24,10 @@
 #' @importFrom dplyr distinct_
 #' @importFrom dplyr ungroup
 #' @importFrom dplyr anti_join
-#' @importFrom dplyr inner_join
 #' @importFrom dplyr full_join
+#' @importFrom dplyr inner_join
 #' @importFrom dplyr left_join
+#' @importFrom dplyr right_join
 #' @importFrom dplyr semi_join
 #' @importFrom purrr set_names
 NULL

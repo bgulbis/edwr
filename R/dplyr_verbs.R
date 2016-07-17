@@ -70,6 +70,13 @@ full_join.edwr <- function(x, y, by = NULL, copy = FALSE,
 }
 
 #' @export
+inner_join.edwr <- function(x, y, by = NULL, copy = FALSE,
+                            suffix = c(".x", ".y"), ...) {
+    z <- NextMethod()
+    keep_class(x, z)
+}
+
+#' @export
 left_join.edwr <- function(x, y, by = NULL, copy = FALSE,
                            suffix = c(".x", ".y"), ...) {
     z <- NextMethod()
@@ -77,8 +84,8 @@ left_join.edwr <- function(x, y, by = NULL, copy = FALSE,
 }
 
 #' @export
-inner_join.edwr <- function(x, y, by = NULL, copy = FALSE,
-                            suffix = c(".x", ".y"), ...) {
+right_join.edwr <- function(x, y, by = NULL, copy = FALSE,
+                           suffix = c(".x", ".y"), ...) {
     z <- NextMethod()
     keep_class(x, z)
 }

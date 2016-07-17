@@ -12,11 +12,6 @@
 #' This could be used to then calculate the AUC or to summarize the continuous
 #' data.
 #'
-#' For continuous medications, the data will be grouped into distinct sets of
-#' infusions, for patients who may have been restarted on the drip one or more
-#' times. Use the \code{drip.off} argument to modify the criteria for
-#' determining distinct infusions.
-#'
 #' @param x A data frame with serial measurement data
 #' @param ... additional arguments passed on to individual methods
 #' @param drip.off An optional numeric indicating the number of hours a
@@ -58,43 +53,52 @@ calc_runtime.default <- function(x, ...) {
     x
 }
 
+#' @details For continuous medications, the data will be grouped into distinct
+#'   sets of infusions, for patients who may have been restarted on the drip one
+#'   or more times. Use the \code{drip.off} argument to modify the criteria for
+#'   determining distinct infusions.
+#'
 #' @export
 #' @rdname calc_runtime
-calc_runtime.meds_cont <- function(x, drip.off = 12, no.doc = 24, units = "hours", ...) {
-    # group the data by pie.id and med
-    cont <- dplyr::group_by_(x, .dots = list("pie.id", "med")) %>%
-        dplyr::arrange_(.dots = list("pie.id", "med", "med.datetime")) %>%
+calc_runtime.meds_cont <- function(x, drip.off = 12, no.doc = 24,
+                                   units = "hours", ...) {
+    cont <- arrange_(x, .dots = list("pie.id", "med", "med.datetime")) %>%
+
         # determine if it's a valid rate documentation
-        dplyr::mutate_(.dots = purrr::set_names(
+        group_by_(.dots = list("pie.id", "med")) %>%
+        mutate_(.dots = set_names(
             x = list(~dplyr::if_else(is.na(med.rate.units), FALSE, TRUE),
                      ~cumsum(rate.change)),
             nm = list("rate.change", "change.num")
         )) %>%
-        dplyr::group_by_("change.num", add = TRUE) %>%
+
         # fill in missing rates
-        dplyr::mutate_(.dots = purrr::set_names(
-            # x = list(~dplyr::coalesce(med.rate, dplyr::first(med.rate))),
+        group_by_("change.num", add = TRUE) %>%
+        mutate_(.dots = set_names(
             x = list(~dplyr::if_else(is.na(med.rate.units),
                                      dplyr::first(med.rate),
                                      med.rate)),
             nm = "rate"
         )) %>%
-        dplyr::group_by_(.dots = list("pie.id", "med")) %>%
+
         # calculate time between rows and order of rate changes
-        dplyr::mutate_(.dots = purrr::set_names(
+        group_by_(.dots = list("pie.id", "med")) %>%
+        mutate_(.dots = set_names(
             x = list(
                 ~difftime(dplyr::lead(med.datetime), med.datetime,
                           units = units),
                 ~dplyr::if_else(is.na(dplyr::lag(rate)) |
                                     rate != dplyr::lag(rate),
-                                TRUE, FALSE),
+                                TRUE,
+                                FALSE),
                 ~cumsum(rate.change)
             ),
             nm = list("time.next", "rate.change", "change.num")
         )) %>%
-        dplyr::group_by_(.dots = list("pie.id", "med", "change.num")) %>%
+
         # calculate how long the drip was at each rate
-        dplyr::summarize_(.dots = purrr::set_names(
+        group_by_(.dots = list("pie.id", "med", "change.num")) %>%
+        dplyr::summarize_(.dots = set_names(
             x = list(~dplyr::first(rate),
                      ~dplyr::first(med.datetime),
                      ~dplyr::last(med.datetime),
@@ -106,10 +110,10 @@ calc_runtime.meds_cont <- function(x, drip.off = 12, no.doc = 24, units = "hours
             nm = list("med.rate", "rate.start", "rate.stop", "rate.duration",
                       "time.next")
         )) %>%
-        # group the data by pie.id and med
-        dplyr::group_by_(.dots = list("pie.id", "med")) %>%
+
         # identify individual drips
-        dplyr::mutate_(.dots = purrr::set_names(
+        group_by_(.dots = list("pie.id", "med")) %>%
+        mutate_(.dots = set_names(
             x = list(
                 ~dplyr::if_else(time.next < drip.off & !is.na(time.next),
                                 rate.duration + time.next,
@@ -125,38 +129,39 @@ calc_runtime.meds_cont <- function(x, drip.off = 12, no.doc = 24, units = "hours
             ),
             nm = list("duration", "drip.stop", "drip.start", "drip.count")
         )) %>%
-        dplyr::group_by_("drip.count", add = TRUE) %>%
+
         # calculate run time
-        dplyr::mutate_(.dots = purrr::set_names(
+        group_by_(.dots = list("pie.id", "med", "drip.count")) %>%
+        mutate_(.dots = set_names(
             x = list(~difftime(rate.start, first(rate.start), units = units)),
             nm = "run.time"
         )) %>%
+
         # remove unnecessary columns
-        dplyr::select_(.dots = list(quote(-rate.duration),
-                                    quote(-time.next),
-                                    quote(-drip.stop),
-                                    quote(-drip.start),
-                                    quote(-change.num))
-        )
+        select_(.dots = list(quote(-rate.duration),
+                             quote(-time.next),
+                             quote(-drip.stop),
+                             quote(-drip.start),
+                             quote(-change.num)
+        ))
 
     # update drip stop information if rate of last row isn't 0
-    drip.end <- dplyr::filter_(cont, .dots = list(
+    drip.end <- filter_(cont, .dots = list(
         ~rate.stop == dplyr::last(rate.stop),
         ~med.rate > 0)
     ) %>%
+
         # calculate the run time for the last drip row
-        dplyr::mutate_(.dots = purrr::set_names(
+        mutate_(.dots = set_names(
             x = list(~duration + run.time, "rate.stop", 0),
             nm = list("run.time", "rate.start", "duration")
-        ))
+        )) %>%
+        ungroup()
 
     # bind the rows with drip end data and arrange by date/time
-    cont <- dplyr::bind_rows(cont, drip.end) %>%
-        dplyr::arrange_(.dots = list("pie.id", "med", "drip.count", "rate.start"))
-
-    # keep original class
-    class(cont) <- class(x)
-    cont
+    ungroup(cont) %>%
+        dplyr::bind_rows(drip.end) %>%
+        arrange_(.dots = list("pie.id", "med", "drip.count", "rate.start"))
 }
 
 #' @export

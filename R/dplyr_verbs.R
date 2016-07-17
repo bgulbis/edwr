@@ -39,6 +39,12 @@ summarise_.edwr <- function(.data, ..., .dots) {
 }
 
 #' @export
+distinct_.edwr <- function(.data, ..., .dots, .keep_all = FALSE) {
+    y <- NextMethod()
+    keep_class(.data, y)
+}
+
+#' @export
 group_by_.edwr <- function(.data, ..., .dots, add = FALSE) {
     y <- NextMethod()
     keep_class(.data, y)
@@ -48,12 +54,6 @@ group_by_.edwr <- function(.data, ..., .dots, add = FALSE) {
 ungroup.edwr <- function(x, ...) {
     y <- NextMethod()
     keep_class(x, y)
-}
-
-#' @export
-distinct_.edwr <- function(.data, ..., .dots, .keep_all = FALSE) {
-    y <- NextMethod()
-    keep_class(.data, y)
 }
 
 #' @export

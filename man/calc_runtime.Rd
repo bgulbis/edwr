@@ -50,10 +50,10 @@ the with the duration of time at each value and cumulative run time.
 This could be used to then calculate the AUC or to summarize the continuous
 data.
 
-For continuous medications, the data will be grouped into distinct sets of
-infusions, for patients who may have been restarted on the drip one or more
-times. Use the \code{drip.off} argument to modify the criteria for
-determining distinct infusions.
+For continuous medications, the data will be grouped into distinct
+  sets of infusions, for patients who may have been restarted on the drip one
+  or more times. Use the \code{drip.off} argument to modify the criteria for
+  determining distinct infusions.
 }
 \examples{
 # make a reference data frame for tidying meds

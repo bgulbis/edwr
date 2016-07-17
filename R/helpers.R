@@ -1,15 +1,23 @@
 # helper functions
 
-# make sure all patients are included in the data frame and the values for added
-# patients are FALSE
+#' Add all included patients to data frame
+#'
+#' Makes sure all patients are included in the data frame and the values for
+#' added patients are \code{FALSE}
+#'
+#' @param tidy data_frame with the data being returned
+#' @param patients data_frame with a column \code{pie.id} that contains all
+#'   included patients
+#'
+#' @return data_frame
+#' @keywords internal
 add_patients <- function(tidy, patients) {
-    dplyr::full_join(tidy, patients["pie.id"], by = "pie.id") %>%
-        dplyr::group_by_("pie.id") %>%
-        dplyr::mutate_at(dplyr::vars(),
-                         function(x) dplyr::coalesce(x, FALSE)) %>%
-        dplyr::ungroup()
+    full_join(tidy, patients["pie.id"], by = "pie.id") %>%
+        group_by_("pie.id") %>%
+        mutate_at(dplyr::vars(),
+                  function(x) dplyr::coalesce(x, FALSE)) %>%
+        ungroup()
 }
-
 
 #' Count the number of rows to go back in data frame
 #'

@@ -86,21 +86,19 @@ summarize_data.meds_cont <- function(x, units = "hours", ...) {
     # turn off scientific notation
     options(scipen = 999)
 
-    cont <- dplyr::group_by_(x, .dots = list("pie.id",
-                                                  "med",
-                                                  "drip.count"))
+    cont <- group_by_(x, .dots = list("pie.id", "med", "drip.count"))
 
     # get last and min non-zero rate
-    nz.rate <- dplyr::filter_(cont, .dots = ~(med.rate > 0)) %>%
-        dplyr::summarize_(.dots = purrr::set_names(
+    nz.rate <- filter_(cont, .dots = ~(med.rate > 0)) %>%
+        summarize_(.dots = set_names(
             x = list(~dplyr::last(med.rate),
                      ~min(med.rate, na.rm = TRUE),
                      ~sum(duration, na.rm = TRUE)),
-            nm = c("last.rate", "min.rate", "run.time")
+            nm = list("last.rate", "min.rate", "run.time")
         ))
 
     # get first and max rates and AUC
-    cont <- dplyr::summarize_(cont, .dots = purrr::set_names(
+    summarize_(cont, .dots = set_names(
         x = list(~dplyr::first(rate.start),
                  ~dplyr::last(rate.stop),
                  ~sum(med.rate * duration, na.rm = TRUE),
@@ -108,20 +106,19 @@ summarize_data.meds_cont <- function(x, units = "hours", ...) {
                  ~max(med.rate, na.rm = TRUE),
                  ~MESS::auc(run.time, med.rate),
                  ~dplyr::last(run.time)),
-        nm = c("start.datetime", "stop.datetime", "cum.dose", "first.rate",
-               "max.rate", "auc", "duration")
+        nm = list("start.datetime", "stop.datetime", "cum.dose", "first.rate",
+                  "max.rate", "auc", "duration")
     )) %>%
-        # join the last and min data
-        dplyr::inner_join(nz.rate, by = c("pie.id", "med", "drip.count")) %>%
-        # calculate the time-weighted average and interval
-        dplyr::mutate_(.dots = purrr::set_names(
+
+        # join the last and min data, then calculate the time-weighted average
+        # and interval
+        inner_join(nz.rate, by = c("pie.id", "med", "drip.count")) %>%
+        group_by_(.dots = list("pie.id", "med", "drip.count")) %>%
+        dplyr::mutate_(.dots = set_names(
             x = list(~auc/duration),
             nm = "time.wt.avg"
-        ))
-
-    # keep original class
-    class(cont) <- class(x)
-    cont
+        )) %>%
+        ungroup()
 }
 
 #' @details The data frame passed to \code{ref} should contain three character

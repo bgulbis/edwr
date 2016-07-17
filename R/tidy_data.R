@@ -245,13 +245,12 @@ tidy_data.vent_times <- function(x, dc, ...) {
             nm = c("event", "first.event.datetime", "last.event.datetime")
         )) %>%
 
-        group_by_("pie.id") %>%
-        left_join(dc[c("pie.id", "discharge.datetime")], by = "pie.id") %>%
-
         # use the last date/time of the next event as stop date/time; this would
         # be the last stop event if there are multiple stop events in a row. if
         # there isn't a stop date/time because there was start with no stop, use
         # the discharge date/time as stop date/time
+        left_join(dc[c("pie.id", "discharge.datetime")], by = "pie.id") %>%
+        group_by_("pie.id") %>%
         mutate_(.dots = set_names(
             x = list(~dplyr::lead(last.event.datetime),
                      ~dplyr::coalesce(stop.datetime, discharge.datetime)),

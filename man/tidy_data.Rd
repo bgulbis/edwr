@@ -99,21 +99,5 @@ print(head(
   tidy_data(meds_sched, ref)
 ))
 
-# tidy home medications
-print(head(
-  tidy_data(meds_home, ref)
-))
-
-# return all patients, even if they do not have any of the desired home meds
-pts <- dplyr::distinct(labs, pie.id)
-print(head(
-  tidy_data(meds_home, ref, pts = pts)
-))
-
-# return discharge prescriptions instead of home meds
-print(head(
-  tidy_data(meds_home, ref, pts = pts, home = FALSE)
-))
-
 }
 

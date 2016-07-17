@@ -80,5 +80,28 @@ print(head(
   summarize_data(x)
 ))
 
+# make a reference data frame for tidying meds
+ref <- tibble::tibble(
+  name = c("heparin", "warfarin", "antiplatelet agents"),
+  type = c("med", "med", "class"),
+  group = c("cont", "sched", "sched")
+)
+
+# tidy home medications
+print(head(
+  summarize_data(meds_home, ref)
+))
+
+# return all patients, even if they do not have any of the desired home meds
+pts <- distinct(labs, pie.id)
+print(head(
+  summarize_data(meds_home, ref, pts = pts)
+))
+
+# return discharge prescriptions instead of home meds
+print(head(
+  summarize_data(meds_home, ref, pts = pts, home = FALSE)
+))
+
 }
 

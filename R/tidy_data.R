@@ -140,9 +140,13 @@ tidy_data.meds_cont <- function(x, ref, sched, ...) {
 
     # remove any rows in continuous data which are actually scheduled doses,
     # then filter to meds in lookup, then sort by pie.id, med, med.datetime
-    anti_join(x, sched, by = "event.id") %>%
+    x <- anti_join(x, sched, by = "event.id") %>%
         filter_(.dots = list(~med %in% lookup.meds)) %>%
         arrange_(.dots = list("pie.id", "med", "med.datetime"))
+
+    # convert rate to numeric values
+    x[["med.rate"]] <- as.numeric(x[["med.rate"]])
+    x
 }
 
 #' @export
@@ -157,8 +161,12 @@ tidy_data.meds_sched <- function(x, ref, ...) {
     lookup.meds <- c(y$name, class.meds$med.name)
 
     # filter to keep only meds in lookup
-    filter_(x, .dots = list(~med %in% lookup.meds)) %>%
+    x <- filter_(x, .dots = list(~med %in% lookup.meds)) %>%
         arrange_(.dots = list("pie.id", "med", "med.datetime"))
+
+    # convert dose to numeric values
+    x[["med.dose"]] <- as.numeric(x[["med.dose"]])
+    x
 }
 
 #' @details For services, this function accounts for incorrect end times

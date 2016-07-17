@@ -105,4 +105,5 @@ is.warfarin(x)
 \description{
 Takes an R object and checks for an edwr class type.
 }
+\keyword{internal}
 

@@ -7,9 +7,12 @@
 #' transforming data which was extracted from the Enterprise Data Warehouse
 #' (EDW) using the standardized EDW queries.
 #'
-#' The main functions include: \code{\link{read_data}} for reading data from
-#' csv files, and \code{\link{tidy_data}} for transforming the data into a tidy
-#' data set.
+#' The main functions include:
+#' \enumerate{
+#'   \item \code{\link{read_data}} for reading data from csv files
+#'   \item \code{\link{tidy_data}} for transforming data into a tidy data set
+#'   \item \code{\link{summarize_data}} for aggregating and summarizing data
+#' }
 #'
 #' @docType package
 #' @name edwr

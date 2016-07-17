@@ -790,7 +790,7 @@ as.warfarin <- function(x) {
 #' Takes an R object and checks for an edwr class type.
 #'
 #' @param x object which may have an edwr class type
-#' @export
+#' @keywords internal
 is.edwr <- function(x) inherits(x, "edwr")
 
 #' @rdname is.edwr

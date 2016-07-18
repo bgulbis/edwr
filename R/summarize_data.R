@@ -58,7 +58,7 @@
 #' ))
 #'
 #' # return all patients, even if they do not have any of the desired home meds
-#' pts <- distinct(meds_home, pie.id)
+#' pts <- dplyr::distinct(meds_home, pie.id)
 #' print(head(
 #'   summarize_data(meds_home, ref, pts = pts)
 #' ))

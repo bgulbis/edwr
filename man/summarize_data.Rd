@@ -5,6 +5,7 @@
 \alias{summarize_data.default}
 \alias{summarize_data.labs}
 \alias{summarize_data.meds_cont}
+\alias{summarize_data.meds_home}
 \alias{summarize_data.meds_sched}
 \title{Summary calculations for serial measurement data}
 \usage{
@@ -13,6 +14,8 @@ summarize_data(x, ...)
 \method{summarize_data}{default}(x, ...)
 
 \method{summarize_data}{meds_cont}(x, units = "hours", ...)
+
+\method{summarize_data}{meds_home}(x, ref, pts = NULL, home = TRUE, ...)
 
 \method{summarize_data}{meds_sched}(x, units = "hours", ...)
 
@@ -25,6 +28,15 @@ summarize_data(x, ...)
 
 \item{units}{An optional character string specifying the time units to use in
 calculations, default is hours}
+
+\item{ref}{A data frame with three columns: name, type, and group. See
+details below.}
+
+\item{pts}{An optional data frame with a column pie.id including all patients
+in study}
+
+\item{home}{A logical, if TRUE (default) look for home medications,
+otherwise look for discharge prescriptions}
 }
 \value{
 A data frame
@@ -43,6 +55,13 @@ duration, total infusion running time, and cumulative dose.
 
 For labs and intermittent medications, the calculations include: first, last,
 median, maximum, minimum, AUC, and time-weighted average result.
+
+The data frame passed to \code{ref} should contain three character
+  columns: name, type, and group. The name column should contain either
+  generic medication names or medication classes. The type column should
+  specify whether the value in name is a "class" or "med". The group column
+  should specify whether the medication is a continous ("cont") or scheduled
+  ("sched") medication.
 }
 \examples{
 # make a reference data frame for tidying meds
@@ -59,6 +78,29 @@ x <- calc_runtime(x)
 # pass runtime data to summarize
 print(head(
   summarize_data(x)
+))
+
+# make a reference data frame for tidying meds
+ref <- tibble::tibble(
+  name = c("heparin", "warfarin", "antiplatelet agents"),
+  type = c("med", "med", "class"),
+  group = c("cont", "sched", "sched")
+)
+
+# tidy home medications
+print(head(
+  summarize_data(meds_home, ref)
+))
+
+# return all patients, even if they do not have any of the desired home meds
+pts <- dplyr::distinct(meds_home, pie.id)
+print(head(
+  summarize_data(meds_home, ref, pts = pts)
+))
+
+# return discharge prescriptions instead of home meds
+print(head(
+  summarize_data(meds_home, ref, pts = pts, home = FALSE)
 ))
 
 }

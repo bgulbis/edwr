@@ -21,6 +21,7 @@
 #'
 #' @examples
 #' # make a reference data frame for tidying meds
+#' library(dplyr)
 #' ref <- tibble::tibble(
 #'   name = c("heparin", "warfarin", "antiplatelet agents"),
 #'   type = c("med", "med", "class"),
@@ -44,52 +45,54 @@ calc_perctime <- function(x, ...) {
 #' @export
 #' @rdname calc_perctime
 calc_perctime.default <- function(x, ...) {
-    warning(paste("No calc_perctime method available for class", class(x)))
+    warning("No method available for objects of this class")
     x
 }
 
 #' @export
 #' @rdname calc_perctime
 calc_perctime.meds_cont <- function(x, thrshld, ...) {
-    # essentially a wrapper for perctime
-    cont <- perctime(x, thrshld, vars = c("pie.id", "med", "drip.count"))
-
-    # keep original class
-    class(cont) <- class(x)
-    cont
+    # a wrapper for perctime
+    perctime(x, thrshld, vars = c("pie.id", "med", "drip.count"))
 }
 
 #' @export
 #' @rdname calc_perctime
 calc_perctime.labs <- function(x, thrshld, ...) {
-    # essentially a wrapper for perctime
-    cont <- perctime(x, thrshld, vars = c("pie.id", "lab"))
-
-    # keep original class
-    class(cont) <- class(x)
-    cont
+    # a wrapper for perctime
+    perctime(x, thrshld, vars = c("pie.id", "lab"))
 }
 
-# function to calculate percent time above or below a threshold
+#' Calculate percent time above or below a threshold
+#'
+#' @param x data_frame
+#' @param thrshld list of criteria
+#' @param vars character vector with columns for grouping
+#'
+#' @return data_frame
+#'
+#' @keywords internal
 perctime <- function(x, thrshld, vars) {
-    cont <- dplyr::group_by_(x, .dots = as.list(vars))
+    cont <- group_by_(x, .dots = as.list(vars))
 
     # find all values within threshold and calculate the total time at goal
-    goal <- dplyr::filter_(cont, .dots = thrshld) %>%
-        dplyr::summarize_(.dots = purrr::set_names(
+    goal <- filter_(cont, .dots = thrshld) %>%
+        summarise_(.dots = set_names(
             x = list(~sum(duration, na.rm = TRUE)),
             nm = "time.goal"
         ))
 
     # get the total duration of data
-    cont <- dplyr::summarize_(cont, .dots = purrr::set_names(
+    cont <- summarise_(cont, .dots = set_names(
         x = list(~dplyr::last(run.time)),
         nm = "total.dur"
     )) %>%
-        dplyr::full_join(goal, by = vars) %>%
-        dplyr::mutate_(.dots = purrr::set_names(
+        full_join(goal, by = vars) %>%
+        group_by_(.dots = as.list(vars)) %>%
+        mutate_(.dots = set_names(
             x = list(~dplyr::coalesce(time.goal, 0),
                      ~dplyr::if_else(total.dur > 0, time.goal / total.dur, 0)),
             nm = list("time.goal", "perc.time")
-        ))
+        )) %>%
+        ungroup()
 }

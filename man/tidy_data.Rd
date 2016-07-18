@@ -6,11 +6,10 @@
 \alias{tidy_data.labs}
 \alias{tidy_data.locations}
 \alias{tidy_data.meds_cont}
-\alias{tidy_data.meds_home}
 \alias{tidy_data.meds_sched}
 \alias{tidy_data.services}
 \alias{tidy_data.vent_times}
-\title{Tidy data}
+\title{Transform to a tidy data set}
 \usage{
 tidy_data(x, ...)
 
@@ -18,13 +17,11 @@ tidy_data(x, ...)
 
 \method{tidy_data}{labs}(x, censor = TRUE, ...)
 
+\method{tidy_data}{locations}(x, ...)
+
 \method{tidy_data}{meds_cont}(x, ref, sched, ...)
 
 \method{tidy_data}{meds_sched}(x, ref, ...)
-
-\method{tidy_data}{meds_home}(x, ref, pts = NULL, home = TRUE, ...)
-
-\method{tidy_data}{locations}(x, ...)
 
 \method{tidy_data}{services}(x, ...)
 
@@ -43,12 +40,6 @@ details below.}
 
 \item{sched}{A data frame with intermittent medications}
 
-\item{pts}{An optional data frame with a column pie.id including all patients
-in study}
-
-\item{home}{A logical, if TRUE (default) look for home medications,
-otherwise look for discharge prescriptions}
-
 \item{dc}{A data frame with discharge date/times}
 }
 \description{
@@ -66,6 +57,23 @@ medication names or medication classes. The type column should specify
 whether the value in name is a "class" or "med". The group column should
 specify whether the medication is a continous ("cont") or scheduled ("sched")
 medication.
+
+For locations, this function accounts for incorrect departure
+  time from raw EDW data by calculating the departure time using the arrival
+  time of the next unit (unless it was the patient's last unit during the
+  hospitalization in which case the recorded departure time is used). It also
+  combines multiple rows of data when the patient did not actually leave that
+  unit.
+
+For services, this function accounts for incorrect end times
+  from raw EDW data by calculating the end time using the start time of the
+  next service (unless  it was the patient's last service during the
+  hospitalization). It also  combines multiple rows of data when the patient
+  did not actually leave  that service.
+
+For vent_times, this function accounts for incorrect start and stop
+  times from raw EDW data. If there is not a recorded stop time then the
+  discharge time will be used as the stop time.
 }
 \examples{
 # tidy lab data; non-numeric results will be converted to NA
@@ -93,22 +101,6 @@ print(head(
 # tidy intermittent medications; will keep warfarin and antiplatelet agents
 print(head(
   tidy_data(meds_sched, ref)
-))
-
-# tidy home medications
-print(head(
-  tidy_data(meds_home, ref)
-))
-
-# return all patients, even if they do not have any of the desired home meds
-pts <- dplyr::distinct(labs, pie.id)
-print(head(
-  tidy_data(meds_home, ref, pts = pts)
-))
-
-# return discharge prescriptions instead of home meds
-print(head(
-  tidy_data(meds_home, ref, pts = pts, home = FALSE)
 ))
 
 }

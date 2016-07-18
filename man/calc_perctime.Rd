@@ -40,6 +40,7 @@ form: \code{list(~variable > value)} or \code{list(~variable < value1,
 }
 \examples{
 # make a reference data frame for tidying meds
+library(dplyr)
 ref <- tibble::tibble(
   name = c("heparin", "warfarin", "antiplatelet agents"),
   type = c("med", "med", "class"),

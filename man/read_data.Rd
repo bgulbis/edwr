@@ -4,8 +4,7 @@
 \alias{read_data}
 \title{Read data from csv files}
 \usage{
-read_data(data.dir, file.name, type = NULL, check.distinct = TRUE,
-  include.pts = NULL)
+read_data(data.dir, file.name)
 }
 \arguments{
 \item{data.dir}{A character string with the name of the directory containing
@@ -13,18 +12,9 @@ the data files}
 
 \item{file.name}{A character string with name of data file or pattern to
 match}
-
-\item{type}{An optional character string indicating type of data being
-tidied; uses file.name if no value is provided}
-
-\item{check.distinct}{An optional logical, calls
-\code{\link[dplyr]{distinct}} on the imported data if \code{TRUE}}
-
-\item{include.pts}{If not NULL, the returned data frame will be limited to
-only the included patients}
 }
 \value{
-A data frame, as an \code{edwr} class type if type is not skip
+A data frame of class \code{tbl_edwr}
 }
 \description{
 \code{read_data} takes a directory and file name and reads in all
@@ -33,14 +23,15 @@ matching csv files and binds them together into a data frame
 \details{
 This function takes a directory and file name and reads in all matching csv
 files and binds them together into a data frame using
-\code{\link[readr]{read_csv}} from the readr package.
+\code{\link[readr]{read_csv}} from \code{readr}. The resulting data frame
+has a class of \code{edwr}, and can then be passed to one of the edwr-related
+class types for variable renaming and type setting (example: \code{as.labs}).
 
-Valid options for \code{type} are listed below, along with the names of the
-EDW Standard Project Queries which correspond to each \code{type}.
+The following table lists the edwr-related class which corresponds to each
+EDW Standard Project Queries.
 
 \tabular{lcl}{
-  \strong{type Argument} \tab --- \tab \strong{EDW Query Name}\cr
-  skip \tab \tab query independent; reads in columns without renaming\cr
+  \strong{edwr Class Name} \tab --- \tab \strong{EDW Query Name}\cr
   blood \tab \tab Blood Products\cr
   charges \tab \tab Charges - [All, Department Prompt]\cr
   demographics \tab \tab Demographics\cr
@@ -78,8 +69,7 @@ EDW Standard Project Queries which correspond to each \code{type}.
   \tab \tab Patients - by Medication\cr
   \tab \tab Patients - by Unit Admission\cr
   problems \tab \tab Problem List\cr
-  procedures9 \tab \tab Procedure Codes (ICD-9-CM) - [All, Prompt]\cr
-  procedures10 \tab \tab Procedure Codes (ICD-10-PCS) - [All, Prompt]\cr
+  procedures \tab \tab Procedure Codes (ICD-9-CM/ICD-10-PCS) - All\cr
   radiology \tab \tab Radiology Reports\cr
   services \tab \tab Service History\cr
   surgeries \tab \tab Surgeries\cr
@@ -94,11 +84,14 @@ EDW Standard Project Queries which correspond to each \code{type}.
 \examples{
 x <- read_data(
   data.dir = paste0(system.file(package = "edwr", "extdata")),
-  file.name = "demographics.csv",
-  type = "demographics"
+  file.name = "demographics.csv"
 )
 
 str(x)
+class(x)
+
+y <- as.demographics(x)
+class(y)
 
 }
 \seealso{

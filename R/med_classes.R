@@ -18,7 +18,7 @@
 #'
 #' @export
 med_lookup <- function(med_class) {
-    dplyr::filter_(med.classes, .dots = list(~med.class %in% med_class))
+    filter_(med.classes, .dots = list(~med.class %in% med_class))
 }
 
 #' Lookup medication class by medication generic name
@@ -35,7 +35,6 @@ med_lookup <- function(med_class) {
 #' @return A data frame with columns: med.class and med.name
 #'
 #' @export
-#' @importFrom magrittr %>%
 med_class_lookup <- function(meds) {
     # make a regular expression string of desired meds, then check each
     # medication to see if it is in the list of desired meds, then filter only
@@ -45,7 +44,7 @@ med_class_lookup <- function(meds) {
     dots <- list(~stringr::str_detect(med.name, regex))
 
     med.classes %>%
-        dplyr::mutate_(.dots = purrr::set_names(dots, "contains")) %>%
-        dplyr::filter_(.dots = list(~contains == TRUE)) %>%
-        dplyr::select_(.dots = list(quote(-contains)))
+        mutate_(.dots = set_names(dots, "contains")) %>%
+        filter_(.dots = list(~contains == TRUE)) %>%
+        select_(.dots = list(quote(-contains)))
 }

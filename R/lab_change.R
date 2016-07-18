@@ -34,19 +34,16 @@ lab_change <- function(x, .lab, change.by, FUN, back = 2) {
     # calculate the running min/max during the time window, then calculate the
     # change from the running min/max to current value, then filter values which
     # exceed the change.by value
-    lab <- dplyr::filter_(x, .dots = list(~lab %in% .lab)) %>%
-        dplyr::group_by_(.dots = list("pie.id", "lab")) %>%
-        dplyr::arrange_(.dots = "lab.datetime") %>%
-        dplyr::mutate_(.dots = purrr::set_names(
+    filter_(x, .dots = list(~lab %in% .lab)) %>%
+        arrange_(.dots = list("pie.id", "lab", "lab.datetime")) %>%
+        group_by_(.dots = list("pie.id", "lab")) %>%
+        mutate_(.dots = set_names(
             x = list(~count_rowsback(lab.datetime, back),
-                     ~zoo::rollapplyr(lab.result, rowsback, FUN, fill = NA,
-                                      partial = TRUE),
-                     ~lab.result - running),
+            ~zoo::rollapplyr(lab.result, rowsback, FUN, fill = NA,
+                             partial = TRUE),
+            ~lab.result - running),
             nm = list("rowsback", "running", "change")
         )) %>%
-        dplyr::filter_(.dots = list(~abs(change) >= abs(change.by)))
-
-    # keep original class
-    class(lab) <- class(x)
-    lab
+        filter_(.dots = list(~abs(change) >= abs(change.by))) %>%
+        ungroup()
 }

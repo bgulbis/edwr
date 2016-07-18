@@ -28,7 +28,7 @@ labs <- read_data(dir.sample, "labs") %>%
     as.labs() %>%
     filter(lab %in% c("hgb", "platelet", "wbc", "inr", "ptt")) %>%
     mutate(pie.id = as.character(as.numeric(pie.id) + rnum),
-           lab.datetime = lab.datetime + days(rdays))
+           lab.datetime = lab.datetime + ddays(rdays))
 
 meds_home <- read_data(dir.sample, "meds_home") %>%
     as.meds_home() %>%
@@ -46,7 +46,7 @@ meds_cont <- read_data(dir.sample, "meds_cont") %>%
     mutate(pie.id = as.character(as.numeric(pie.id) + rnum),
            order.id = as.character(as.numeric(order.id) + rnum),
            event.id = as.character(as.numeric(event.id) + rnum),
-           med.datetime = med.datetime + days(rdays))
+           med.datetime = med.datetime + ddays(rdays))
 
 meds_sched <- read_data(dir.sample, "meds_sched") %>%
     as.meds_sched() %>%
@@ -54,40 +54,40 @@ meds_sched <- read_data(dir.sample, "meds_sched") %>%
     mutate(pie.id = as.character(as.numeric(pie.id) + rnum),
            order.id = as.character(as.numeric(order.id) + rnum),
            event.id = as.character(as.numeric(event.id) + rnum),
-           med.datetime = med.datetime + days(rdays))
+           med.datetime = med.datetime + ddays(rdays))
 
 warfarin <- read_data(dir.sample, "warfarin") %>%
     as.warfarin() %>%
     mutate(pie.id = as.character(as.numeric(pie.id) + rnum),
-           warfarin.datetime = warfarin.datetime + days(rdays))
+           warfarin.datetime = warfarin.datetime + ddays(rdays))
 
 hosp <- c("Jones" = "Smith", "Hermann" = "George", "HVI" = "HeartHosp",
           "Cullen" = "Roy", "PAHH" = "PACU")
 locations <- read_data(dir.sample, "locations") %>%
     as.locations() %>%
     mutate(pie.id = as.character(as.numeric(pie.id) + rnum),
-           arrive.datetime = arrive.datetime + days(rdays),
-           depart.datetime = depart.datetime + days(rdays),
+           arrive.datetime = arrive.datetime + ddays(rdays),
+           depart.datetime = depart.datetime + ddays(rdays),
            unit.from = str_replace_all(unit.from, hosp),
            unit.to = str_replace_all(unit.to, hosp))
 
 services <- read_data(dir.sample, "services") %>%
     as.services() %>%
     mutate(pie.id = as.character(as.numeric(pie.id) + rnum),
-           start.datetime = start.datetime + days(rdays),
-           end.datetime = end.datetime + days(rdays))
+           start.datetime = start.datetime + ddays(rdays),
+           end.datetime = end.datetime + ddays(rdays))
 
 vent_times <- read_data(dir.sample, "vent_times") %>%
     as.vent_times() %>%
     mutate(pie.id = as.character(as.numeric(pie.id) + rnum),
-           vent.datetime = vent.datetime + days(rdays))
+           vent.datetime = vent.datetime + ddays(rdays))
 
 visits <- read_data(dir.sample, "visits") %>%
     as.visits() %>%
     mutate(pie.id = as.character(as.numeric(pie.id) + rnum),
-           arrival.datetime = arrival.datetime + days(rdays),
-           admit.datetime = admit.datetime + days(rdays),
-           discharge.datetime = discharge.datetime + days(rdays),
+           arrival.datetime = arrival.datetime + ddays(rdays),
+           admit.datetime = admit.datetime + ddays(rdays),
+           discharge.datetime = discharge.datetime + ddays(rdays),
            facility = "Hospital",
            nurse.unit.admit = str_replace_all(nurse.unit.admit, hosp))
 

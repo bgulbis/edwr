@@ -352,7 +352,7 @@ as.meds_home <- function(x) {
     if (is.meds_home(x)) return(x)
     if (!is.tbl_edwr(x)) x <- as.tbl_edwr(x)
 
-    df <- rename_(.data = x, .dots = c(val.pie, list(
+    df <- select_(.data = x, .dots = c(val.pie, list(
         "med" = "`Order Catalog Short Description`",
         "order.name" = "`Order Catalog Mnemonic`",
         "med.type" = "`Orig Orderable Type-Flag Desc`"

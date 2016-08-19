@@ -7,7 +7,7 @@
 
 library(dplyr)
 
-BGTools::gzip_files("data-raw", pattern = "medication_classes.csv")
+dirr::gzip_files("data-raw", pattern = "medication_classes.csv")
 
 med.classes <- readr::read_csv("data-raw/medication_classes.csv.gz") %>%
     rename(med.class = `Drug Catalog`,

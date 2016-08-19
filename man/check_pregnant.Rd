@@ -2,12 +2,23 @@
 % Please edit documentation in R/check_pregnant.R
 \name{check_pregnant}
 \alias{check_pregnant}
-\title{Check for pregnant patients}
+\alias{check_pregnant.default}
+\alias{check_pregnant.diagnosis}
+\alias{check_pregnant.labs}
+\title{Identify pregnant patients}
 \usage{
-check_pregnant(x)
+check_pregnant(x, ...)
+
+\method{check_pregnant}{default}(x, ...)
+
+\method{check_pregnant}{diagnosis}(x, ...)
+
+\method{check_pregnant}{labs}(x, ...)
 }
 \arguments{
 \item{x}{A data frame of either class diagnosis or labs}
+
+\item{...}{additional arguments passed on to individual methods}
 }
 \value{
 A data frame

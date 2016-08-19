@@ -1,6 +1,6 @@
 # check_pregnant.R
 
-#' Check for pregnant patients
+#' Identify pregnant patients
 #'
 #' \code{check_pregnant} takes data frames with either diagnosis codes or labs
 #' and returns a data frame with identifiers of pregnant patients
@@ -10,56 +10,54 @@
 #' be used to exclude patients from research studies.
 #'
 #' @param x A data frame of either class diagnosis or labs
+#' @param ... additional arguments passed on to individual methods
 #'
 #' @return A data frame
 #'
 #' @export
-check_pregnant <- function(x) {
-    if (is.diagnosis(x)) {
-        icd9 <- stringr::str_detect(names(icd::icd9_chapters), "Pregnancy")
-        codes.icd9 <- list(pregnant = icd::icd_expand_range(
-            start = icd::icd9_chapters[icd9][[1]][[1]],
-            end = icd::icd9_chapters[icd9][[1]][[2]]))
+check_pregnant <- function(x, ...) {
+    UseMethod("check_pregnant")
+}
 
-        preg.icd9 <- filter_(x, .dots = list(~code.source == "ICD-9-CM")) %>%
-            icd::icd9_comorbid(map = codes.icd9,
-                               icd_name = "diag.code",
-                               return_df = TRUE) %>%
-            filter_(.dots = list(~pregnant == TRUE))
+#' @export
+#' @rdname check_pregnant
+check_pregnant.default <- function(x, ...) {
+    warning("No method available for objects of this class")
+    x
+}
 
-        # get list of ICD-10 codes related to pregnancy / complications
-        icd10 <- stringr::str_detect(names(icd::icd10_chapters), "Pregnancy")
-        codes.icd10 <- list(pregnant = icd::icd_expand_range(
-            start = icd::icd10_chapters[icd10][[1]][[1]],
-            end = icd::icd10_chapters[icd10][[1]][[2]]))
+#' @export
+#' @rdname check_pregnant
+check_pregnant.diagnosis <- function(x, ...) {
+    preg9 <- filter_(x, .dots = list(~code.source == "ICD-9-CM")) %>%
+        icd::icd9_comorbid(map = preg.icd9,
+                           icd_name = "diag.code",
+                           return_df = TRUE) %>%
+        filter_(.dots = list(~pregnant == TRUE))
 
-        preg.icd10 <- filter_(x, .dots = list(~code.source == "ICD-10-CM")) %>%
-            icd::icd9_comorbid(map = codes.icd10,
-                               icd_name = "diag.code",
-                               return_df = TRUE) %>%
-            filter_(.dots = list(~pregnant == TRUE))
+    preg10 <- filter_(x, .dots = list(~code.source == "ICD-10-CM")) %>%
+        icd::icd9_comorbid(map = preg.icd10,
+                           icd_name = "diag.code",
+                           return_df = TRUE) %>%
+        filter_(.dots = list(~pregnant == TRUE))
 
-        preg <- tibble::data_frame_(list(
-            pie.id = ~c(preg.icd9$pie.id, preg.icd10$pie.id)
-        ))
+    full_join(preg9["pie.id"], preg10["pie.id"], by = "pie.id") %>%
+        distinct_()
+}
 
-    } else if (is.labs(x)) {
-        # consider pregnant if they have a positve urine or serum pregnancy test
-        preg.test <- filter_(x, .dots = list(
-            ~lab %in% c("u preg", "s preg"),
-            ~lab.result == "Positive"))
+#' @export
+#' @rdname check_pregnant
+check_pregnant.labs <- function(x, ...) {
+    # consider pregnant if they have a positve urine or serum pregnancy test
+    preg.test <- filter_(x, .dots = list(
+        ~lab %in% c("u preg", "s preg"),
+        ~lab.result == "Positive"))
 
-        # or if beta hcg is > 5
-        bhcg <- filter_(x, .dots = list(~lab %in% c("hcg tot", "hcg total"))) %>%
-            tidy_data() %>%
-            filter_(.dots = list(~lab.result > 5))
+    # or if beta hcg is > 5
+    bhcg <- filter_(x, .dots = list(~lab %in% c("hcg tot", "hcg total"))) %>%
+        tidy_data() %>%
+        filter_(.dots = list(~lab.result > 5))
 
-        preg <- tibble::data_frame_(list(
-            pie.id = ~c(preg.test$pie.id, bhcg$pie.id)
-        ))
-    } else {
-        stop("Data must be of class diagnosis or labs")
-    }
-
-    distinct_(preg)
+    full_join(preg.test["pie.id"], bhcg["pie.id"], by = "pie.id") %>%
+        distinct_()
 }

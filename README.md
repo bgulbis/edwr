@@ -11,7 +11,7 @@ Installation
 The `edwr` package can be installed from GitHub using the `devtools` package and the following commands:
 
 ``` r
-libryar(devtools)
+library(devtools)
 
 install_github("bgulbis\edwr")
 ```

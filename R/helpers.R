@@ -43,7 +43,7 @@ count_rowsback <- function(x, back = 2) {
 #'
 #' @param x character vector of date/time data
 #'
-#' @return A \code{\link[readr]{collector}} object
+#' @return A \code{\link[readr]{parse_datetime}} object
 #'
 #' @keywords internal
 format_dates <- function(x) {

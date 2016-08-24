@@ -10,7 +10,7 @@ format_dates(x)
 \item{x}{character vector of date/time data}
 }
 \value{
-A \code{\link[readr]{collector}} object
+A \code{\link[readr]{parse_datetime}} object
 }
 \description{
 Set the default format for parsing date/time variables when creating

@@ -65,6 +65,52 @@ tidy_data.default <- function(x, ...) {
     x
 }
 
+
+#' @details For diagnosis, checks to see whether the code is a valid ICD-9-CM or
+#'   ICD-10-CM code. For codes that are valid for both (i.e., "E" and "V"
+#'   codes), then it looks to see if the code matches a defined ICD-9-CM or
+#'   ICD-10-CM code. For codes that are defined in both, then the designated
+#'   code type from the source is used.
+#'
+#' @export
+#' @rdname tidy_data
+tidy_data.diagnosis <- function(x, ...) {
+    # find codes which are valid
+    valid.codes <- mutate_(x, .dots = set_names(
+        x = list(~icd::icd_is_valid(icd::as.icd9cm(diag.code)),
+                 ~icd::icd_is_valid(icd::as.icd10cm(diag.code))),
+        nm = list("icd9", "icd10")
+    ))
+
+    # if code only valid in one type, then assign it to the correct group
+    assign <- filter_(valid.codes,
+                      .dots = list(~!(icd9 == TRUE & icd10 == TRUE)))
+
+    # find codes which are valid in both ICD9/10 and check if they are defined
+    undefined <- filter_(valid.codes,
+                         .dots = list(~icd9 == TRUE, ~icd10 == TRUE)) %>%
+        mutate_(.dots = set_names(
+            x = list(~icd::icd_is_defined(icd::as.icd9cm(diag.code)),
+                     ~icd::icd_is_defined(icd::as.icd10cm(diag.code))),
+            nm = list("icd9", "icd10")
+        ))
+
+    # if code only defined in one type, assign it to the correct group
+    icd_defined <- filter_(undefined,
+                           .dots = list(~!(icd9 == TRUE & icd10 == TRUE)))
+
+    # for codes defined in both, use the source assignment from EDW
+    source_default <- filter_(undefined,
+                              .dots = list(~icd9 == TRUE, ~icd10 == TRUE)) %>%
+        mutate_(.dots = set_names(
+            x = list(~code.source == "ICD-9-CM"),
+            nm = "icd9"
+        ))
+
+    dplyr::bind_rows(assign, icd_defined, source_default) %>%
+        select_(.dots = quote(-icd10))
+}
+
 #' @export
 #' @rdname tidy_data
 tidy_data.labs <- function(x, censor = TRUE, ...) {

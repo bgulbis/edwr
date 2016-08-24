@@ -3,6 +3,7 @@
 \name{tidy_data}
 \alias{tidy_data}
 \alias{tidy_data.default}
+\alias{tidy_data.diagnosis}
 \alias{tidy_data.labs}
 \alias{tidy_data.locations}
 \alias{tidy_data.meds_cont}
@@ -14,6 +15,8 @@
 tidy_data(x, ...)
 
 \method{tidy_data}{default}(x, ...)
+
+\method{tidy_data}{diagnosis}(x, ...)
 
 \method{tidy_data}{labs}(x, censor = TRUE, ...)
 
@@ -57,6 +60,12 @@ medication names or medication classes. The type column should specify
 whether the value in name is a "class" or "med". The group column should
 specify whether the medication is a continous ("cont") or scheduled ("sched")
 medication.
+
+For diagnosis, checks to see whether the code is a valid ICD-9-CM or
+  ICD-10-CM code. For codes that are valid for both (i.e., "E" and "V"
+  codes), then it looks to see if the code matches a defined ICD-9-CM or
+  ICD-10-CM code. For codes that are defined in both, then the designated
+  code type from the source is used.
 
 For locations, this function accounts for incorrect departure
   time from raw EDW data by calculating the departure time using the arrival

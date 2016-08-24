@@ -29,13 +29,13 @@ check_pregnant.default <- function(x, ...) {
 #' @export
 #' @rdname check_pregnant
 check_pregnant.diagnosis <- function(x, ...) {
-    preg9 <- check_icd(x, "icd9") %>%
+    preg9 <- filter_(x, .dots = list(~icd9 == TRUE)) %>%
         icd::icd9_comorbid(map = preg.icd9,
                            icd_name = "diag.code",
                            return_df = TRUE) %>%
         filter_(.dots = list(~pregnant == TRUE))
 
-    preg10 <- check_icd(x, "icd10") %>%
+    preg10 <- filter_(x, .dots = list(~icd9 == FALSE)) %>%
         icd::icd10_comorbid(map = preg.icd10,
                            icd_name = "diag.code",
                            return_df = TRUE) %>%

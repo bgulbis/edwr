@@ -63,9 +63,32 @@ format_dates <- function(x) {
 #'
 #' @keywords internal
 keep_class <- function(x, y) {
-    if(is.tbl_edwr(y)) return(y)
+    if (is.tbl_edwr(y)) return(y)
 
     cls <- match("tbl_edwr", class(x), nomatch = 0L)
     class(y) <- c(class(x)[1:cls], class(y))
     y
+}
+
+#' Find valid ICD-9-CM or ICD-10-CM codes
+#'
+#' @param x tibble of class diagnosis
+#' @param type character vector indicating whether to return ICD-9 or ICD-10
+#'   codes
+#'
+#' @return tibble
+#'
+#' @keywords internal
+check_icd <- function(x, type = "icd9") {
+    if (!is.diagnosis(x)) stop("x must be of class diagnosis")
+
+    if (type == "icd10") {
+        icd.type <- icd::as.icd10cm()
+    } else {
+        icd.type <- icd::as.icd9cm()
+    }
+
+    purrr::dmap_at(x, "diag.code", icd.type) %>%
+        mutate(valid == icd_is_valid(diag.code)) %>%
+        filter(valid == TRUE)
 }

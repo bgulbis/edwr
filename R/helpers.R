@@ -89,6 +89,6 @@ check_icd <- function(x, type = "icd9") {
     }
 
     purrr::dmap_at(x, "diag.code", icd.type) %>%
-        mutate(valid == icd_is_valid(diag.code)) %>%
+        mutate(valid = icd_is_valid(diag.code)) %>%
         filter(valid == TRUE)
 }

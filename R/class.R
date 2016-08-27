@@ -127,7 +127,7 @@ as.diagnosis <- function(x) {
     if (is.diagnosis(x)) return(x)
     if (!is.tbl_edwr(x)) x <- as.tbl_edwr(x)
 
-    df <- rename_(.data = x, .dots = c(val.pie, list(
+    df <- select_(.data = x, .dots = c(val.pie, list(
         "diag.code" = "`Diagnosis Code`",
         "code.source" = "`Diagnosis Code Source Vocabulary`",
         "diag.type" = "`Diagnosis Type`",

@@ -151,7 +151,7 @@ as.drg <- function(x) {
     df <- select_(.data = x, .dots = c(val.pie, list(
         "drg" = "`Grouping Code`",
         "drg.source" = "`Grouping Code Source Vocabulary`",
-        "drg.type" = "`Grouping Type`"
+        "drg.type" = "`Grouping Code Type`"
     ))) %>%
         dplyr::distinct_()
 

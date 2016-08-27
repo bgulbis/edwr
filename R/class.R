@@ -143,6 +143,25 @@ as.diagnosis <- function(x) {
 
 #' @rdname set_edwr_class
 #' @export
+as.drg <- function(x) {
+    if (missing(x)) stop("Missing object")
+    if (is.drg(x)) return(x)
+    if (!is.tbl_edwr(x)) x <- as.tbl_edwr(x)
+
+    df <- select_(.data = x, .dots = c(val.pie, list(
+        "drg" = "`Grouping Code`",
+        "drg.source" = "`Grouping Code Source Vocabulary`",
+        "drg.type" = "`Grouping Type`"
+    ))) %>%
+        dplyr::distinct_()
+
+    after <- match("drg", class(x), nomatch = 0L)
+    class(df) <- append(class(x), "drg", after = after)
+    df
+}
+
+#' @rdname set_edwr_class
+#' @export
 as.encounters <- function(x) {
     if (missing(x)) stop("Missing object")
     if (is.encounters(x)) return(x)
@@ -808,6 +827,10 @@ is.demographics <- function(x) inherits(x, "demographics")
 #' @rdname is.tbl_edwr
 #' @export
 is.diagnosis <- function(x) inherits(x, "diagnosis")
+
+#' @rdname is.tbl_edwr
+#' @export
+is.drg <- function(x) inherits(x, "drg")
 
 #' @rdname is.tbl_edwr
 #' @export

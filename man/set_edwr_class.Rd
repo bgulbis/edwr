@@ -5,6 +5,7 @@
 \alias{as.charges}
 \alias{as.demographics}
 \alias{as.diagnosis}
+\alias{as.drg}
 \alias{as.encounters}
 \alias{as.events}
 \alias{as.icu_assess}
@@ -48,6 +49,8 @@ as.charges(x)
 as.demographics(x)
 
 as.diagnosis(x)
+
+as.drg(x)
 
 as.encounters(x)
 

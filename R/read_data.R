@@ -20,6 +20,7 @@
 #'   charges \tab \tab Charges - [All, Department Prompt]\cr
 #'   demographics \tab \tab Demographics\cr
 #'   diagnosis \tab \tab Diagnosis Codes (ICD-9/10-CM) - All\cr
+#'   drg \tab \tab DRG Codes - All\cr
 #'   encounters \tab \tab Encounters - by Person ID\cr
 #'   events \tab \tab Clinical Events - Prompt\cr
 #'   icu_assess \tab \tab ICU Assessments (CAM-ICU, GCS, RASS)\cr

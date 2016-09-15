@@ -522,6 +522,7 @@ as.patients <- function(x) {
         "visit.type" = "`Encounter Type`",
         "facility" = "`Person Location- Facility (Curr)`"
     ))) %>%
+        dplyr::arrange_(.dots = list("pie.id", "discharge.datetime")) %>%
         dplyr::distinct_() %>%
         readr::type_convert(col_types = readr::cols(pie.id = "c")) %>%
         mutate_(.dots = set_names(

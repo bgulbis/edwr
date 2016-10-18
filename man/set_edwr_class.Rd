@@ -21,6 +21,7 @@
 \alias{as.mrn}
 \alias{as.order_by}
 \alias{as.order_detail}
+\alias{as.order_info}
 \alias{as.patients}
 \alias{as.problems}
 \alias{as.procedures}
@@ -81,6 +82,8 @@ as.mpp(x)
 as.order_by(x)
 
 as.order_detail(x)
+
+as.order_info(x)
 
 as.patients(x)
 

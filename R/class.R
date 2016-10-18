@@ -458,7 +458,7 @@ as.order_by <- function(x) {
     if (is.order_by(x)) return(x)
     if (!is.tbl_edwr(x)) x <- as.tbl_edwr(x)
 
-    df <- rename_(.data = x, .dots = c(val.pie, list(
+    colnm <- list(
         "order" = "`Order Catalog Mnemonic`",
         "order.unit" = "`Person Location- Nurse Unit (Order)`",
         "provider" = "`Action Provider`",
@@ -468,7 +468,17 @@ as.order_by <- function(x) {
         "action.provider" = "`Action Personnel`",
         "action.provider.role" = "`Action Personnel Position`",
         "action.comm" = "`Action Communication Type`"
-    ))) %>%
+    )
+
+    if ("Source Order ID" %in% names(x)) {
+        colnm <- c(list("order.id" = "`Source Order ID`"), colnm)
+    }
+
+    if ("Order Department Status - Generic" %in% names(x)) {
+        colnm <- c(colnm, list("order.status" = "`Order Department Status - Generic`"))
+    }
+
+    df <- rename_(.data = x, .dots = c(val.pie, colnm)) %>%
         dplyr::distinct_() %>%
         mutate_(.dots = set_names(
             x = list(~format_dates(action.datetime)),
@@ -506,6 +516,30 @@ as.order_detail <- function(x) {
 
     after <- match("order_detail", class(x), nomatch = 0L)
     class(df) <- append(class(x), "order_detail", after = after)
+    df
+}
+
+#' @rdname set_edwr_class
+#' @export
+as.order_info <- function(x) {
+    if (missing(x)) x <- character()
+    if (is.order_info(x)) return(x)
+    if (!is.tbl_edwr(x)) x <- as.tbl_edwr(x)
+
+    df <- rename_(.data = x, .dots = c(val.pie, list(
+        "order.id" = "`Source Order ID`",
+        "detail.datetime" = "`Detail Date & Time`",
+        "detail" = "`Order Detail Value`",
+        "detail.descr" = "`Field Description`"
+    ))) %>%
+        dplyr::distinct_() %>%
+        mutate_(.dots = set_names(
+            x = list(~format_dates(detail.datetime)),
+            nm = list("detail.datetime")
+        ))
+
+    after <- match("order_info", class(x), nomatch = 0L)
+    class(df) <- append(class(x), "order_info", after = after)
     df
 }
 
@@ -892,6 +926,10 @@ is.order_by <- function(x) inherits(x, "order_by")
 #' @rdname is.tbl_edwr
 #' @export
 is.order_detail <- function(x) inherits(x, "order_detail")
+
+#' @rdname is.tbl_edwr
+#' @export
+is.order_info <- function(x) inherits(x, "order_info")
 
 #' @rdname is.tbl_edwr
 #' @export

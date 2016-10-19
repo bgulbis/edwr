@@ -19,6 +19,7 @@
 \alias{as.meds_sched}
 \alias{as.mpp}
 \alias{as.mrn}
+\alias{as.order_action}
 \alias{as.order_by}
 \alias{as.order_detail}
 \alias{as.order_info}
@@ -79,6 +80,8 @@ as.meds_sched(x)
 as.mrn(x)
 
 as.mpp(x)
+
+as.order_action(x)
 
 as.order_by(x)
 

@@ -453,6 +453,35 @@ as.mpp <- function(x) {
 
 #' @rdname set_edwr_class
 #' @export
+as.order_action <- function(x) {
+    if (missing(x)) x <- character()
+    if (is.order_action(x)) return(x)
+    if (!is.tbl_edwr(x)) x <- as.tbl_edwr(x)
+
+    colnm <- list(
+        "order.id" = "`Source Order ID`",
+        "action.datetime" = "`Order Action Date & Time`",
+        "provider" = "`Action Provider`",
+        "provider.role" = "`Action Provider Position`",
+        "action.type" = "`Action Type`",
+        "action.provider" = "`Action Personnel`",
+        "action.provider.role" = "`Action Personnel Position`",
+        "action.comm" = "`Action Communication Type`",
+        "order.status" = "`Order Department Status - Generic`"
+    )
+
+    df <- rename_(.data = x, .dots = c(val.pie, colnm)) %>%
+        dplyr::distinct_() %>%
+        purrr::dmap_at("action.datetime", format_dates)
+
+    after <- match("order_action", class(x), nomatch = 0L)
+    class(df) <- append(class(x), "order_action", after = after)
+    df
+}
+
+
+#' @rdname set_edwr_class
+#' @export
 as.order_by <- function(x) {
     if (missing(x)) x <- character()
     if (is.order_by(x)) return(x)
@@ -953,6 +982,10 @@ is.mpp <- function(x) inherits(x, "mpp")
 #' @rdname is.tbl_edwr
 #' @export
 is.mrn <- function(x) inherits(x, "mrn")
+
+#' @rdname is.tbl_edwr
+#' @export
+is.order_action <- function(x) inherits(x, "order_action")
 
 #' @rdname is.tbl_edwr
 #' @export

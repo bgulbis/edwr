@@ -22,6 +22,7 @@
 \alias{as.order_by}
 \alias{as.order_detail}
 \alias{as.order_info}
+\alias{as.order_timing}
 \alias{as.patients}
 \alias{as.problems}
 \alias{as.procedures}
@@ -84,6 +85,8 @@ as.order_by(x)
 as.order_detail(x)
 
 as.order_info(x)
+
+as.order_timing(x)
 
 as.patients(x)
 

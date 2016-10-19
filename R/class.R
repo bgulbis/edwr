@@ -545,6 +545,41 @@ as.order_info <- function(x) {
 
 #' @rdname set_edwr_class
 #' @export
+as.order_timing <- function(x) {
+    if (missing(x)) x <- character()
+    if (is.order_timing(x)) return(x)
+    if (!is.tbl_edwr(x)) x <- as.tbl_edwr(x)
+
+    colnm <- list(
+        "order.id" = "`Source Order ID`",
+        "order" = "`Order Catalog Mnemonic`",
+        "order.unit" = "`Person Location- Nurse Unit (Order)`",
+        "order.datetime" = "`Order Date & Time`",
+        "request.datetime" = "`Order Request Date & Time`",
+        "review.datetime" = "`Review Date and Time`",
+        "review.person" = "`Review Personnel`",
+        "complete.datetime" = "`Order Complete Date & Time`",
+        "complete.person" = "`Complete Personnel`",
+        "discontinue.datetime" = "`Order Discontinue Date & Time`",
+        "cancel.datetime" = "`Order Cancel Date & Time`",
+        "cancel.person" = "`Order Personnel - Cancel`",
+        "cancel.reason" = "`Order Cancel Reason`"
+    )
+
+    dtm <- c("order.datetime", "request.datetime", "review.datetime",
+             "complete.datetime", "discontinue.datetime", "cancel.datetime")
+
+    df <- rename_(.data = x, .dots = c(val.pie, colnm)) %>%
+        dplyr::distinct_() %>%
+        purrr::dmap_at(dtm, format_dates)
+
+    after <- match("order_timing", class(x), nomatch = 0L)
+    class(df) <- append(class(x), "order_timing", after = after)
+    df
+}
+
+#' @rdname set_edwr_class
+#' @export
 as.patients <- function(x) {
     if (missing(x)) stop("Missing object")
     if (is.patients(x)) return(x)
@@ -930,6 +965,10 @@ is.order_detail <- function(x) inherits(x, "order_detail")
 #' @rdname is.tbl_edwr
 #' @export
 is.order_info <- function(x) inherits(x, "order_info")
+
+#' @rdname is.tbl_edwr
+#' @export
+is.order_timing <- function(x) inherits(x, "order_timing")
 
 #' @rdname is.tbl_edwr
 #' @export

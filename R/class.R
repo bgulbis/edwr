@@ -558,7 +558,7 @@ as.order_info <- function(x) {
     df <- rename_(.data = x, .dots = c(val.pie, list(
         "order.id" = "`Source Order ID`",
         "detail.datetime" = "`Detail Date & Time`",
-        "detail" = "`Order Detail Value`",
+        "detail" = "`Detail Display Value`",
         "detail.descr" = "`Field Description`"
     ))) %>%
         dplyr::distinct_() %>%

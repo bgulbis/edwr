@@ -585,8 +585,8 @@ as.order_timing <- function(x) {
         "order.unit" = "`Person Location- Nurse Unit (Order)`",
         "order.datetime" = "`Order Date & Time`",
         "request.datetime" = "`Order Request Date & Time`",
-        "review.datetime" = "`Review Date and Time`",
-        "review.person" = "`Review Personnel`",
+        # "review.datetime" = "`Review Date and Time`",
+        # "review.person" = "`Review Personnel`",
         "complete.datetime" = "`Order Complete Date & Time`",
         "complete.person" = "`Complete Personnel`",
         "discontinue.datetime" = "`Order Discontinue Date & Time`",
@@ -595,8 +595,12 @@ as.order_timing <- function(x) {
         "cancel.reason" = "`Order Cancel Reason`"
     )
 
-    dtm <- c("order.datetime", "request.datetime", "review.datetime",
-             "complete.datetime", "discontinue.datetime", "cancel.datetime")
+    dtm <- c("order.datetime",
+             "request.datetime",
+             # "review.datetime",
+             "complete.datetime",
+             "discontinue.datetime",
+             "cancel.datetime")
 
     df <- rename_(.data = x, .dots = c(val.pie, colnm)) %>%
         dplyr::distinct_() %>%

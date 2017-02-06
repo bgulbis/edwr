@@ -5,6 +5,7 @@
 
 # default values ---------------------------------------
 val.pie <- list("pie.id" = "`PowerInsight Encounter Id`")
+val.mil <- list("millennium.id" = "`Encounter Identifier`")
 val.dt <- "`Clinical Event End Date/Time`"
 val.ce <- "`Clinical Event`"
 val.res <- "`Clinical Event Result`"
@@ -16,6 +17,9 @@ val.res <- "`Clinical Event Result`"
 #' Takes an R object and sets class to an edwr type.
 #'
 #' @param x object to set class \code{tbl_edwr}
+#' @param edw logical indicating if data source is EDW, set to false for MBO
+#' @param varnames named character list, where the name is the desired variable name
+#' @param tzone character indicating the timezone of the data
 #'
 #' @name set_edwr_class
 #' @keywords internal
@@ -613,24 +617,36 @@ as.order_timing <- function(x) {
 
 #' @rdname set_edwr_class
 #' @export
-as.patients <- function(x) {
+as.patients <- function(x, edw = TRUE, varnames = NULL, tzone = "US/Central") {
     if (missing(x)) stop("Missing object")
     if (is.patients(x)) return(x)
     if (!is.tbl_edwr(x)) x <- as.tbl_edwr(x)
 
-    df <- rename_(.data = x, .dots = c(val.pie, list(
-        "age" = "`Age- Years (Visit)`",
-        "discharge.datetime" = "`Discharge Date & Time`",
-        "visit.type" = "`Encounter Type`",
-        "facility" = "`Person Location- Facility (Curr)`"
-    ))) %>%
-        dplyr::arrange_(.dots = list("pie.id", "discharge.datetime")) %>%
-        dplyr::distinct_() %>%
-        readr::type_convert(col_types = readr::cols(pie.id = "c")) %>%
-        mutate_(.dots = set_names(
-            x = list(~format_dates(discharge.datetime)),
-            nm = list("discharge.datetime")
+    # default EDW names
+    if (edw & is.null(varnames)) {
+        varnames <- c(val.pie, list(
+            "age" = "`Age- Years (Visit)`",
+            "discharge.datetime" = "`Discharge Date & Time`",
+            "visit.type" = "`Encounter Type`",
+            "facility" = "`Person Location- Facility (Curr)`"
         ))
+
+    # default CDW/MBO names
+    } else if (!edw & is.null(varnames)) {
+        varnames <- c(val.mil, list(
+            "age" = "`Age- Years (At Admit)`",
+            "discharge.datetime" = "`Date and Time - Discharge`",
+            "visit.type" = "`Encounter Class Subtype`",
+            "facility" = "`Facility (Curr)`"
+        ))
+    }
+
+    df <- rename_(.data = x, .dots = varnames) %>%
+        dplyr::distinct_() %>%
+        purrr::dmap_at("age", as.numeric) %>%
+        # convert timezones to US/Central
+        purrr::dmap_at("discharge.datetime", lubridate::ymd_hms, tz = tzone) %>%
+        purrr::dmap_at("discharge.datetime", lubridate::with_tz, tzone = "US/Central")
 
     after <- match("patients", class(x), nomatch = 0L)
     class(df) <- append(class(x), "patients", after = after)

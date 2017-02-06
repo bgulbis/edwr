@@ -91,7 +91,7 @@ as.order_info(x)
 
 as.order_timing(x)
 
-as.patients(x)
+as.patients(x, edw = TRUE, varnames = NULL, tzone = "US/Central")
 
 as.problems(x)
 
@@ -117,6 +117,12 @@ as.warfarin(x)
 }
 \arguments{
 \item{x}{object to set class \code{tbl_edwr}}
+
+\item{edw}{logical indicating if data source is EDW, set to false for MBO}
+
+\item{varnames}{named character list, where the name is the desired variable name}
+
+\item{tzone}{character indicating the timezone of the data}
 }
 \description{
 Takes an R object and sets class to an edwr type.

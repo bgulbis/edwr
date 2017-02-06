@@ -4,10 +4,12 @@
 \alias{format_dates}
 \title{Set the default format for reading date/time variables}
 \usage{
-format_dates(x)
+format_dates(x, tzone = "US/Central")
 }
 \arguments{
 \item{x}{character vector of date/time data}
+
+\item{tzone}{character indicating timezone}
 }
 \value{
 A \code{\link[readr]{parse_datetime}} object

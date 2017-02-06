@@ -42,15 +42,16 @@ count_rowsback <- function(x, back = 2) {
 #' \code{edwr} classes.
 #'
 #' @param x character vector of date/time data
+#' @param tzone character indicating timezone
 #'
 #' @return A \code{\link[readr]{parse_datetime}} object
 #'
 #' @keywords internal
-format_dates <- function(x) {
+format_dates <- function(x, tzone = "US/Central") {
     readr::parse_datetime(
         x = x,
         format = "%Y/%m/%d %H:%M:%S",
-        locale = readr::locale(tz = "US/Central")
+        locale = readr::locale(tz = tzone)
     )
 }
 

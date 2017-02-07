@@ -17,11 +17,9 @@ val.res <- "`Clinical Event Result`"
 #' Takes an R object and sets class to an edwr type.
 #'
 #' @param x object to set class \code{tbl_edwr}
-#' @param edw logical indicating if data source is EDW, set to false for MBO
 #' @param varnames named character list, where the name is the desired variable
-#'   name
+#'   name; overrides default names
 #' @param extras named character list; if given, will append to default varnames
-#' @param tzone character indicating the timezone of the data
 #'
 #' @name set_edwr_class
 #' @keywords internal
@@ -128,13 +126,13 @@ as.demographics <- function(x) {
 
 #' @rdname set_edwr_class
 #' @export
-as.diagnosis <- function(x, edw = TRUE, varnames = NULL, extras = NULL) {
+as.diagnosis <- function(x, varnames = NULL, extras = NULL) {
     if (missing(x)) stop("Missing object")
     if (is.diagnosis(x)) return(x)
     if (!is.tbl_edwr(x)) x <- as.tbl_edwr(x)
 
     # default EDW names
-    if (edw & is.null(varnames)) {
+    if (attr(x, "data") == "edw" & is.null(varnames)) {
         varnames <- c(val.pie, list(
             "diag.code" = "`Diagnosis Code`",
             "code.source" = "`Diagnosis Code Source Vocabulary`",
@@ -144,7 +142,7 @@ as.diagnosis <- function(x, edw = TRUE, varnames = NULL, extras = NULL) {
         ))
 
     # default CDW/MBO names
-    } else if (!edw & is.null(varnames)) {
+    } else if (attr(x, "data") == "mbo" & is.null(varnames)) {
         varnames <- c(val.mil, list(
             "diag.code" = "`Diagnosis Code`",
             "code.source" = "`Diagnosis Code Source Vocabulary`",
@@ -633,14 +631,13 @@ as.order_timing <- function(x) {
 
 #' @rdname set_edwr_class
 #' @export
-as.patients <- function(x, edw = TRUE, varnames = NULL, extras = NULL,
-                        tzone = "US/Central") {
+as.patients <- function(x, varnames = NULL, extras = NULL) {
     if (missing(x)) stop("Missing object")
     if (is.patients(x)) return(x)
     if (!is.tbl_edwr(x)) x <- as.tbl_edwr(x)
 
     # default EDW names
-    if (edw & is.null(varnames)) {
+    if (attr(x, "data") == "edw" & is.null(varnames)) {
         varnames <- c(val.pie, list(
             "age" = "`Age- Years (Visit)`",
             "discharge.datetime" = "`Discharge Date & Time`",
@@ -649,7 +646,7 @@ as.patients <- function(x, edw = TRUE, varnames = NULL, extras = NULL,
         ))
 
     # default CDW/MBO names
-    } else if (!edw & is.null(varnames)) {
+    } else if (attr(x, "data") == "mbo" & is.null(varnames)) {
         varnames <- c(val.mil, list(
             "age" = "`Age- Years (At Admit)`",
             "discharge.datetime" = "`Date and Time - Discharge`",
@@ -666,9 +663,7 @@ as.patients <- function(x, edw = TRUE, varnames = NULL, extras = NULL,
     df <- rename_(.data = x, .dots = varnames) %>%
         dplyr::distinct_() %>%
         purrr::dmap_at("age", as.numeric) %>%
-        # convert timezones to US/Central
-        purrr::dmap_at("discharge.datetime", lubridate::ymd_hms, tz = tzone) %>%
-        purrr::dmap_at("discharge.datetime", lubridate::with_tz, tzone = "US/Central")
+        format_dates("discharge.datetime")
 
     after <- match("patients", class(x), nomatch = 0L)
     class(df) <- append(class(x), "patients", after = after)

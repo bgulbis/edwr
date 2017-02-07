@@ -496,26 +496,49 @@ as.mpp <- function(x) {
 
 #' @rdname set_edwr_class
 #' @export
-as.order_action <- function(x) {
+as.order_action <- function(x, varnames = NULL, extras = NULL) {
     if (missing(x)) x <- character()
     if (is.order_action(x)) return(x)
     if (!is.tbl_edwr(x)) x <- as.tbl_edwr(x)
 
-    colnm <- list(
-        "order.id" = "`Source Order ID`",
-        "action.datetime" = "`Order Action Date & Time`",
-        "provider" = "`Action Provider`",
-        "provider.role" = "`Action Provider Position`",
-        "action.type" = "`Action Type`",
-        "action.provider" = "`Action Personnel`",
-        "action.provider.role" = "`Action Personnel Position`",
-        "action.comm" = "`Action Communication Type`",
-        "order.status" = "`Order Department Status - Generic`"
-    )
+    # default EDW names
+    if (attr(x, "data") == "edw" & is.null(varnames)) {
+        varnames <- c(val.pie, list(
+            "order.id" = "`Source Order ID`",
+            "action.datetime" = "`Order Action Date & Time`",
+            "provider" = "`Action Provider`",
+            "provider.role" = "`Action Provider Position`",
+            "action.type" = "`Action Type`",
+            "action.provider" = "`Action Personnel`",
+            "action.provider.role" = "`Action Personnel Position`",
+            "action.comm" = "`Action Communication Type`",
+            "order.status" = "`Order Department Status - Generic`"
+        ))
 
-    df <- rename_(.data = x, .dots = c(val.pie, colnm)) %>%
+        # default CDW/MBO names
+    } else if (attr(x, "data") == "mbo" & is.null(varnames)) {
+        varnames <- c(val.mil, list(
+            "order.id" = "`Order Id`",
+            "order.parent.id" = "`Parent Order Id`",
+            "action.datetime" = "`Date and Time - Order Action`",
+            "order" = "`Mnemonic (Primary Generic) FILTER ON`",
+            "order.location" = "`Nurse Unit (Order)`",
+            "action.type" = "`Order Action Type`",
+            "action.provider" = "`Order Action Personnel`",
+            "action.provider.role" = "`Order Action Personnel Position`",
+            "action.comm" = "`Order Communication Type`",
+            "order.status" = "`Order Status (Curr)`"
+        ))
+    }
+
+    # if extra var names are given, append those to the list
+    if (!is.null(extras)) {
+        varnames <- c(varnames, extras)
+    }
+
+    df <- select_(.data = x, .dots = varnames) %>%
         dplyr::distinct_() %>%
-        purrr::dmap_at("action.datetime", format_dates)
+        format_dates("action.datetime")
 
     after <- match("order_action", class(x), nomatch = 0L)
     class(df) <- append(class(x), "order_action", after = after)

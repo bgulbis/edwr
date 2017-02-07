@@ -81,7 +81,7 @@ as.mrn(x)
 
 as.mpp(x)
 
-as.order_action(x)
+as.order_action(x, varnames = NULL, extras = NULL)
 
 as.order_by(x)
 

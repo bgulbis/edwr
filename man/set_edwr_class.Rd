@@ -51,7 +51,7 @@ as.charges(x)
 
 as.demographics(x)
 
-as.diagnosis(x)
+as.diagnosis(x, edw = TRUE, varnames = NULL, extras = NULL)
 
 as.drg(x)
 
@@ -91,7 +91,8 @@ as.order_info(x)
 
 as.order_timing(x)
 
-as.patients(x, edw = TRUE, varnames = NULL, tzone = "US/Central")
+as.patients(x, edw = TRUE, varnames = NULL, extras = NULL,
+  tzone = "US/Central")
 
 as.problems(x)
 
@@ -120,7 +121,10 @@ as.warfarin(x)
 
 \item{edw}{logical indicating if data source is EDW, set to false for MBO}
 
-\item{varnames}{named character list, where the name is the desired variable name}
+\item{varnames}{named character list, where the name is the desired variable
+name}
+
+\item{extras}{named character list; if given, will append to default varnames}
 
 \item{tzone}{character indicating the timezone of the data}
 }

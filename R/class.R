@@ -18,7 +18,9 @@ val.res <- "`Clinical Event Result`"
 #'
 #' @param x object to set class \code{tbl_edwr}
 #' @param edw logical indicating if data source is EDW, set to false for MBO
-#' @param varnames named character list, where the name is the desired variable name
+#' @param varnames named character list, where the name is the desired variable
+#'   name
+#' @param extras named character list; if given, will append to default varnames
 #' @param tzone character indicating the timezone of the data
 #'
 #' @name set_edwr_class
@@ -126,18 +128,32 @@ as.demographics <- function(x) {
 
 #' @rdname set_edwr_class
 #' @export
-as.diagnosis <- function(x) {
+as.diagnosis <- function(x, edw = TRUE, varnames = NULL, extras = NULL) {
     if (missing(x)) stop("Missing object")
     if (is.diagnosis(x)) return(x)
     if (!is.tbl_edwr(x)) x <- as.tbl_edwr(x)
 
-    df <- select_(.data = x, .dots = c(val.pie, list(
-        "diag.code" = "`Diagnosis Code`",
-        "code.source" = "`Diagnosis Code Source Vocabulary`",
-        "diag.type" = "`Diagnosis Type`",
-        "diag.seq" = "`Diagnosis Code Sequence`",
-        "present.admit" = "`Present on Admission`"
-    ))) %>%
+    # default EDW names
+    if (edw & is.null(varnames)) {
+        varnames <- c(val.pie, list(
+            "diag.code" = "`Diagnosis Code`",
+            "code.source" = "`Diagnosis Code Source Vocabulary`",
+            "diag.type" = "`Diagnosis Type`",
+            "diag.seq" = "`Diagnosis Code Sequence`",
+            "present.admit" = "`Present on Admission`"
+        ))
+
+    # default CDW/MBO names
+    } else if (!edw & is.null(varnames)) {
+        varnames <- c(val.mil, list(
+            "diag.code" = "`Diagnosis Code`",
+            "code.source" = "`Diagnosis Code Source Vocabulary`",
+            "diag.type" = "`Diagnosis Type`",
+            "diag.seq" = "`Diagnosis Code (Primary VS Non Primary)`"
+        ))
+    }
+
+    df <- select_(.data = x, .dots = varnames) %>%
         dplyr::distinct_()
 
     after <- match("diagnosis", class(x), nomatch = 0L)
@@ -617,7 +633,8 @@ as.order_timing <- function(x) {
 
 #' @rdname set_edwr_class
 #' @export
-as.patients <- function(x, edw = TRUE, varnames = NULL, tzone = "US/Central") {
+as.patients <- function(x, edw = TRUE, varnames = NULL, extras = NULL,
+                        tzone = "US/Central") {
     if (missing(x)) stop("Missing object")
     if (is.patients(x)) return(x)
     if (!is.tbl_edwr(x)) x <- as.tbl_edwr(x)
@@ -639,6 +656,11 @@ as.patients <- function(x, edw = TRUE, varnames = NULL, tzone = "US/Central") {
             "visit.type" = "`Encounter Class Subtype`",
             "facility" = "`Facility (Curr)`"
         ))
+    }
+
+    # if extra var names are given, append those to the list
+    if (!is.null(extras)) {
+        varnames <- c(varnames, extras)
     }
 
     df <- rename_(.data = x, .dots = varnames) %>%

@@ -57,7 +57,7 @@ as.drg(x)
 
 as.encounters(x)
 
-as.events(x)
+as.events(x, varnames = NULL, extras = NULL)
 
 as.icu_assess(x)
 

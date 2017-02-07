@@ -151,6 +151,11 @@ as.diagnosis <- function(x, varnames = NULL, extras = NULL) {
         ))
     }
 
+    # if extra var names are given, append those to the list
+    if (!is.null(extras)) {
+        varnames <- c(varnames, extras)
+    }
+
     df <- select_(.data = x, .dots = varnames) %>%
         dplyr::distinct_()
 
@@ -205,22 +210,42 @@ as.encounters <- function(x) {
 
 #' @rdname set_edwr_class
 #' @export
-as.events <- function(x) {
+as.events <- function(x, varnames = NULL, extras = NULL) {
     if (missing(x)) x <- character()
     if (is.events(x)) return(x)
     if (!is.tbl_edwr(x)) x <- as.tbl_edwr(x)
 
-    df <- rename_(.data = x, .dots = c(val.pie, list(
-        "event.datetime" = val.dt,
-        "event" = val.ce,
-        "event.result" = val.res
-    ))) %>%
-        dplyr::distinct_() %>%
-        mutate_(.dots = set_names(
-            x = list(~stringr::str_to_lower(event),
-                     ~format_dates(event.datetime)),
-            nm = list("event", "event.datetime")
+    # default EDW names
+    if (attr(x, "data") == "edw" & is.null(varnames)) {
+        varnames <- c(val.pie, list(
+            "event.datetime" = val.dt,
+            "event" = val.ce,
+            "event.result" = val.res
         ))
+
+        # default CDW/MBO names
+    } else if (attr(x, "data") == "mbo" & is.null(varnames)) {
+        varnames <- c(val.mil, list(
+            "event.datetime" = "`Date and Time - Performed`",
+            "event" = val.ce,
+            "event.result" = val.res,
+            "event.result.units" = "`Clinical Event Result Units`",
+            "event.location" = "`Nurse Unit (Event)`",
+            "event.id" = "`Event Id`",
+            "event.parent.id" = "`Parent Event Id`",
+            "order.id" = "`Order Id`"
+        ))
+    }
+
+    # if extra var names are given, append those to the list
+    if (!is.null(extras)) {
+        varnames <- c(varnames, extras)
+    }
+
+    df <- select_(.data = x, .dots = varnames) %>%
+        dplyr::distinct_() %>%
+        format_dates("event.datetime") %>%
+        purrr::dmap_at("event", stringr::str_to_lower)
 
     after <- match("events", class(x), nomatch = 0L)
     class(df) <- append(class(x), "events", after = after)

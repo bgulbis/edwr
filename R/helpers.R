@@ -36,23 +36,22 @@ count_rowsback <- function(x, back = 2) {
     purrr::map_int(x, function(y) sum(x >= y - lubridate::days(back) & x <= y))
 }
 
-#' Set the default format for reading date/time variables
+#' Convert date/time variables to POSIXct
 #'
-#' Set the default format for parsing date/time variables when creating
-#' \code{edwr} classes.
+#' Converts date/time variables to POSIXct and adjusts to US/Central timezone.
 #'
 #' @param x character vector of date/time data
-#' @param tzone character indicating timezone
+#' @param date_col character of column names to be converted
 #'
-#' @return A \code{\link[readr]{parse_datetime}} object
+#' @return A tibble
 #'
 #' @keywords internal
-format_dates <- function(x, tzone = "US/Central") {
-    readr::parse_datetime(
-        x = x,
-        format = "%Y/%m/%d %H:%M:%S",
-        locale = readr::locale(tz = tzone)
-    )
+format_dates <- function(x, date_col) {
+    tzone <- set_timezone(x)
+
+    x %>%
+        purrr::dmap_at(date_col, lubridate::ymd_hms, tz = tzone) %>%
+        purrr::dmap_at(date_col, lubridate::with_tz, tzone = "US/Central")
 }
 
 #' Keep edwr class assignments
@@ -69,4 +68,19 @@ keep_class <- function(x, y) {
     cls <- match("tbl_edwr", class(x), nomatch = 0L)
     class(y) <- c(class(x)[1:cls], class(y))
     y
+}
+
+#' Set timezone based on data source
+#'
+#' Sets the timezone to US/Central for EDW data, and UTC for MBO data
+#'
+#' @param x A tibble with an attribute of "data"
+#'
+#' @return character vector indicating the timezone
+#'
+#' @keywords internal
+set_timezone <- function(x) {
+    tzone <- "US/Central"
+    if (attr(x, "data") == "mbo") tzone <- "UTC"
+    tzone
 }

@@ -63,7 +63,7 @@ as.icu_assess(x)
 
 as.id(x)
 
-as.labs(x)
+as.labs(x, varnames = NULL, extras = NULL)
 
 as.locations(x)
 

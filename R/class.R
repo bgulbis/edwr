@@ -312,18 +312,40 @@ as.id <- function(x) {
 
 #' @rdname set_edwr_class
 #' @export
-as.labs <- function(x) {
+as.labs <- function(x, varnames = NULL, extras = NULL) {
     # inherits from events class
     if (missing(x)) x <- character()
     if (is.labs(x)) return(x)
     if (!is.tbl_edwr(x)) x <- as.tbl_edwr(x)
-    if (!is.events(x)) x <- as.events(x)
 
-    df <- rename_(.data = x, .dots = list(
-        "lab.datetime" = "event.datetime",
-        "lab" = "event",
-        "lab.result" = "event.result"
-    ))
+    # default EDW names
+    if (attr(x, "data") == "edw" & is.null(varnames)) {
+        if (!is.events(x)) x <- as.events(x)
+        varnames <- c(val.pie, list(
+            "lab.datetime" = "event.datetime",
+            "lab" = "event",
+            "lab.result" = "event.result"
+        ))
+
+        # default CDW/MBO names
+    } else if (attr(x, "data") == "mbo" & is.null(varnames)) {
+        varnames <- c(val.mil, list(
+            "lab.datetime" = "`Date and Time - Nurse Draw`",
+            "lab" = "`Lab Event (FILTER ON)`",
+            "lab.result" = "`Lab Result`",
+            "lab.result.units" = "`Lab Result Units`",
+            "lab.draw.location" = "`Nurse Unit (Lab)`",
+            "lab.id" = "`Lab Event Id`"
+        ))
+    }
+
+    # if extra var names are given, append those to the list
+    if (!is.null(extras)) {
+        varnames <- c(varnames, extras)
+    }
+
+    df <- select_(.data = x, .dots = varnames) %>%
+        dplyr::distinct_()
 
     after <- match("labs", class(x), nomatch = 0L)
     class(df) <- append(class(x), "labs", after = after)

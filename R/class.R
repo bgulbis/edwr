@@ -98,26 +98,45 @@ as.charges <- function(x) {
 
 #' @rdname set_edwr_class
 #' @export
-as.demographics <- function(x) {
+as.demographics <- function(x, varnames = NULL, extras = NULL) {
     if (missing(x)) stop("Missing object")
     if (is.demographics(x)) return(x)
     if (!is.tbl_edwr(x)) x <- as.tbl_edwr(x)
 
-    df <- rename_(.data = x, .dots = c(val.pie, list(
-        "age" = "`Age- Years (Visit)`",
-        "disposition" = "`Discharge Disposition`",
-        "length.stay" = "`LOS (Actual)`",
-        "visit.type" = "`Encounter Type`",
-        "person.id" = "`Person ID`",
-        "facility" = "`Person Location- Facility (Curr)`"
-    ))) %>%
-        dplyr::distinct_() %>%
-        readr::type_convert(col_types = readr::cols(
-            pie.id = "c",
-            person.id = "c"
+    # default EDW names
+    if (attr(x, "data") == "edw" & is.null(varnames)) {
+        varnames <- c(val.pie, list(
+            "age" = "`Age- Years (Visit)`",
+            "gender" = "Gender",
+            "race" = "Race",
+            "disposition" = "`Discharge Disposition`",
+            "length.stay" = "`LOS (Actual)`",
+            "visit.type" = "`Encounter Type`",
+            "person.id" = "`Person ID`",
+            "facility" = "`Person Location- Facility (Curr)`"
         ))
 
-    names(df) <- stringr::str_to_lower(names(df))
+        # default CDW/MBO names
+    } else if (attr(x, "data") == "mbo" & is.null(varnames)) {
+        varnames <- c(val.mil, list(
+            "age" = "`Age- Years (At Admit)`",
+            "gender" = "Gender",
+            "race" = "Race",
+            "disposition" = "`Discharge Disposition`",
+            "length.stay" = "`LOS (Curr)`",
+            "visit.type" = "`Encounter Class Subtype`",
+            "facility" = "`Facility (Curr)`"
+        ))
+    }
+
+    # if extra var names are given, append those to the list
+    if (!is.null(extras)) {
+        varnames <- c(varnames, extras)
+    }
+
+    df <- select_(.data = x, .dots = varnames) %>%
+        dplyr::distinct_() %>%
+        purrr::dmap_at(c("age", "length.stay"), as.numeric)
 
     after <- match("demographics", class(x), nomatch = 0L)
     class(df) <- append(class(x), "demographics", after = after)
@@ -233,7 +252,8 @@ as.events <- function(x, varnames = NULL, extras = NULL) {
             "event.location" = "`Nurse Unit (Event)`",
             "event.id" = "`Event Id`",
             "event.parent.id" = "`Parent Event Id`",
-            "order.id" = "`Order Id`"
+            "order.id" = "`Order Id`",
+            "order.parent.id" = "`Parent Order Id`"
         ))
     }
 

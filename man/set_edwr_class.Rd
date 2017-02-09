@@ -49,7 +49,7 @@ as.blood(x)
 
 as.charges(x)
 
-as.demographics(x)
+as.demographics(x, varnames = NULL, extras = NULL)
 
 as.diagnosis(x, varnames = NULL, extras = NULL)
 

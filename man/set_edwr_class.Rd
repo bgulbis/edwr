@@ -65,7 +65,7 @@ as.id(x)
 
 as.labs(x, varnames = NULL, extras = NULL)
 
-as.locations(x)
+as.locations(x, varnames = NULL, extras = NULL)
 
 as.measures(x)
 

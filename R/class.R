@@ -354,26 +354,42 @@ as.labs <- function(x, varnames = NULL, extras = NULL) {
 
 #' @rdname set_edwr_class
 #' @export
-as.locations <- function(x) {
+as.locations <- function(x, varnames = NULL, extras = NULL) {
     if (missing(x)) x <- character()
     if (is.locations(x)) return(x)
     if (!is.tbl_edwr(x)) x <- as.tbl_edwr(x)
 
-    df <- rename_(.data = x, .dots = c(val.pie, list(
-        "arrive.datetime" = "`Location Arrival Date & Time`",
-        "depart.datetime" = "`Location Depart Date & Time`",
-        "unit.to" = "`Person Location - Nurse Unit (To)`",
-        "unit.from" = "`Person Location - Nurse Unit (From)`"
-    ))) %>%
-        dplyr::distinct_() %>%
-        mutate_(.dots = set_names(
-            x = list(~format_dates(arrive.datetime),
-                     ~format_dates(depart.datetime),
-                     ~dplyr::na_if(unit.to, ""),
-                     ~dplyr::na_if(unit.from, "")),
-            nm = list("arrive.datetime", "depart.datetime", "unit.to",
-                      "unit.from")
+    # default EDW names
+    if (attr(x, "data") == "edw" & is.null(varnames)) {
+        if (!is.events(x)) x <- as.events(x)
+        varnames <- c(val.pie, list(
+            "arrive.datetime" = "`Location Arrival Date & Time`",
+            "depart.datetime" = "`Location Depart Date & Time`",
+            "unit.to" = "`Person Location - Nurse Unit (To)`",
+            "unit.from" = "`Person Location - Nurse Unit (From)`"
         ))
+
+        # default CDW/MBO names
+    } else if (attr(x, "data") == "mbo" & is.null(varnames)) {
+        varnames <- c(val.mil, list(
+            "arrive.datetime" = "`Date and Time - Nurse Unit Begin`",
+            "depart.datetime" = "`Date and Time - Nurse Unit End`",
+            "unit.name" = "`Nurse Unit All`"
+        ))
+    }
+
+    # if extra var names are given, append those to the list
+    if (!is.null(extras)) {
+        varnames <- c(varnames, extras)
+    }
+
+    df <- select_(.data = x, .dots = varnames) %>%
+        dplyr::distinct_() %>%
+        format_dates(c("arrive.datetime", "depart.datetime"))
+
+    if (attr(x, "data") == "edw") {
+        df <- dmap_at(df, dplyr::na_if, y = "")
+    }
 
     after <- match("locations", class(x), nomatch = 0L)
     class(df) <- append(class(x), "locations", after = after)

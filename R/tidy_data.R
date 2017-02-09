@@ -116,13 +116,15 @@ tidy_data.diagnosis <- function(x, ...) {
 tidy_data.labs <- function(x, censor = TRUE, ...) {
     # create a column noting if data was censored
     if (censor == TRUE) {
-        x[["censor.low"]] <- stringr::str_detect(x[["lab.result"]], "<")
-        x[["censor.high"]] <- stringr::str_detect(x[["lab.result"]], ">")
+        x <- mutate_(x, .dots = set_names(
+            x = list(~stringr::str_detect("lab.result", "<"),
+                     ~stringr::str_detect("lab.result", ">")),
+            nm = list("censor.low", "censor.high")
+        ))
     }
 
     # convert lab results to numeric values
-    x[["lab.result"]] <- as.numeric(x[["lab.result"]])
-    x
+    x <- purrr::dmap_at(x, "lab.result", as.numeric)
 }
 
 #' @details For locations, this function accounts for incorrect departure

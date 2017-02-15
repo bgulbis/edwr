@@ -103,7 +103,7 @@ tidy_data.diagnosis <- function(x, ...) {
     source_default <- filter_(undefined,
                               .dots = list(~icd9 == TRUE, ~icd10 == TRUE)) %>%
         mutate_(.dots = set_names(
-            x = list(~code.source == "ICD-9-CM"),
+            x = list(~code.source == "ICD-9-CM" | code.source == "ICD9"),
             nm = "icd9"
         ))
 

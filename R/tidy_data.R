@@ -137,42 +137,99 @@ tidy_data.labs <- function(x, censor = TRUE, ...) {
 #' @export
 #' @rdname tidy_data
 tidy_data.locations <- function(x, ...) {
-    arrange_(x, "arrive.datetime") %>%
-        group_by_("pie.id") %>%
+    if (attr(x, "data") == "edw") {
+        arrange_(x, "arrive.datetime") %>%
+            group_by_("pie.id") %>%
 
-        # determine if pt went to different unit, count num of different units
-        mutate_(.dots = set_names(
-            x = list(~is.na(unit.to) | is.na(dplyr::lag(unit.to)) |
-                         unit.to != dplyr::lag(unit.to),
-                     ~cumsum(diff.unit)),
-            nm = list("diff.unit", "unit.count")
-        )) %>%
+            # determine if pt went to different unit, count num of different units
+            mutate_(.dots = set_names(
+                x = list(~is.na(unit.to) | is.na(dplyr::lag(unit.to)) |
+                             unit.to != dplyr::lag(unit.to),
+                         ~cumsum(diff.unit)),
+                nm = list("diff.unit", "unit.count")
+            )) %>%
 
-        # use the count to group multiple rows of the same unit together
-        group_by_(.dots = list("pie.id", "unit.count")) %>%
-        summarise_(.dots = set_names(
-            x = list(~dplyr::first(unit.to),
-                     ~dplyr::first(arrive.datetime),
-                     ~dplyr::last(depart.datetime)),
-            nm = list("location", "arrive.datetime", "depart.recorded")
-        )) %>%
+            # use the count to group multiple rows of the same unit together
+            group_by_(.dots = list("pie.id", "unit.count")) %>%
+            summarise_(.dots = set_names(
+                x = list(~dplyr::first(unit.to),
+                         ~dplyr::first(arrive.datetime),
+                         ~dplyr::last(depart.datetime)),
+                nm = list("location", "arrive.datetime", "depart.recorded")
+            )) %>%
 
-        # use the arrival time for the next unit to calculate a depart time; if
-        # there is no arrival time for the next unit then used the depart
-        # date/time from EDW
-        group_by_(.dots = "pie.id") %>%
-        mutate_(.dots = set_names(
-            x = list(~dplyr::lead(arrive.datetime),
-                     ~dplyr::coalesce(depart.datetime, depart.recorded)),
-            nm = list("depart.datetime", "depart.datetime")
-        )) %>%
+            # use the arrival time for the next unit to calculate a depart time; if
+            # there is no arrival time for the next unit then used the depart
+            # date/time from EDW
+            group_by_(.dots = "pie.id") %>%
+            mutate_(.dots = set_names(
+                x = list(~dplyr::lead(arrive.datetime),
+                         ~dplyr::coalesce(depart.datetime, depart.recorded)),
+                nm = list("depart.datetime", "depart.datetime")
+            )) %>%
 
-        ungroup() %>%
-        mutate_(.dots = set_names(
-            x = list(~difftime(depart.datetime, arrive.datetime, units = "days")),
-            nm = "unit.length.stay"
-        )) %>%
-        select_(.dots = list(quote(-depart.recorded)))
+            ungroup() %>%
+            mutate_(.dots = set_names(
+                x = list(~difftime(depart.datetime, arrive.datetime, units = "days")),
+                nm = "unit.length.stay"
+            )) %>%
+            select_(.dots = list(quote(-depart.recorded)))
+    } else {
+        # tidy location data from MBO
+        arrange_(x, .dots = list("millennium.id", "arrive.datetime")) %>%
+            group_by_("millennium.id") %>%
+            # determine if pt went to different unit, count num of different units
+            mutate_(.dots = set_names(
+                x = list(~unit.name != dplyr::lag(unit.name),
+                         ~dplyr::coalesce(diff.unit, TRUE),
+                         ~cumsum(diff.unit)),
+                nm = list("diff.unit", "diff.unit", "unit.count")
+            )) %>%
+            # use the count to group multiple rows of the same unit together
+            group_by_(.dots = list("millennium.id", "unit.count")) %>%
+            summarise_(.dots = set_names(
+                x = list(~dplyr::first(unit.name),
+                         ~dplyr::first(arrive.datetime),
+                         ~max(depart.datetime)),
+                nm = list("location", "arrive.datetime", "depart.datetime")
+            )) %>%
+            # combine location stays that are < 5 minutes
+            mutate_(.dots = set_names(
+                x = list(~difftime(depart.datetime, arrive.datetime, units = "mins"),
+                         ~duration > 5 | is.na(dplyr::lag(duration)),
+                         ~cumsum(diff.unit)),
+                nm = list("duration", "diff.unit", "unit.count")
+            )) %>%
+            # use the count to group multiple rows of the same unit together
+            group_by_(.dots = list("millennium.id", "unit.count")) %>%
+            summarise_(.dots = set_names(
+                x = list(~dplyr::first(location),
+                         ~dplyr::first(arrive.datetime),
+                         ~max(depart.datetime)),
+                nm = list("location", "arrive.datetime", "depart.datetime")
+            )) %>%
+            # determine again if pt went to different unit, count num of
+            # different units
+            mutate_(.dots = set_names(
+                x = list(~location != dplyr::lag(location),
+                         ~dplyr::coalesce(diff.unit, TRUE),
+                         ~cumsum(diff.unit)),
+                nm = list("diff.unit", "diff.unit", "unit.count")
+            )) %>%
+            # final grouping of multiple rows of the same unit together
+            group_by_(.dots = list("millennium.id", "unit.count")) %>%
+            summarise_(.dots = set_names(
+                x = list(~dplyr::first(location),
+                         ~dplyr::first(arrive.datetime),
+                         ~max(depart.datetime)),
+                nm = list("location", "arrive.datetime", "depart.datetime")
+            )) %>%
+            ungroup() %>%
+            mutate_(.dots = set_names(
+                x = list(~difftime(depart.datetime, arrive.datetime, units = "days")),
+                nm = "unit.length.stay"
+            ))
+    }
 }
 
 #' @export

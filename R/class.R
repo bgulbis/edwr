@@ -361,7 +361,6 @@ as.locations <- function(x, varnames = NULL, extras = NULL) {
 
     # default EDW names
     if (attr(x, "data") == "edw" & is.null(varnames)) {
-        if (!is.events(x)) x <- as.events(x)
         varnames <- c(val.pie, list(
             "arrive.datetime" = "`Location Arrival Date & Time`",
             "depart.datetime" = "`Location Depart Date & Time`",
@@ -398,19 +397,41 @@ as.locations <- function(x, varnames = NULL, extras = NULL) {
 
 #' @rdname set_edwr_class
 #' @export
-as.measures <- function(x) {
+as.measures <- function(x, varnames = NULL, extras = NULL) {
     # inherits from events class
     if (missing(x)) x <- character()
     if (is.measures(x)) return(x)
     if (!is.tbl_edwr(x)) x <- as.tbl_edwr(x)
-    if (!is.events(x)) x <- as.events(x)
 
-    df <- rename_(.data = x, .dots = list(
-        "measure.datetime" = "event.datetime",
-        "measure" = "event",
-        "measure.result" = "event.result",
-        "measure.units" = "`Clinical Event Result Units`"
-    ))
+    # default EDW names
+    if (attr(x, "data") == "edw" & is.null(varnames)) {
+        if (!is.events(x)) x <- as.events(x)
+        varnames <- c(val.pie, list(
+            "measure.datetime" = "event.datetime",
+            "measure" = "event",
+            "measure.result" = "event.result",
+            "measure.units" = "`Clinical Event Result Units`"
+        ))
+
+        # default CDW/MBO names
+    } else if (attr(x, "data") == "mbo" & is.null(varnames)) {
+        varnames <- c(val.mil, list(
+            "measure.datetime" = "`Date and Time - Performed`",
+            "measure" = "`Clinical Event`",
+            "measure.result" = "`Clinical Event Result`",
+            "measure.units" = "`Clinical Event Result Units`"
+        ))
+    }
+
+    # if extra var names are given, append those to the list
+    if (!is.null(extras)) {
+        varnames <- c(varnames, extras)
+    }
+
+    df <- select_(.data = x, .dots = varnames) %>%
+        dplyr::distinct_() %>%
+        purrr::dmap_at("measure.result", as.numeric) %>%
+        format_dates("measure.datetime")
 
     after <- match("measures", class(x), nomatch = 0L)
     class(df) <- append(class(x), "measures", after = after)

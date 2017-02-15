@@ -107,8 +107,11 @@ tidy_data.diagnosis <- function(x, ...) {
             nm = "icd9"
         ))
 
-    dplyr::bind_rows(assign, icd_defined, source_default) %>%
+    df <- dplyr::bind_rows(assign, icd_defined, source_default) %>%
         select_(.dots = quote(-icd10))
+
+    attr(df, "data") <- attr(x, "data")
+    df
 }
 
 #' @export
@@ -116,7 +119,7 @@ tidy_data.diagnosis <- function(x, ...) {
 tidy_data.labs <- function(x, censor = TRUE, ...) {
     # create a column noting if data was censored
     if (censor == TRUE) {
-        x <- mutate_(x, .dots = set_names(
+        df <- mutate_(x, .dots = set_names(
             x = list(~stringr::str_detect("lab.result", "<"),
                      ~stringr::str_detect("lab.result", ">")),
             nm = list("censor.low", "censor.high")
@@ -124,7 +127,9 @@ tidy_data.labs <- function(x, censor = TRUE, ...) {
     }
 
     # convert lab results to numeric values
-    x <- purrr::dmap_at(x, "lab.result", as.numeric)
+    df <- purrr::dmap_at(df, "lab.result", as.numeric)
+    attr(df, "data") <- attr(x, "data")
+    df
 }
 
 #' @details For locations, this function accounts for incorrect departure
@@ -138,7 +143,7 @@ tidy_data.labs <- function(x, censor = TRUE, ...) {
 #' @rdname tidy_data
 tidy_data.locations <- function(x, ...) {
     if (attr(x, "data") == "edw") {
-        arrange_(x, "arrive.datetime") %>%
+        df <- arrange_(x, "arrive.datetime") %>%
             group_by_("pie.id") %>%
 
             # determine if pt went to different unit, count num of different units
@@ -176,7 +181,7 @@ tidy_data.locations <- function(x, ...) {
             select_(.dots = list(quote(-depart.recorded)))
     } else {
         # tidy location data from MBO
-        arrange_(x, .dots = list("millennium.id", "arrive.datetime")) %>%
+        df <- arrange_(x, .dots = list("millennium.id", "arrive.datetime")) %>%
             group_by_("millennium.id") %>%
             # determine if pt went to different unit, count num of different units
             mutate_(.dots = set_names(
@@ -230,6 +235,9 @@ tidy_data.locations <- function(x, ...) {
                 nm = "unit.length.stay"
             ))
     }
+
+    attr(df, "data") <- attr(x, "data")
+    df
 }
 
 #' @export

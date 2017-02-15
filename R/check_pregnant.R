@@ -41,8 +41,17 @@ check_pregnant.diagnosis <- function(x, ...) {
                            return_df = TRUE) %>%
         filter_(.dots = list(~pregnant == TRUE))
 
-    full_join(preg9["pie.id"], preg10["pie.id"], by = "pie.id") %>%
+    if (attr(x, "data") == "edw") {
+        encounter <- "pie.id"
+    } else {
+        encounter <- "millennium.id"
+    }
+
+    df <- full_join(preg9[encounter], preg10[encounter], by = encounter) %>%
         distinct_()
+
+    attr(df, "data") <- attr(x, "data")
+    df
 }
 
 #' @export
@@ -58,6 +67,15 @@ check_pregnant.labs <- function(x, ...) {
         tidy_data() %>%
         filter_(.dots = list(~lab.result > 5))
 
-    full_join(preg.test["pie.id"], bhcg["pie.id"], by = "pie.id") %>%
+    if (attr(x, "data") == "edw") {
+        encounter <- "pie.id"
+    } else {
+        encounter <- "millennium.id"
+    }
+
+    df <- full_join(preg.test[encounter], bhcg[encounter], by = encounter) %>%
         distinct_()
+
+    attr(df, "data") <- attr(x, "data")
+    df
 }

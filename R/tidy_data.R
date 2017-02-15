@@ -128,6 +128,7 @@ tidy_data.labs <- function(x, censor = TRUE, ...) {
 
     # convert lab results to numeric values
     df <- purrr::dmap_at(df, "lab.result", as.numeric)
+
     attr(df, "data") <- attr(x, "data")
     df
 }

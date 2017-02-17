@@ -511,6 +511,61 @@ as.meds_home <- function(x) {
 
 #' @rdname set_edwr_class
 #' @export
+as.meds_inpt <- function(x, varnames = NULL, extras = NULL) {
+    if (missing(x)) x <- character()
+    if (is.meds_cont(x)) return(x)
+    if (!is.tbl_edwr(x)) x <- as.tbl_edwr(x)
+
+    # default EDW names
+    if (attr(x, "data") == "edw" & is.null(varnames)) {
+        varnames <- c(val.pie, list(
+            "order.id" = "`Clinical Event Order ID`",
+            "event.id" = "`Event ID`",
+            "med.datetime" = val.dt,
+            "med" = val.ce,
+            "med.rate" = "`Infusion Rate`",
+            "med.rate.units" = "`Infusion Rate Unit`",
+            "route" = "`Route of Administration - Short`",
+            "event.tag" = "`Event Tag`"
+        ))
+
+        # default CDW/MBO names
+    } else if (attr(x, "data") == "mbo" & is.null(varnames)) {
+        varnames <- c(val.mil, list(
+            "order.id" = "`Order Id`",
+            "order.parent.id" = "`Parent Order Id`",
+            "event.id" = "`Med Event Id`",
+            "med.datetime" = "`Date and Time - Administration`",
+            "med" = "`Medication (Generic)`",
+            "med.dose" = "`Admin Dosage`",
+            "med.dose.units" = "`Admin Dosage Unit`",
+            "med.rate" = "`Infusion Rate`",
+            "med.rate.units" = "`Infusion Unit`",
+            "route" = "`Admin Route`",
+            "event.tag" = "`Infusion Actions`",
+            "med.location" = "`Nurse Unit (Med)`"
+        ))
+    }
+
+    # if extra var names are given, append those to the list
+    if (!is.null(extras)) {
+        varnames <- c(varnames, extras)
+    }
+
+    df <- select_(.data = x, .dots = varnames) %>%
+        dplyr::distinct_() %>%
+        purrr::dmap_at("med", stringr::str_to_lower) %>%
+        purrr::dmap_at(c("med.dose", "med.rate"), as.numeric) %>%
+        # purrr::dmap_at("med.rate.units", ~dplyr::na_if(.x, "")) %>%
+        format_dates("med.datetime")
+
+    after <- match("meds_inpt", class(x), nomatch = 0L)
+    class(df) <- append(class(x), "meds_inpt", after = after)
+    df
+}
+
+#' @rdname set_edwr_class
+#' @export
 as.meds_sched <- function(x) {
     if (missing(x)) x <- character()
     if (is.meds_sched(x)) return(x)
@@ -1134,6 +1189,10 @@ is.meds_freq <- function(x) inherits(x, "meds_freq")
 #' @rdname is.tbl_edwr
 #' @export
 is.meds_home <- function(x) inherits(x, "meds_home")
+
+#' @rdname is.tbl_edwr
+#' @export
+is.meds_inpt <- function(x) inherits(x, "meds_inpt")
 
 #' @rdname is.tbl_edwr
 #' @export

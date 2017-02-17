@@ -16,6 +16,7 @@
 \alias{is.meds_cont}
 \alias{is.meds_freq}
 \alias{is.meds_home}
+\alias{is.meds_inpt}
 \alias{is.meds_sched}
 \alias{is.mpp}
 \alias{is.mrn}
@@ -70,6 +71,8 @@ is.meds_cont(x)
 is.meds_freq(x)
 
 is.meds_home(x)
+
+is.meds_inpt(x)
 
 is.meds_sched(x)
 

@@ -16,6 +16,7 @@
 \alias{as.meds_cont}
 \alias{as.meds_freq}
 \alias{as.meds_home}
+\alias{as.meds_inpt}
 \alias{as.meds_sched}
 \alias{as.mpp}
 \alias{as.mrn}
@@ -67,13 +68,15 @@ as.labs(x, varnames = NULL, extras = NULL)
 
 as.locations(x, varnames = NULL, extras = NULL)
 
-as.measures(x)
+as.measures(x, varnames = NULL, extras = NULL)
 
 as.meds_cont(x)
 
 as.meds_freq(x)
 
 as.meds_home(x)
+
+as.meds_inpt(x, varnames = NULL, extras = NULL)
 
 as.meds_sched(x)
 

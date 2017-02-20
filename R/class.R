@@ -204,23 +204,40 @@ as.drg <- function(x) {
 
 #' @rdname set_edwr_class
 #' @export
-as.encounters <- function(x) {
+as.encounters <- function(x, varnames = NULL, extras = NULL) {
     if (missing(x)) stop("Missing object")
     if (is.encounters(x)) return(x)
     if (!is.tbl_edwr(x)) x <- as.tbl_edwr(x)
 
-    df <- rename_(.data = x, .dots = c(val.pie, list(
-        "person.id" = "`Person ID`",
-        "admit.datetime" = "`Admit Date & Time`",
-        "visit.type" = "`Encounter Type`",
-        "facility" = "`Person Location- Facility (Curr)`",
-        "disposition" = "`Discharge Disposition`"
-    ))) %>%
-        dplyr::distinct_() %>%
-        mutate_(.dots = set_names(
-            x = list(~format_dates(admit.datetime)),
-            nm = "admit.datetime"
+    # default EDW names
+    if (attr(x, "data") == "edw" & is.null(varnames)) {
+        varnames <- c(val.pie, list(
+            "millennium.id" = "`Millennium Encounter ID`",
+            "person.id" = "`Person ID`",
+            "admit.datetime" = "`Admit Date & Time`",
+            "visit.type" = "`Encounter Type`",
+            "facility" = "`Person Location- Facility (Curr)`",
+            "disposition" = "`Discharge Disposition`"
         ))
+
+        # default CDW/MBO names
+    } else if (attr(x, "data") == "mbo" & is.null(varnames)) {
+        varnames <- c(val.mil, list(
+            "admit.datetime" = "`Date and Time - Admit`",
+            "visit.type" = "`Encounter Class Subtype`",
+            "facility" = "`Facility (Curr)`",
+            "disposition" = "`Discharge Disposition`"
+        ))
+    }
+
+    # if extra var names are given, append those to the list
+    if (!is.null(extras)) {
+        varnames <- c(varnames, extras)
+    }
+
+    df <- select_(.data = x, .dots = varnames) %>%
+        dplyr::distinct_() %>%
+        format_dates("admit.datetime")
 
     after <- match("encounters", class(x), nomatch = 0L)
     class(df) <- append(class(x), "encounters", after = after)
@@ -294,15 +311,32 @@ as.icu_assess <- function(x) {
 
 #' @rdname set_edwr_class
 #' @export
-as.id <- function(x) {
+as.id <- function(x, varnames = NULL, extras = NULL) {
     if (missing(x)) stop("Missing object")
     if (is.id(x)) return(x)
     if (!is.tbl_edwr(x)) x <- as.tbl_edwr(x)
 
-    df <- rename_(.data = x, .dots = c(val.pie, list(
-        "fin" = "`Formatted Financial Nbr`",
-        "person.id" = "`Person ID`"
-    ))) %>%
+    # default EDW names
+    if (attr(x, "data") == "edw" & is.null(varnames)) {
+        varnames <- c(val.pie, list(
+            "millennium.id" = "`Millennium Encounter ID`",
+            "fin" = "`Formatted Financial Nbr`",
+            "person.id" = "`Person ID`"
+        ))
+
+        # default CDW/MBO names
+    } else if (attr(x, "data") == "mbo" & is.null(varnames)) {
+        varnames <- c(val.mil, list(
+            "fin" = "`Financial Number`"
+        ))
+    }
+
+    # if extra var names are given, append those to the list
+    if (!is.null(extras)) {
+        varnames <- c(varnames, extras)
+    }
+
+    df <- select_(.data = x, .dots = varnames) %>%
         dplyr::distinct_()
 
     after <- match("id", class(x), nomatch = 0L)
@@ -738,10 +772,11 @@ as.order_detail <- function(x) {
         "action.datetime" = "`Order Action Date & Time`"
     ))) %>%
         dplyr::distinct_() %>%
-        mutate_(.dots = set_names(
-            x = list(~format_dates(action.datetime)),
-            nm = list("action.datetime")
-        ))
+        format_dates("action.datetime")
+        # mutate_(.dots = set_names(
+        #     x = list(~format_dates(action.datetime)),
+        #     nm = list("action.datetime")
+        # ))
 
     after <- match("order_detail", class(x), nomatch = 0L)
     class(df) <- append(class(x), "order_detail", after = after)

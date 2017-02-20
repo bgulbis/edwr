@@ -56,13 +56,13 @@ as.diagnosis(x, varnames = NULL, extras = NULL)
 
 as.drg(x)
 
-as.encounters(x)
+as.encounters(x, varnames = NULL, extras = NULL)
 
 as.events(x, varnames = NULL, extras = NULL)
 
 as.icu_assess(x)
 
-as.id(x)
+as.id(x, varnames = NULL, extras = NULL)
 
 as.labs(x, varnames = NULL, extras = NULL)
 

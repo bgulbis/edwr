@@ -822,10 +822,11 @@ as.order_info <- function(x) {
         "detail.descr" = "`Field Description`"
     ))) %>%
         dplyr::distinct_() %>%
-        mutate_(.dots = set_names(
-            x = list(~format_dates(detail.datetime)),
-            nm = list("detail.datetime")
-        ))
+        format_dates("detail.datetime")
+        # mutate_(.dots = set_names(
+        #     x = list(~format_dates(detail.datetime)),
+        #     nm = list("detail.datetime")
+        # ))
 
     after <- match("order_info", class(x), nomatch = 0L)
     class(df) <- append(class(x), "order_info", after = after)

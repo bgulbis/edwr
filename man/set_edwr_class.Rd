@@ -88,7 +88,7 @@ as.order_action(x, varnames = NULL, extras = NULL)
 
 as.order_by(x)
 
-as.order_detail(x)
+as.order_detail(x, varnames = NULL, extras = NULL)
 
 as.order_info(x)
 

@@ -354,11 +354,11 @@ as.labs <- function(x, varnames = NULL, extras = NULL) {
 
     # default EDW names
     if (attr(x, "data") == "edw" & is.null(varnames)) {
-        if (!is.events(x)) x <- as.events(x)
+        # if (!is.events(x)) x <- as.events(x)
         varnames <- c(val.pie, list(
-            "lab.datetime" = "event.datetime",
-            "lab" = "event",
-            "lab.result" = "event.result"
+            "lab.datetime" = val.dt,
+            "lab" = val.ce,
+            "lab.result" = val.res
         ))
 
         # default CDW/MBO names
@@ -464,6 +464,7 @@ as.measures <- function(x, varnames = NULL, extras = NULL) {
 
     df <- select_(.data = x, .dots = varnames) %>%
         dplyr::distinct_() %>%
+        purrr::dmap_at("measure", stringr::str_to_lower) %>%
         purrr::dmap_at("measure.result", as.numeric) %>%
         format_dates("measure.datetime")
 
@@ -755,28 +756,52 @@ as.order_by <- function(x) {
 
 #' @rdname set_edwr_class
 #' @export
-as.order_detail <- function(x) {
+as.order_detail <- function(x, varnames = NULL, extras = NULL) {
     if (missing(x)) x <- character()
     if (is.order_detail(x)) return(x)
     if (!is.tbl_edwr(x)) x <- as.tbl_edwr(x)
 
-    df <- rename_(.data = x, .dots = c(val.pie, list(
-        "order.id" = "`Source Order ID`",
-        "order" = "`Order Catalog Mnemonic`",
-        "ingredient" = "`Ingredient Catalog Short Desc`",
-        "ingredient.dose" = "`Dose Strength - Order`",
-        "ingredient.unit" = "`Dose Strength - Unit`",
-        "ingredient.freetext" = "`Dose Freetext`",
-        "order.unit" = "`Person Location- Nurse Unit (Order)`",
-        "action.type" = "`Action Type`",
-        "action.datetime" = "`Order Action Date & Time`"
-    ))) %>%
+    # default EDW names
+    if (attr(x, "data") == "edw" & is.null(varnames)) {
+        varnames <- c(val.pie, list(
+            "order.id" = "`Source Order ID`",
+            "order" = "`Order Catalog Mnemonic`",
+            "ingredient" = "`Ingredient Catalog Short Desc`",
+            "ingredient.dose" = "`Dose Strength - Order`",
+            "ingredient.unit" = "`Dose Strength - Unit`",
+            "ingredient.freetext" = "`Dose Freetext`",
+            "order.unit" = "`Person Location- Nurse Unit (Order)`",
+            "action.type" = "`Action Type`",
+            "action.datetime" = "`Order Action Date & Time`"
+        ))
+
+        dt_name <- "action.datetime"
+
+        # default CDW/MBO names
+    } else if (attr(x, "data") == "mbo" & is.null(varnames)) {
+        varnames <- c(val.mil, list(
+            "order.id" = "`Order Id`",
+            "order.datetime" = "`Date and Time - Original (Placed)`",
+            "order" = "`Mnemonic (Primary Generic) FILTER ON`",
+            "ingredient.dose" = "`Order Strength Dose`",
+            "ingredient.unit" = "`Order Strength Dose Unit`",
+            "route" = "`Order Route`",
+            "freq" = "Frequency",
+            "order.provider" = "`Ordering Provider LIMITS`",
+            "order.provider.position" = "`Ordering Provider Position LIMITS`"
+        ))
+
+        dt_name <- "order.datetime"
+    }
+
+    # if extra var names are given, append those to the list
+    if (!is.null(extras)) {
+        varnames <- c(varnames, extras)
+    }
+
+    df <- select_(.data = x, .dots = varnames) %>%
         dplyr::distinct_() %>%
-        format_dates("action.datetime")
-        # mutate_(.dots = set_names(
-        #     x = list(~format_dates(action.datetime)),
-        #     nm = list("action.datetime")
-        # ))
+        format_dates(dt_name)
 
     after <- match("order_detail", class(x), nomatch = 0L)
     class(df) <- append(class(x), "order_detail", after = after)
@@ -839,7 +864,8 @@ as.order_timing <- function(x) {
 
     df <- rename_(.data = x, .dots = c(val.pie, colnm)) %>%
         dplyr::distinct_() %>%
-        purrr::dmap_at(dtm, format_dates)
+        format_dates(dtm)
+        # purrr::dmap_at(dtm, format_dates)
 
     after <- match("order_timing", class(x), nomatch = 0L)
     class(df) <- append(class(x), "order_timing", after = after)

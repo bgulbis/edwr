@@ -740,10 +740,7 @@ as.order_by <- function(x) {
 
     df <- rename_(.data = x, .dots = c(val.pie, colnm)) %>%
         dplyr::distinct_() %>%
-        mutate_(.dots = set_names(
-            x = list(~format_dates(action.datetime)),
-            nm = list("action.datetime")
-        ))
+        format_dates("action.datetime")
 
     after <- match("order_by", class(x), nomatch = 0L)
     class(df) <- append(class(x), "order_by", after = after)
@@ -1145,7 +1142,12 @@ as.vitals <- function(x) {
     if (missing(x)) x <- character()
     if (is.vitals(x)) return(x)
     if (!is.tbl_edwr(x)) x <- as.tbl_edwr(x)
-    if (!is.events(x)) x <- as.events(x)
+    if (!is.events(x)) {
+        x <- as.events(
+            x,
+            extras = list(vital.result.units = "`Clinical Event Result Units`")
+        )
+    }
 
     df <- rename_(.data = x, .dots = list(
         "vital.datetime" = "event.datetime",

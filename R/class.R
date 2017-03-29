@@ -379,7 +379,9 @@ as.labs <- function(x, varnames = NULL, extras = NULL) {
     }
 
     df <- select_(.data = x, .dots = varnames) %>%
-        dplyr::distinct_()
+        dplyr::distinct_() %>%
+        purrr::dmap_at("lab", stringr::str_to_lower) %>%
+        format_dates("lab.datetime")
 
     after <- match("labs", class(x), nomatch = 0L)
     class(df) <- append(class(x), "labs", after = after)
@@ -491,12 +493,9 @@ as.meds_cont <- function(x) {
         "event.tag" = "`Event Tag`"
     ))) %>%
         dplyr::distinct_() %>%
-        mutate_(.dots = set_names(
-            x = list(~stringr::str_to_lower(med),
-                     ~format_dates(med.datetime),
-                     ~dplyr::na_if(med.rate.units, "")),
-            nm = list("med", "med.datetime", "med.rate.units")
-        ))
+        purrr::dmap_at("med", stringr::str_to_lower) %>%
+        purrr::dmap_at("med.rate.units", dplyr::na_if, y = "") %>%
+        format_dates("med.datetime")
 
     after <- match("meds_cont", class(x), nomatch = 0L)
     class(df) <- append(class(x), "meds_cont", after = after)

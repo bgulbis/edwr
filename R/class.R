@@ -617,11 +617,8 @@ as.meds_sched <- function(x) {
         "event.type" = "`Event Type Code`"
     ))) %>%
         dplyr::distinct_() %>%
-        mutate_(.dots = set_names(
-            x = list(~stringr::str_to_lower(med),
-                     ~format_dates(med.datetime)),
-            nm = list("med", "med.datetime")
-        ))
+        purrr::dmap_at("med", stringr::str_to_lower) %>%
+        format_dates("med.datetime")
 
     after <- match("meds_sched", class(x), nomatch = 0L)
     class(df) <- append(class(x), "meds_sched", after = after)

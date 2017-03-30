@@ -25,4 +25,3 @@ meds_cont
 A dataset containing sample continuous medication data
 }
 \keyword{datasets}
-

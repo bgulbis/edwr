@@ -25,4 +25,3 @@ meds_sched
 A dataset containing sample intermittent medication data
 }
 \keyword{datasets}
-

@@ -24,4 +24,3 @@ This function takes a vector of encounters and concatenates them together,
 separated by a semi-colon. The list is then split into the desired group
 size. The resulting string can be used in an EDW query prompt.
 }
-

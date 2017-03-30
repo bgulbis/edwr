@@ -18,4 +18,3 @@ A tibble
 Converts date/time variables to POSIXct and adjusts to US/Central timezone.
 }
 \keyword{internal}
-

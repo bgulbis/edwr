@@ -16,4 +16,3 @@ character vector indicating the timezone
 Sets the timezone to US/Central for EDW data, and UTC for MBO data
 }
 \keyword{internal}
-

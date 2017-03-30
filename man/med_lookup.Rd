@@ -24,4 +24,3 @@ med.name.
 
 Medication class data comes from the Enterprise Data Warehouse.
 }
-

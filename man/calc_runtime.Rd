@@ -3,9 +3,9 @@
 \name{calc_runtime}
 \alias{calc_runtime}
 \alias{calc_runtime.default}
-\alias{calc_runtime.labs}
 \alias{calc_runtime.meds_cont}
 \alias{calc_runtime.meds_sched}
+\alias{calc_runtime.labs}
 \title{Calculate the running time for serial measurement data}
 \usage{
 calc_runtime(x, ...)
@@ -72,4 +72,3 @@ print(head(
 ))
 
 }
-

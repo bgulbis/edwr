@@ -79,4 +79,3 @@ class(y)
 \seealso{
 \code{\link[readr]{read_csv}}
 }
-

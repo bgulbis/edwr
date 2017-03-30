@@ -21,4 +21,3 @@ The main functions include:
   \item \code{\link{summarize_data}} for aggregating and summarizing data
 }
 }
-

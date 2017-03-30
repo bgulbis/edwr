@@ -18,4 +18,3 @@ tibble
 Keep edwr class assignments
 }
 \keyword{internal}
-

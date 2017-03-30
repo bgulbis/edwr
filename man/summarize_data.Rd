@@ -3,10 +3,10 @@
 \name{summarize_data}
 \alias{summarize_data}
 \alias{summarize_data.default}
-\alias{summarize_data.labs}
 \alias{summarize_data.meds_cont}
 \alias{summarize_data.meds_home}
 \alias{summarize_data.meds_sched}
+\alias{summarize_data.labs}
 \title{Summary calculations for serial measurement data}
 \usage{
 summarize_data(x, ...)
@@ -104,4 +104,3 @@ print(head(
 ))
 
 }
-

@@ -21,4 +21,3 @@ within the specified time frame. Typically called from
 \code{\link[zoo]{rollapplyr}}.
 }
 \keyword{internal}
-

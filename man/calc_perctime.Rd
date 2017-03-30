@@ -3,8 +3,8 @@
 \name{calc_perctime}
 \alias{calc_perctime}
 \alias{calc_perctime.default}
-\alias{calc_perctime.labs}
 \alias{calc_perctime.meds_cont}
+\alias{calc_perctime.labs}
 \title{Calculate proportion of time above or below a threshold}
 \usage{
 calc_perctime(x, ...)
@@ -57,4 +57,3 @@ print(head(
 ))
 
 }
-

@@ -185,8 +185,10 @@ calc_runtime.meds_sched <- function(x, units = "hours", ...) {
 #' @export
 #' @rdname calc_runtime
 calc_runtime.labs <- function(x, units = "hours", ...) {
-    arrange_(x, .dots = list("pie.id", "lab", "lab.datetime")) %>%
-        group_by_(.dots = c("pie.id", "lab")) %>%
+    id <- set_id_name(x)
+
+    df <- arrange_(x, .dots = list(id, "lab", "lab.datetime")) %>%
+        group_by_(.dots = c(id, "lab")) %>%
         mutate_(.dots = set_names(
             x = list(~difftime(lab.datetime, dplyr::lag(lab.datetime),
                                units = units),
@@ -197,4 +199,7 @@ calc_runtime.labs <- function(x, units = "hours", ...) {
             nm = list("duration", "duration", "run.time")
         )) %>%
         ungroup()
+
+    attr(df, "data") <- attr(x, "data")
+    df
 }

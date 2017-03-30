@@ -1137,23 +1137,40 @@ as.visits <- function(x) {
 
 #' @rdname set_edwr_class
 #' @export
-as.vitals <- function(x) {
+as.vitals <- function(x, varnames = NULL, extras = NULL) {
     # inherits from events class
     if (missing(x)) x <- character()
     if (is.vitals(x)) return(x)
     if (!is.tbl_edwr(x)) x <- as.tbl_edwr(x)
-    if (!is.events(x)) {
-        x <- as.events(
-            x,
-            extras = list(vital.result.units = "`Clinical Event Result Units`")
-        )
+
+    # default EDW names
+    if (attr(x, "data") == "edw" & is.null(varnames)) {
+        varnames <- c(val.pie, list(
+            "vital.datetime" = val.dt,
+            "vital" = val.ce,
+            "vital.result" = val.res,
+            "vital.result.units" = "`Clinical Event Result Units`"
+        ))
+
+        # default CDW/MBO names
+    } else if (attr(x, "data") == "mbo" & is.null(varnames)) {
+        varnames <- c(val.mil, list(
+            "vital.datetime" = "`Date and Time - Performed`",
+            "vital" = "`Clinical Event`",
+            "vital.result" = "`Clinical Event Result`",
+            "vital.result.units" = "`Clinical Event Result Units`",
+            "vital.location" = "`Nurse Unit (Event)`",
+            "vital.id" = "`Event Id`",
+            "vital.parent.id" = "`Parent Event Id`"
+        ))
     }
 
-    df <- rename_(.data = x, .dots = list(
-        "vital.datetime" = "event.datetime",
-        "vital" = "event",
-        "vital.result" = "event.result"
-    ))
+
+    df <- select_(.data = x, .dots = varnames) %>%
+        dplyr::distinct_() %>%
+        purrr::dmap_at("vital", stringr::str_to_lower) %>%
+        purrr::dmap_at("vital.result", as.numeric) %>%
+        format_dates("vital.datetime")
 
     after <- match("vitals", class(x), nomatch = 0L)
     class(df) <- append(class(x), "vitals", after = after)

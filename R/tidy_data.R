@@ -120,8 +120,8 @@ tidy_data.labs <- function(x, censor = TRUE, ...) {
     # create a column noting if data was censored
     if (censor == TRUE) {
         df <- mutate_(x, .dots = set_names(
-            x = list(~stringr::str_detect("lab.result", "<"),
-                     ~stringr::str_detect("lab.result", ">")),
+            x = list(~stringr::str_detect(lab.result, "<"),
+                     ~stringr::str_detect(lab.result, ">")),
             nm = list("censor.low", "censor.high")
         ))
     }

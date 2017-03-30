@@ -276,9 +276,7 @@ tidy_data.meds_inpt <- function(x, ref, ...) {
 
     # remove any rows in continuous data which are actually scheduled doses,
     # then filter to meds in lookup, then sort by pie.id, med, med.datetime
-    df <- x %>%
-        filter_(.dots = list(~med %in% lookup.meds)) %>%
-        arrange_(.dots = list("pie.id", "med", "med.datetime"))
+    df <- filter_(x, .dots = list(~med %in% lookup.meds))
 
     attr(df, "data") <- attr(x, "data")
     df

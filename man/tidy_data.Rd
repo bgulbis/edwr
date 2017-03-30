@@ -7,6 +7,7 @@
 \alias{tidy_data.labs}
 \alias{tidy_data.locations}
 \alias{tidy_data.meds_cont}
+\alias{tidy_data.meds_inpt}
 \alias{tidy_data.meds_sched}
 \alias{tidy_data.services}
 \alias{tidy_data.vent_times}
@@ -23,6 +24,8 @@ tidy_data(x, ...)
 \method{tidy_data}{locations}(x, ...)
 
 \method{tidy_data}{meds_cont}(x, ref, sched, ...)
+
+\method{tidy_data}{meds_inpt}(x, ref, ...)
 
 \method{tidy_data}{meds_sched}(x, ref, ...)
 

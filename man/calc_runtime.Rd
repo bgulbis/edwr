@@ -6,6 +6,7 @@
 \alias{calc_runtime.meds_cont}
 \alias{calc_runtime.meds_sched}
 \alias{calc_runtime.labs}
+\alias{calc_runtime.vitals}
 \title{Calculate the running time for serial measurement data}
 \usage{
 calc_runtime(x, ...)
@@ -18,6 +19,8 @@ calc_runtime(x, ...)
 \method{calc_runtime}{meds_sched}(x, units = "hours", ...)
 
 \method{calc_runtime}{labs}(x, units = "hours", ...)
+
+\method{calc_runtime}{vitals}(x, units = "hours", ...)
 }
 \arguments{
 \item{x}{A data frame with serial measurement data}

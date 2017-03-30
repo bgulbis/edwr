@@ -84,3 +84,21 @@ set_timezone <- function(x) {
     if (attr(x, "data") == "mbo") tzone <- "UTC"
     tzone
 }
+
+#' Set the name of the id field based on data source
+#'
+#' Sets the id name to pie.id for EDW data and millennium.id for MBO data
+#'
+#' @param x A tibble with an attribute of "data"
+#'
+#' @return character vector with the id name
+#'
+#' @keywords internal
+set_id_name <- function(x) {
+    if (attr(x, "data") == "edw") {
+        id <- "pie.id"
+    } else {
+        id <- "millennium.id"
+    }
+    id
+}

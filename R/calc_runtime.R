@@ -62,10 +62,11 @@ calc_runtime.default <- function(x, ...) {
 #' @rdname calc_runtime
 calc_runtime.meds_cont <- function(x, drip.off = 12, no.doc = 24,
                                    units = "hours", ...) {
-    cont <- arrange_(x, .dots = list("pie.id", "med", "med.datetime")) %>%
+    id <- set_id_name(x)
+    cont <- arrange_(x, .dots = list(id, "med", "med.datetime")) %>%
 
         # determine if it's a valid rate documentation
-        group_by_(.dots = list("pie.id", "med")) %>%
+        group_by_(.dots = list(id, "med")) %>%
         mutate_(.dots = set_names(
             x = list(~dplyr::if_else(is.na(med.rate.units), FALSE, TRUE),
                      ~cumsum(rate.change)),
@@ -82,7 +83,7 @@ calc_runtime.meds_cont <- function(x, drip.off = 12, no.doc = 24,
         )) %>%
 
         # calculate time between rows and order of rate changes
-        group_by_(.dots = list("pie.id", "med")) %>%
+        group_by_(.dots = list(id, "med")) %>%
         mutate_(.dots = set_names(
             x = list(
                 ~difftime(dplyr::lead(med.datetime), med.datetime,
@@ -97,7 +98,7 @@ calc_runtime.meds_cont <- function(x, drip.off = 12, no.doc = 24,
         )) %>%
 
         # calculate how long the drip was at each rate
-        group_by_(.dots = list("pie.id", "med", "change.num")) %>%
+        group_by_(.dots = list(id, "med", "change.num")) %>%
         dplyr::summarize_(.dots = set_names(
             x = list(~dplyr::first(rate),
                      ~dplyr::first(med.datetime),
@@ -112,7 +113,7 @@ calc_runtime.meds_cont <- function(x, drip.off = 12, no.doc = 24,
         )) %>%
 
         # identify individual drips
-        group_by_(.dots = list("pie.id", "med")) %>%
+        group_by_(.dots = list(id, "med")) %>%
         mutate_(.dots = set_names(
             x = list(
                 ~dplyr::if_else(time.next < drip.off & !is.na(time.next),
@@ -131,7 +132,7 @@ calc_runtime.meds_cont <- function(x, drip.off = 12, no.doc = 24,
         )) %>%
 
         # calculate run time
-        group_by_(.dots = list("pie.id", "med", "drip.count")) %>%
+        group_by_(.dots = list(id, "med", "drip.count")) %>%
         mutate_(.dots = set_names(
             x = list(~difftime(rate.start, first(rate.start), units = units)),
             nm = "run.time"
@@ -160,9 +161,20 @@ calc_runtime.meds_cont <- function(x, drip.off = 12, no.doc = 24,
 
     # bind the rows with drip end data and arrange by date/time; need to ungroup
     # first for bind_rows to keep edwr class assigment
-    ungroup(cont) %>%
+    df <- ungroup(cont) %>%
         dplyr::bind_rows(drip.end) %>%
-        arrange_(.dots = list("pie.id", "med", "drip.count", "rate.start"))
+        arrange_(.dots = list(id, "med", "drip.count", "rate.start"))
+
+    attr(df, "data") <- attr(x, "data")
+    df
+}
+
+#' @export
+#' @rdname calc_runtime
+calc_runtime.meds_inpt <- function(x, drip.off = 12, no.doc = 24,
+                                   units = "hours", ...) {
+    # calls method for continuous meds
+    calc_runtime.meds_cont(x, drip.off = drip.off, no.doc = no.doc, units = units, ...)
 }
 
 #' @export

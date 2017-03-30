@@ -4,6 +4,7 @@
 \alias{calc_runtime}
 \alias{calc_runtime.default}
 \alias{calc_runtime.meds_cont}
+\alias{calc_runtime.meds_inpt}
 \alias{calc_runtime.meds_sched}
 \alias{calc_runtime.labs}
 \alias{calc_runtime.vitals}
@@ -14,6 +15,9 @@ calc_runtime(x, ...)
 \method{calc_runtime}{default}(x, ...)
 
 \method{calc_runtime}{meds_cont}(x, drip.off = 12, no.doc = 24,
+  units = "hours", ...)
+
+\method{calc_runtime}{meds_inpt}(x, drip.off = 12, no.doc = 24,
   units = "hours", ...)
 
 \method{calc_runtime}{meds_sched}(x, units = "hours", ...)

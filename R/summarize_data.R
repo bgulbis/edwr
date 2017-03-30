@@ -86,7 +86,8 @@ summarize_data.meds_cont <- function(x, units = "hours", ...) {
     # turn off scientific notation
     options(scipen = 999)
 
-    cont <- group_by_(x, .dots = list("pie.id", "med", "drip.count"))
+    id <- set_id_name(x)
+    cont <- group_by_(x, .dots = list(id, "med", "drip.count"))
 
     # get last and min non-zero rate
     nz.rate <- filter_(cont, .dots = ~(med.rate > 0)) %>%
@@ -112,13 +113,19 @@ summarize_data.meds_cont <- function(x, units = "hours", ...) {
 
         # join the last and min data, then calculate the time-weighted average
         # and interval
-        inner_join(nz.rate, by = c("pie.id", "med", "drip.count")) %>%
-        group_by_(.dots = list("pie.id", "med", "drip.count")) %>%
+        inner_join(nz.rate, by = c(id, "med", "drip.count")) %>%
+        group_by_(.dots = list(id, "med", "drip.count")) %>%
         dplyr::mutate_(.dots = set_names(
             x = list(~auc/duration),
             nm = "time.wt.avg"
         )) %>%
         ungroup()
+}
+
+#' @export
+#' @rdname summarize_data
+summarize_data.meds_inpt <- function(x, units = "hours", ...) {
+    summarize_data.meds_cont(x, units = units, ...)
 }
 
 #' @details The data frame passed to \code{ref} should contain three character

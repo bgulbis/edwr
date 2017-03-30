@@ -4,6 +4,7 @@
 \alias{summarize_data}
 \alias{summarize_data.default}
 \alias{summarize_data.meds_cont}
+\alias{summarize_data.meds_inpt}
 \alias{summarize_data.meds_home}
 \alias{summarize_data.meds_sched}
 \alias{summarize_data.labs}
@@ -15,6 +16,8 @@ summarize_data(x, ...)
 \method{summarize_data}{default}(x, ...)
 
 \method{summarize_data}{meds_cont}(x, units = "hours", ...)
+
+\method{summarize_data}{meds_inpt}(x, units = "hours", ...)
 
 \method{summarize_data}{meds_home}(x, ref, pts = NULL, home = TRUE, ...)
 

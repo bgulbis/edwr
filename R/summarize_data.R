@@ -213,7 +213,9 @@ summarize_data.labs <- function(x, units = "hours", ...) {
     # turn off scientific notation
     options(scipen = 999)
 
-    group_by_(x, .dots = list("pie.id", "lab")) %>%
+    id <- set_id_name(x)
+
+    group_by_(x, .dots = list(id, "lab")) %>%
         summarise_(.dots = set_names(
             x = list(~dplyr::first(lab.datetime),
                      ~dplyr::last(lab.datetime),
@@ -236,7 +238,7 @@ summarize_data.labs <- function(x, units = "hours", ...) {
         )) %>%
 
         # calculate the time-weighted average and interval
-        group_by_(.dots = list("pie.id", "lab")) %>%
+        group_by_(.dots = list(id, "lab")) %>%
         mutate_(.dots = set_names(
             x = list(~auc/duration),
             nm = "time.wt.avg"

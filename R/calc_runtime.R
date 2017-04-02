@@ -202,7 +202,7 @@ calc_runtime.labs <- function(x, units = "hours", ...) {
     df <- arrange_(x, .dots = list(id, "lab", "lab.datetime")) %>%
         group_by_(.dots = c(id, "lab")) %>%
         mutate_(.dots = set_names(
-            x = list(~difftime(lab.datetime, dplyr::lag(lab.datetime),
+            x = list(~difftime(dplyr::lead(lab.datetime), lab.datetime,
                                units = units),
                      ~dplyr::coalesce(duration, 0),
                      ~difftime(lab.datetime, dplyr::first(lab.datetime),
@@ -224,7 +224,7 @@ calc_runtime.vitals <- function(x, units = "hours", ...) {
     df <- arrange_(x, .dots = list(id, "vital", "vital.datetime")) %>%
         group_by_(.dots = c(id, "vital")) %>%
         mutate_(.dots = set_names(
-            x = list(~difftime(vital.datetime, dplyr::lag(vital.datetime),
+            x = list(~difftime(dplyr::lead(vital.datetime), vital.datetime,
                                units = units),
                      ~dplyr::coalesce(duration, 0),
                      ~difftime(vital.datetime, dplyr::first(vital.datetime),

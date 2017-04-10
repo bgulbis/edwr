@@ -2,6 +2,7 @@
 % Please edit documentation in R/class.R
 \name{is.tbl_edwr}
 \alias{is.tbl_edwr}
+\alias{is.admit}
 \alias{is.blood}
 \alias{is.charges}
 \alias{is.demographics}
@@ -41,6 +42,8 @@
 \title{Test edwr-related classes}
 \usage{
 is.tbl_edwr(x)
+
+is.admit(x)
 
 is.blood(x)
 

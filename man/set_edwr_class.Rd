@@ -4,6 +4,7 @@
 \alias{set_edwr_class}
 \alias{tbl_edwr}
 \alias{as.tbl_edwr}
+\alias{as.admit}
 \alias{as.blood}
 \alias{as.charges}
 \alias{as.demographics}
@@ -45,6 +46,8 @@
 tbl_edwr(x)
 
 as.tbl_edwr(x)
+
+as.admit(x, varnames = NULL, extras = NULL)
 
 as.blood(x)
 

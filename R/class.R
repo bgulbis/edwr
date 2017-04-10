@@ -50,6 +50,43 @@ as.tbl_edwr <- function(x) {
 
 #' @rdname set_edwr_class
 #' @export
+as.admit <- function(x, varnames = NULL, extras = NULL) {
+    if (missing(x)) stop("Missing object")
+    if (is.admit(x)) return(x)
+    if (!is.tbl_edwr(x)) x <- as.tbl_edwr(x)
+
+    # default EDW names
+    if (attr(x, "data") == "edw" & is.null(varnames)) {
+        varnames <- c(val.pie, list(
+            "visit.type" = "`Encounter Type`",
+            "visit.type.class" = "`Encounter Type Class`",
+            "admit.type" = "`Admit Type`",
+            "admit.source" = "`Admit Source`"
+        ))
+
+        # default CDW/MBO names
+    } else if (attr(x, "data") == "mbo" & is.null(varnames)) {
+        varnames <- c(val.mil, list(
+            "visit.type" = "`Encounter Class Subtype`"
+        ))
+    }
+
+    # if extra var names are given, append those to the list
+    if (!is.null(extras)) {
+        varnames <- c(varnames, extras)
+    }
+
+    df <- select_(.data = x, .dots = varnames) %>%
+        dplyr::distinct_()
+
+    after <- match("admit", class(x), nomatch = 0L)
+    class(df) <- append(class(x), "admit", after = after)
+    df
+}
+
+
+#' @rdname set_edwr_class
+#' @export
 as.blood <- function(x) {
     # inherits from events class
     if (missing(x)) x <- character()
@@ -107,7 +144,7 @@ as.demographics <- function(x, varnames = NULL, extras = NULL) {
     if (attr(x, "data") == "edw" & is.null(varnames)) {
         varnames <- c(val.pie, list(
             "age" = "`Age- Years (Visit)`",
-            "gender" = "Gender",
+            "gender" = "Sex",
             "race" = "Race",
             "disposition" = "`Discharge Disposition`",
             "length.stay" = "`LOS (Actual)`",
@@ -1206,6 +1243,10 @@ as.warfarin <- function(x) {
 #' @param x object which may have a tbl_edwr class type
 #' @keywords internal
 is.tbl_edwr <- function(x) inherits(x, "tbl_edwr")
+
+#' @rdname is.tbl_edwr
+#' @export
+is.admit <- function(x) inherits(x, "admit")
 
 #' @rdname is.tbl_edwr
 #' @export

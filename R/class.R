@@ -1261,18 +1261,38 @@ as.vitals <- function(x, varnames = NULL, extras = NULL) {
 
 #' @rdname set_edwr_class
 #' @export
-as.warfarin <- function(x) {
+as.warfarin <- function(x, varnames = NULL, extras = NULL) {
     # inherits from events class
     if (missing(x)) x <- character()
     if (is.warfarin(x)) return(x)
     if (!is.tbl_edwr(x)) x <- as.tbl_edwr(x)
-    if (!is.events(x)) x <- as.events(x)
+    # if (!is.events(x)) x <- as.events(x)
 
-    df <- rename_(.data = x, .dots = list(
-        "warfarin.datetime" = "event.datetime",
-        "warfarin.event" = "event",
-        "warfarin.result" = "event.result"
-    ))
+    # default EDW names
+    if (attr(x, "data") == "edw" & is.null(varnames)) {
+        varnames <- c(val.pie, list(
+            "warfarin.datetime" = val.dt,
+            "warfarin.event" = val.ce,
+            "warfarin.result" = val.res
+        ))
+
+        # default CDW/MBO names
+    } else if (attr(x, "data") == "mbo" & is.null(varnames)) {
+        varnames <- c(val.mil, list(
+            "warfarin.datetime" = "`Date and Time - Performed`",
+            "warfarin.event" = val.ce,
+            "warfarin.result" = val.res
+        ))
+    }
+
+    # if extra var names are given, append those to the list
+    if (!is.null(extras)) {
+        varnames <- c(varnames, extras)
+    }
+
+    df <- rename_(.data = x, .dots = varnames) %>%
+        dplyr::distinct_() %>%
+        format_dates("warfarin.datetime")
 
     after <- match("warfarin", class(x), nomatch = 0L)
     class(df) <- append(class(x), "warfarin", after = after)

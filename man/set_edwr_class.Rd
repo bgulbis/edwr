@@ -122,7 +122,7 @@ as.visits(x)
 
 as.vitals(x, varnames = NULL, extras = NULL)
 
-as.warfarin(x)
+as.warfarin(x, varnames = NULL, extras = NULL)
 }
 \arguments{
 \item{x}{object to set class \code{tbl_edwr}}

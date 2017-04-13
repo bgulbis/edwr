@@ -905,6 +905,51 @@ as.order_timing <- function(x) {
 
 #' @rdname set_edwr_class
 #' @export
+as.output <- function(x, varnames = NULL, extras = NULL) {
+    # inherits from events class
+    if (missing(x)) x <- character()
+    if (is.output(x)) return(x)
+    if (!is.tbl_edwr(x)) x <- as.tbl_edwr(x)
+    # if (!is.events(x)) x <- as.events(x)
+
+    # default EDW names
+    if (attr(x, "data") == "edw" & is.null(varnames)) {
+        varnames <- c(val.pie, list(
+            "output.datetime" = val.dt,
+            "output" = val.ce,
+            "output.result" = val.res
+        ))
+
+        # default CDW/MBO names
+    } else if (attr(x, "data") == "mbo" & is.null(varnames)) {
+        varnames <- c(val.mil, list(
+            "output.datetime" = "`Date and Time - Performed`",
+            "output" = val.ce,
+            "output.result" = val.res,
+            "output.result.units" = "`Clinical Event Result Units`",
+            "output.location" = "`Nurse Unit (Event)`",
+            "event.id" = "`Event Id`",
+            "event.parent.id" = "`Parent Event Id`"
+        ))
+    }
+
+    # if extra var names are given, append those to the list
+    if (!is.null(extras)) {
+        varnames <- c(varnames, extras)
+    }
+
+    df <- rename_(.data = x, .dots = varnames) %>%
+        dplyr::distinct_() %>%
+        purrr::dmap_at("output.result", as.numeric) %>%
+        format_dates("output.datetime")
+
+    after <- match("output", class(x), nomatch = 0L)
+    class(df) <- append(class(x), "output", after = after)
+    df
+}
+
+#' @rdname set_edwr_class
+#' @export
 as.patients <- function(x, varnames = NULL, extras = NULL) {
     if (missing(x)) stop("Missing object")
     if (is.patients(x)) return(x)
@@ -1343,6 +1388,10 @@ is.order_info <- function(x) inherits(x, "order_info")
 #' @rdname is.tbl_edwr
 #' @export
 is.order_timing <- function(x) inherits(x, "order_timing")
+
+#' @rdname is.tbl_edwr
+#' @export
+is.output <- function(x) inherits(x, "output")
 
 #' @rdname is.tbl_edwr
 #' @export

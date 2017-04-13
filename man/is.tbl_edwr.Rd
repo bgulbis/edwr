@@ -27,6 +27,7 @@
 \alias{is.order_detail}
 \alias{is.order_info}
 \alias{is.order_timing}
+\alias{is.output}
 \alias{is.patients}
 \alias{is.problems}
 \alias{is.procedures}
@@ -92,6 +93,8 @@ is.order_detail(x)
 is.order_info(x)
 
 is.order_timing(x)
+
+is.output(x)
 
 is.patients(x)
 

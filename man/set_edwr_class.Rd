@@ -29,6 +29,7 @@
 \alias{as.order_detail}
 \alias{as.order_info}
 \alias{as.order_timing}
+\alias{as.output}
 \alias{as.patients}
 \alias{as.problems}
 \alias{as.procedures}
@@ -96,6 +97,8 @@ as.order_detail(x, varnames = NULL, extras = NULL)
 as.order_info(x)
 
 as.order_timing(x)
+
+as.output(x, varnames = NULL, extras = NULL)
 
 as.patients(x, varnames = NULL, extras = NULL)
 

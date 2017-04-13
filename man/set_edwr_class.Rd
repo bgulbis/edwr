@@ -104,7 +104,7 @@ as.patients(x, varnames = NULL, extras = NULL)
 
 as.problems(x)
 
-as.procedures(x)
+as.procedures(x, varnames = NULL, extras = NULL)
 
 as.radiology(x)
 

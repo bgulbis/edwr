@@ -1021,21 +1021,38 @@ as.problems <- function(x) {
 
 #' @rdname set_edwr_class
 #' @export
-as.procedures <- function(x) {
+as.procedures <- function(x, varnames = NULL, extras = NULL) {
     if (missing(x)) stop("Missing object")
     if (is.procedures(x)) return(x)
     if (!is.tbl_edwr(x)) x <- as.tbl_edwr(x)
 
-    df <- rename_(.data = x, .dots = c(val.pie, list(
-        "proc.date" = "`Procedure Date and Time`",
-        "proc.code" = "`Procedure Code`",
-        "proc.source" = "`Procedure Code Source Vocabulary`"
-    ))) %>%
-        dplyr::distinct_() %>%
-        mutate_(.dots = set_names(
-            x = list(~format_dates(proc.date)),
-            nm = "proc.date"
+    # default EDW names
+    if (attr(x, "data") == "edw" & is.null(varnames)) {
+        varnames <- c(val.pie, list(
+            "proc.date" = "`Procedure Date and Time`",
+            "proc.code" = "`Procedure Code`",
+            "proc.source" = "`Procedure Code Source Vocabulary`",
+            "proc.seq" = "`Procedure Code Sequence`"
         ))
+
+        # default CDW/MBO names
+    } else if (attr(x, "data") == "mbo" & is.null(varnames)) {
+        varnames <- c(val.mil, list(
+            "proc.date" = "`Procedure Date and Time`",
+            "proc.code" = "`Procedure Code`",
+            "proc.source" = "`Diagnosis Code Source Vocabulary`",
+            "proc.seq" = "`Procedure Code Sequence`"
+        ))
+    }
+
+    # if extra var names are given, append those to the list
+    if (!is.null(extras)) {
+        varnames <- c(varnames, extras)
+    }
+
+    df <- rename_(.data = x, .dots = varnames) %>%
+        dplyr::distinct_() %>%
+        format_dates("proc.date")
 
     after <- match("procedures", class(x), nomatch = 0L)
     class(df) <- append(class(x), "procedures", after = after)

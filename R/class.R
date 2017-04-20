@@ -1309,6 +1309,7 @@ as.warfarin <- function(x, varnames = NULL, extras = NULL) {
 
     df <- rename_(.data = x, .dots = varnames) %>%
         dplyr::distinct_() %>%
+        purrr::dmap_at("warfarin.event", stringr::str_to_lower) %>%
         format_dates("warfarin.datetime")
 
     after <- match("warfarin", class(x), nomatch = 0L)

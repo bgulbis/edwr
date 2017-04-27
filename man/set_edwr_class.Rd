@@ -50,7 +50,7 @@ as.tbl_edwr(x)
 
 as.admit(x, varnames = NULL, extras = NULL)
 
-as.blood(x)
+as.blood(x, varnames = NULL, extras = NULL)
 
 as.charges(x)
 

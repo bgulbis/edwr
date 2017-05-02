@@ -362,10 +362,13 @@ tidy_data.services <- function(x, ...) {
 #' @export
 #' @rdname tidy_data
 tidy_data.vent_times <- function(x, dc, ...) {
+
+    id <- set_id_name(x)
+
     # remove any missing data
     filter_(x, .dots = list(~!is.na(vent.datetime))) %>%
         arrange_("vent.datetime") %>%
-        group_by_("pie.id") %>%
+        group_by_(id) %>%
 
         # if it's the first event or the next event is a stop, then count as a
         # new vent event
@@ -377,7 +380,7 @@ tidy_data.vent_times <- function(x, dc, ...) {
         )) %>%
 
         # for each event count, get the first and last date/time
-        group_by_(.dots = list("pie.id", "event.count")) %>%
+        group_by_(.dots = list(id, "event.count")) %>%
         summarise_(.dots = set_names(
             x = list(~dplyr::first(vent.event),
                      ~dplyr::first(vent.datetime),
@@ -389,8 +392,8 @@ tidy_data.vent_times <- function(x, dc, ...) {
         # be the last stop event if there are multiple stop events in a row. if
         # there isn't a stop date/time because there was start with no stop, use
         # the discharge date/time as stop date/time
-        left_join(dc[c("pie.id", "discharge.datetime")], by = "pie.id") %>%
-        group_by_("pie.id") %>%
+        left_join(dc[c(id, "discharge.datetime")], by = id) %>%
+        group_by_(id) %>%
         mutate_(.dots = set_names(
             x = list(~dplyr::lead(last.event.datetime),
                      ~dplyr::coalesce(stop.datetime, discharge.datetime)),
@@ -398,7 +401,7 @@ tidy_data.vent_times <- function(x, dc, ...) {
         )) %>%
 
         filter_(.dots = list(~event == "vent start time")) %>%
-        select_(.dots = list("pie.id",
+        select_(.dots = list(id,
                              "start.datetime" = "first.event.datetime",
                              "stop.datetime")) %>%
         ungroup() %>%

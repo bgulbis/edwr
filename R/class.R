@@ -1207,21 +1207,40 @@ as.vent_settings <- function(x) {
 
 #' @rdname set_edwr_class
 #' @export
-as.vent_times <- function(x) {
+as.vent_times <- function(x, varnames = NULL, extras = NULL) {
     if (missing(x)) x <- character()
     if (is.vent_times(x)) return(x)
     if (!is.tbl_edwr(x)) x <- as.tbl_edwr(x)
 
-    df <- rename_(.data = x, .dots = c(val.pie, list(
-        "vent.datetime" = "`Clinical Event Date Result`",
-        "vent.event" = val.ce
-    ))) %>%
-        dplyr::distinct_() %>%
-        mutate_(.dots = set_names(
-            x = list(~stringr::str_to_lower(vent.event),
-                     ~format_dates(vent.datetime)),
-            nm = list("vent.event", "vent.datetime")
+    # default EDW names
+    if (attr(x, "data") == "edw" & is.null(varnames)) {
+        varnames <- c(val.pie, list(
+            "vent.datetime" = "`Clinical Event Date Result`",
+            "vent.event" = val.ce
         ))
+
+        # default CDW/MBO names
+    } else if (attr(x, "data") == "mbo" & is.null(varnames)) {
+        varnames <- c(val.mil, list(
+            "vent.datetime" = "`Date and Time - Performed`",
+            "vent.event" = val.ce,
+            "vent.location" = "`Nurse Unit (Event)`",
+            "event.id" = "`Event Id`",
+            "event.parent.id" = "`Parent Event Id`",
+            "order.id" = "`Order Id`",
+            "order.parent.id" = "`Parent Order Id`"
+        ))
+    }
+
+    # if extra var names are given, append those to the list
+    if (!is.null(extras)) {
+        varnames <- c(varnames, extras)
+    }
+
+    df <- select_(.data = x, .dots = varnames) %>%
+        dplyr::distinct_() %>%
+        purrr::dmap_at("vent.event", stringr::str_to_lower) %>%
+        format_dates("vent.datetime")
 
     after <- match("vent_times", class(x), nomatch = 0L)
     class(df) <- append(class(x), "vent_times", after = after)
@@ -1288,6 +1307,11 @@ as.vitals <- function(x, varnames = NULL, extras = NULL) {
         ))
     }
 
+
+    # if extra var names are given, append those to the list
+    if (!is.null(extras)) {
+        varnames <- c(varnames, extras)
+    }
 
     df <- select_(.data = x, .dots = varnames) %>%
         dplyr::distinct_() %>%

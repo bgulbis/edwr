@@ -116,7 +116,7 @@ as.uop(x)
 
 as.vent_settings(x)
 
-as.vent_times(x)
+as.vent_times(x, varnames = NULL, extras = NULL)
 
 as.visits(x)
 

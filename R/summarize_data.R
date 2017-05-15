@@ -87,7 +87,8 @@ summarize_data.meds_cont <- function(x, units = "hours", ...) {
     options(scipen = 999)
 
     id <- set_id_name(x)
-    cont <- group_by_(x, .dots = list(id, "med", "drip.count"))
+    cont <- group_by_(x, .dots = list(id, "med", "drip.count")) %>%
+        filter_(.dots = list(~run.time > 0))
 
     # get last and min non-zero rate
     nz.rate <- filter_(cont, .dots = ~(med.rate > 0)) %>%

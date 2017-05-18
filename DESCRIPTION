@@ -1,7 +1,7 @@
 Package: edwr
 Type: Package
 Title: Standardized Functions for Working with Data from the EDW
-Version: 0.1.3.9020
+Version: 0.1.3.9021
 Depends:
     R (>= 2.10)
 Authors@R: person("Brian", "Gulbis", email="brian.gulbis@gmail.com", role=c("aut","cre"))
@@ -18,6 +18,7 @@ Imports:
     magrittr,
     MESS,
     purrr,
+    purrrlyr,
     readr,
     stringr,
     tibble (>= 1.1),

@@ -197,7 +197,7 @@ as.demographics <- function(x, varnames = NULL, extras = NULL) {
 
     df <- select_(.data = x, .dots = varnames) %>%
         dplyr::distinct_() %>%
-        purrr::dmap_at(c("age", "length.stay"), as.numeric)
+        purrrlyr::dmap_at(c("age", "length.stay"), as.numeric)
 
     after <- match("demographics", class(x), nomatch = 0L)
     class(df) <- append(class(x), "demographics", after = after)
@@ -343,7 +343,7 @@ as.events <- function(x, varnames = NULL, extras = NULL) {
     df <- select_(.data = x, .dots = varnames) %>%
         dplyr::distinct_() %>%
         format_dates("event.datetime") %>%
-        purrr::dmap_at("event", stringr::str_to_lower)
+        purrrlyr::dmap_at("event", stringr::str_to_lower)
 
     after <- match("events", class(x), nomatch = 0L)
     class(df) <- append(class(x), "events", after = after)
@@ -441,7 +441,7 @@ as.labs <- function(x, varnames = NULL, extras = NULL) {
 
     df <- select_(.data = x, .dots = varnames) %>%
         dplyr::distinct_() %>%
-        purrr::dmap_at("lab", stringr::str_to_lower) %>%
+        purrrlyr::dmap_at("lab", stringr::str_to_lower) %>%
         format_dates("lab.datetime")
 
     after <- match("labs", class(x), nomatch = 0L)
@@ -527,8 +527,8 @@ as.measures <- function(x, varnames = NULL, extras = NULL) {
 
     df <- select_(.data = x, .dots = varnames) %>%
         dplyr::distinct_() %>%
-        purrr::dmap_at("measure", stringr::str_to_lower) %>%
-        purrr::dmap_at("measure.result", as.numeric) %>%
+        purrrlyr::dmap_at("measure", stringr::str_to_lower) %>%
+        purrrlyr::dmap_at("measure.result", as.numeric) %>%
         format_dates("measure.datetime")
 
     after <- match("measures", class(x), nomatch = 0L)
@@ -554,8 +554,8 @@ as.meds_cont <- function(x) {
         "event.tag" = "`Event Tag`"
     ))) %>%
         dplyr::distinct_() %>%
-        purrr::dmap_at("med", stringr::str_to_lower) %>%
-        purrr::dmap_at("med.rate.units", dplyr::na_if, y = "") %>%
+        purrrlyr::dmap_at("med", stringr::str_to_lower) %>%
+        purrrlyr::dmap_at("med.rate.units", dplyr::na_if, y = "") %>%
         format_dates("med.datetime")
 
     after <- match("meds_cont", class(x), nomatch = 0L)
@@ -649,9 +649,9 @@ as.meds_inpt <- function(x, varnames = NULL, extras = NULL) {
 
     df <- select_(.data = x, .dots = varnames) %>%
         dplyr::distinct_() %>%
-        purrr::dmap_at("med", stringr::str_to_lower) %>%
-        purrr::dmap_at(c("med.dose", "med.rate"), as.numeric) %>%
-        # purrr::dmap_at("med.rate.units", ~dplyr::na_if(.x, "")) %>%
+        purrrlyr::dmap_at("med", stringr::str_to_lower) %>%
+        purrrlyr::dmap_at(c("med.dose", "med.rate"), as.numeric) %>%
+        # purrrlyr::dmap_at("med.rate.units", ~dplyr::na_if(.x, "")) %>%
         format_dates("med.datetime")
 
     after <- match("meds_inpt", class(x), nomatch = 0L)
@@ -677,7 +677,7 @@ as.meds_sched <- function(x) {
         "event.type" = "`Event Type Code`"
     ))) %>%
         dplyr::distinct_() %>%
-        purrr::dmap_at("med", stringr::str_to_lower) %>%
+        purrrlyr::dmap_at("med", stringr::str_to_lower) %>%
         format_dates("med.datetime")
 
     after <- match("meds_sched", class(x), nomatch = 0L)
@@ -920,7 +920,7 @@ as.order_timing <- function(x) {
     df <- rename_(.data = x, .dots = c(val.pie, colnm)) %>%
         dplyr::distinct_() %>%
         format_dates(dtm)
-        # purrr::dmap_at(dtm, format_dates)
+        # purrrlyr::dmap_at(dtm, format_dates)
 
     after <- match("order_timing", class(x), nomatch = 0L)
     class(df) <- append(class(x), "order_timing", after = after)
@@ -964,7 +964,7 @@ as.output <- function(x, varnames = NULL, extras = NULL) {
 
     df <- rename_(.data = x, .dots = varnames) %>%
         dplyr::distinct_() %>%
-        purrr::dmap_at("output.result", as.numeric) %>%
+        purrrlyr::dmap_at("output.result", as.numeric) %>%
         format_dates("output.datetime")
 
     after <- match("output", class(x), nomatch = 0L)
@@ -1005,7 +1005,7 @@ as.patients <- function(x, varnames = NULL, extras = NULL) {
 
     df <- rename_(.data = x, .dots = varnames) %>%
         dplyr::distinct_() %>%
-        purrr::dmap_at("age", as.numeric) %>%
+        purrrlyr::dmap_at("age", as.numeric) %>%
         format_dates("discharge.datetime")
 
     after <- match("patients", class(x), nomatch = 0L)
@@ -1239,7 +1239,7 @@ as.vent_times <- function(x, varnames = NULL, extras = NULL) {
 
     df <- select_(.data = x, .dots = varnames) %>%
         dplyr::distinct_() %>%
-        purrr::dmap_at("vent.event", stringr::str_to_lower) %>%
+        purrrlyr::dmap_at("vent.event", stringr::str_to_lower) %>%
         format_dates("vent.datetime")
 
     after <- match("vent_times", class(x), nomatch = 0L)
@@ -1315,8 +1315,8 @@ as.vitals <- function(x, varnames = NULL, extras = NULL) {
 
     df <- select_(.data = x, .dots = varnames) %>%
         dplyr::distinct_() %>%
-        purrr::dmap_at("vital", stringr::str_to_lower) %>%
-        purrr::dmap_at("vital.result", as.numeric) %>%
+        purrrlyr::dmap_at("vital", stringr::str_to_lower) %>%
+        purrrlyr::dmap_at("vital.result", as.numeric) %>%
         format_dates("vital.datetime")
 
     after <- match("vitals", class(x), nomatch = 0L)
@@ -1357,7 +1357,7 @@ as.warfarin <- function(x, varnames = NULL, extras = NULL) {
 
     df <- rename_(.data = x, .dots = varnames) %>%
         dplyr::distinct_() %>%
-        purrr::dmap_at("warfarin.event", stringr::str_to_lower) %>%
+        purrrlyr::dmap_at("warfarin.event", stringr::str_to_lower) %>%
         format_dates("warfarin.datetime")
 
     after <- match("warfarin", class(x), nomatch = 0L)

@@ -50,8 +50,8 @@ format_dates <- function(x, date_col) {
     tzone <- set_timezone(x)
 
     x %>%
-        purrr::dmap_at(date_col, lubridate::ymd_hms, tz = tzone) %>%
-        purrr::dmap_at(date_col, lubridate::with_tz, tzone = "US/Central")
+        purrrlyr::dmap_at(date_col, lubridate::ymd_hms, tz = tzone) %>%
+        purrrlyr::dmap_at(date_col, lubridate::with_tz, tzone = "US/Central")
 }
 
 #' Keep edwr class assignments

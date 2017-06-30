@@ -21,6 +21,8 @@
 #'
 #' @export
 calc_crcl <- function(age, sex, scr, weight, height) {
+    if (is.na(age) | is.na(sex) | is.na(scr) | is.na(weight) | is.na(height)) return(NA_real_)
+
     lbw <- calc_leanbw(sex, height)
 
     if (weight < lbw) {

@@ -1,6 +1,6 @@
 #' Caculate the creatinine clearance
 #'
-#' \code{calculate_crcl} calculates the creatinine clearance using the
+#' \code{cal_crcl} calculates the creatinine clearance using the
 #' Cockcroft-Gault equation
 #'
 #' This function calculates the creatinine clearance for a patient based on the
@@ -20,8 +20,8 @@
 #' @references Cockcroft DW, Gault MH. Prediction of creatinine clearance from serum creatinine. Nephron. 1976;16(1):31-41
 #'
 #' @export
-calculate_crcl <- function(age, sex, scr, weight, height) {
-    lbw <- calculate_leanbw(sex, height)
+calc_crcl <- function(age, sex, scr, weight, height) {
+    lbw <- calc_leanbw(sex, height)
 
     if (weight < lbw) {
         wt <- weight
@@ -41,7 +41,7 @@ calculate_crcl <- function(age, sex, scr, weight, height) {
 
 #' Calculate the Lean Body Weight
 #'
-#' \code{calculate_leanbw} calculates the ideal body weight in kg
+#' \code{calc_leanbw} calculates the ideal body weight in kg
 #'
 #' This function takes a patient's height and based on their gender returns the
 #' patient's lean body weight in kg. For males, the equation is: LBW[kg] = (0.73
@@ -54,7 +54,7 @@ calculate_crcl <- function(age, sex, scr, weight, height) {
 #'
 #' @references Burton ME, Chow MS, Platt DR, et. al. Accuracy of Bayesian and Sawchuk-Zaske dosing methods for gentamicin. Clin Pharm. 1986 Feb;5(2):143-9
 #'
-calculate_leanbw <- function(sex, height) {
+calc_leanbw <- function(sex, height) {
     if (sex == "Male") {
         (0.73 * height) - 59.42
     } else {

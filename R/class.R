@@ -483,9 +483,9 @@ as.locations <- function(x, varnames = NULL, extras = NULL) {
         dplyr::distinct_() %>%
         format_dates(c("arrive.datetime", "depart.datetime"))
 
-    if (attr(x, "data") == "edw") {
-        df <- dmap_at(df, dplyr::na_if, y = "")
-    }
+    # if (attr(x, "data") == "edw") {
+    #     df <- purrrlyr::dmap_at(df, dplyr::na_if, y = "")
+    # }
 
     after <- match("locations", class(x), nomatch = 0L)
     class(df) <- append(class(x), "locations", after = after)

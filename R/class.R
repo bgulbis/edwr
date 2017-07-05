@@ -1265,12 +1265,9 @@ as.visits <- function(x) {
         "nurse.unit.admit" = "`Person Location- Nurse Unit (Admit)`"
     ))) %>%
         dplyr::distinct_() %>%
-        mutate_(.dots = set_names(
-            x = list(~format_dates(arrival.datetime),
-                     ~format_dates(admit.datetime),
-                     ~format_dates(discharge.datetime)),
-            nm = list("arrival.datetime", "admit.datetime", "discharge.datetime")
-        ))
+        format_dates("arrival.datetime") %>%
+        format_dates("admit.datetime") %>%
+        format_dates("discharge.datetime")
 
     after <- match("visits", class(x), nomatch = 0L)
     class(df) <- append(class(x), "visits", after = after)

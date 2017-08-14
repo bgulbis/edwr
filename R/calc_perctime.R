@@ -53,14 +53,16 @@ calc_perctime.default <- function(x, ...) {
 #' @rdname calc_perctime
 calc_perctime.meds_cont <- function(x, thrshld, ...) {
     # a wrapper for perctime
-    perctime(x, thrshld, vars = c("pie.id", "med", "drip.count"))
+    id <- set_id_name(x)
+    perctime(x, thrshld, vars = c(id, "med", "drip.count"))
 }
 
 #' @export
 #' @rdname calc_perctime
 calc_perctime.labs <- function(x, thrshld, ...) {
     # a wrapper for perctime
-    perctime(x, thrshld, vars = c("pie.id", "lab"))
+    id <- set_id_name(x)
+    perctime(x, thrshld, vars = c(id, "lab"))
 }
 
 #' Calculate percent time above or below a threshold

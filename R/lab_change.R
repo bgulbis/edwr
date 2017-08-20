@@ -40,11 +40,15 @@ lab_change <- function(x, .lab, change.by, FUN, back = 2) {
         arrange_(.dots = list(id, "lab", "lab.datetime")) %>%
         group_by_(.dots = list(id, "lab")) %>%
         mutate_(.dots = set_names(
-            x = list(~count_rowsback(lab.datetime, back),
-            ~zoo::rollapplyr(lab.result, rowsback, FUN, fill = NA,
-                             partial = TRUE),
-            ~lab.result - running),
-            nm = list("rowsback", "running", "change")
+            x = list(~count_rowsback(lab.datetime, back)),
+            nm = list("rowsback")
+        )) %>%
+        filter_(.dots = list(~!is.na(rowsback))) %>%
+        mutate_(.dots = set_names(
+            x = list(~zoo::rollapplyr(lab.result, rowsback, FUN, fill = NA,
+                                      partial = TRUE),
+                     ~lab.result - running),
+            nm = list("running", "change")
         )) %>%
         filter_(.dots = list(~abs(change) >= abs(change.by))) %>%
         ungroup()

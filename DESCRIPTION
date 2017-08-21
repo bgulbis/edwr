@@ -1,7 +1,7 @@
 Package: edwr
 Type: Package
 Title: Standardized Functions for Working with Data from the EDW
-Version: 0.1.3.9024
+Version: 0.1.3.9025
 Depends:
     R (>= 2.10)
 Authors@R: person("Brian", "Gulbis", email="brian.gulbis@gmail.com", role=c("aut","cre"))

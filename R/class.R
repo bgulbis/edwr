@@ -317,7 +317,9 @@ as.events <- function(x, varnames = NULL, extras = NULL) {
         varnames <- c(val.pie, list(
             "event.datetime" = val.dt,
             "event" = val.ce,
-            "event.result" = val.res
+            "event.result" = val.res,
+            "event.location" = "`Nurse Unit of Clinical Event`",
+            "order.id" = "`Clinical Event Order ID`"
         ))
 
         # default CDW/MBO names

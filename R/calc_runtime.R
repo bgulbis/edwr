@@ -130,6 +130,7 @@ calc_runtime.meds_cont <- function(x, drip.off = 12, no.doc = 24,
             ),
             nm = list("duration", "drip.stop", "drip.start", "drip.count")
         )) %>%
+        mutate_at("duration", as.numeric) %>%
 
         # calculate run time
         group_by_(.dots = list(id, "med", "drip.count")) %>%
@@ -161,7 +162,8 @@ calc_runtime.meds_cont <- function(x, drip.off = 12, no.doc = 24,
 
     # bind the rows with drip end data and arrange by date/time; need to ungroup
     # first for bind_rows to keep edwr class assigment
-    df <- ungroup(cont) %>%
+    df <- cont %>%
+        ungroup() %>%
         dplyr::bind_rows(drip.end) %>%
         arrange_(.dots = list(id, "med", "drip.count", "rate.start"))
 

@@ -976,6 +976,52 @@ as.output <- function(x, varnames = NULL, extras = NULL) {
 
 #' @rdname set_edwr_class
 #' @export
+as.pain_scores <- function(x, varnames = NULL, extras = NULL) {
+    if (missing(x)) x <- character()
+    if (is.events(x)) return(x)
+    if (!is.tbl_edwr(x)) x <- as.tbl_edwr(x)
+
+    # default EDW names
+    if (attr(x, "data") == "edw" & is.null(varnames)) {
+        varnames <- c(val.pie, list(
+            "event.datetime" = val.dt,
+            "event" = val.ce,
+            "event.result" = val.res,
+            "event.location" = "`Nurse Unit of Clinical Event`",
+            "order.id" = "`Clinical Event Order ID`"
+        ))
+
+        # default CDW/MBO names
+    } else if (attr(x, "data") == "mbo" & is.null(varnames)) {
+        varnames <- c(val.mil, list(
+            "event.datetime" = "`Date and Time - Scheduled OR Given On`",
+            "event" = val.ce,
+            "event.result" = val.res,
+            "event.result.units" = "`Clinical Event Result Units`",
+            "event.location" = "`Nurse Unit (Event)`",
+            "event.id" = "`Event Id`",
+            "event.parent.id" = "`Parent Event Id`",
+            "order.id" = "`Clinical Event Order Id`"
+        ))
+    }
+
+    # if extra var names are given, append those to the list
+    if (!is.null(extras)) {
+        varnames <- c(varnames, extras)
+    }
+
+    df <- select_(.data = x, .dots = varnames) %>%
+        dplyr::distinct_() %>%
+        format_dates("event.datetime") %>%
+        purrrlyr::dmap_at("event", stringr::str_to_lower)
+
+    after <- match("events", class(x), nomatch = 0L)
+    class(df) <- append(class(x), "events", after = after)
+    df
+}
+
+#' @rdname set_edwr_class
+#' @export
 as.patients <- function(x, varnames = NULL, extras = NULL) {
     if (missing(x)) stop("Missing object")
     if (is.patients(x)) return(x)
@@ -1477,6 +1523,10 @@ is.order_timing <- function(x) inherits(x, "order_timing")
 #' @rdname is.tbl_edwr
 #' @export
 is.output <- function(x) inherits(x, "output")
+
+#' @rdname is.tbl_edwr
+#' @export
+is.pain_scores <- function(x) inherits(x, "pain_scores")
 
 #' @rdname is.tbl_edwr
 #' @export

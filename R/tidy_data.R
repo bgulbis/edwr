@@ -250,17 +250,18 @@ tidy_data.meds_cont <- function(x, ref, sched, ...) {
 
     # join the list of meds with any indivdual meds included
     y <- filter_(ref, .dots = list(~type == "med", ~group == "cont"))
-    lookup.meds <- c(y$name, class.meds$med.name)
+    lookup.meds <- c(y$name, class.meds$med.name) %>%
+        stringr::str_to_lower()
 
     # remove any rows in continuous data which are actually scheduled doses,
     # then filter to meds in lookup, then sort by pie.id, med, med.datetime
-    x <- anti_join(x, sched, by = "event.id") %>%
+    df <- anti_join(x, sched, by = "event.id") %>%
         filter_(.dots = list(~med %in% lookup.meds)) %>%
-        arrange_(.dots = list("pie.id", "med", "med.datetime"))
+        arrange_(.dots = list("pie.id", "med", "med.datetime")) %>%
+        dplyr::mutate_at("med.rate", as.numeric)
 
-    # convert rate to numeric values
-    x[["med.rate"]] <- as.numeric(x[["med.rate"]])
-    x
+    attr(df, "data") <- attr(x, "data")
+    df
 }
 
 #' @export
@@ -272,11 +273,14 @@ tidy_data.meds_inpt <- function(x, ref, ...) {
 
     # join the list of meds with any indivdual meds included
     y <- filter_(ref, .dots = list(~type == "med", ~group == "cont"))
-    lookup.meds <- c(y$name, class.meds$med.name)
+    lookup.meds <- c(y$name, class.meds$med.name) %>%
+        stringr::str_to_lower()
 
     # remove any rows in continuous data which are actually scheduled doses,
     # then filter to meds in lookup, then sort by pie.id, med, med.datetime
-    df <- filter_(x, .dots = list(~med %in% lookup.meds))
+    df <- filter_(x, .dots = list(~med %in% lookup.meds)) %>%
+        arrange_(.dots = list("pie.id", "med", "med.datetime")) %>%
+        dplyr::mutate_at("med.dose", as.numeric)
 
     attr(df, "data") <- attr(x, "data")
     df
@@ -291,15 +295,16 @@ tidy_data.meds_sched <- function(x, ref, ...) {
 
     # join the list of meds with any indivdual meds included
     y <- filter_(ref, .dots = list(~type == "med", ~group == "sched"))
-    lookup.meds <- c(y$name, class.meds$med.name)
+    lookup.meds <- c(y$name, class.meds$med.name) %>%
+        stringr::str_to_lower()
 
     # filter to keep only meds in lookup
-    x <- filter_(x, .dots = list(~med %in% lookup.meds)) %>%
-        arrange_(.dots = list("pie.id", "med", "med.datetime"))
+    df <- filter_(x, .dots = list(~med %in% lookup.meds)) %>%
+        arrange_(.dots = list("pie.id", "med", "med.datetime")) %>%
+        dplyr::mutate_at("med.dose", as.numeric)
 
-    # convert dose to numeric values
-    x[["med.dose"]] <- as.numeric(x[["med.dose"]])
-    x
+    attr(df, "data") <- attr(x, "data")
+    df
 }
 
 #' @details For services, this function accounts for incorrect end times

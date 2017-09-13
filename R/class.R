@@ -1185,18 +1185,18 @@ as.services <- function(x) {
 #' @export
 as.surgery_times <- function(x, varnames = NULL, extras = NULL) {
     if (missing(x)) x <- character()
-    if (is.vent_times(x)) return(x)
+    if (is.surgery_times(x)) return(x)
     if (!is.tbl_edwr(x)) x <- as.tbl_edwr(x)
 
     # default EDW names
     if (attr(x, "data") == "edw" & is.null(varnames)) {
         varnames <- c(val.pie, list(
-            surgery_start = `Start Date/Time`,
-            surgery_stop = `Stop Date/Time`,
-            room_in = `Patient In Room Date/Time`,
-            room_out = `Patient Out Room Date/Time`,
-            recovery_in = `Patient In Recovery Date/Time`,
-            recovery_out = `Patient Out Recovery Date/Time`
+            "surgery_start" = "`Start Date/Time`",
+            "surgery_stop" = "`Stop Date/Time`",
+            "room_in" = "`Patient In Room Date/Time`",
+            "room_out" = "`Patient Out Room Date/Time`",
+            "recovery_in" = "`Patient In Recovery Date/Time`",
+            "recovery_out" = "`Patient Out Recovery Date/Time`"
         ))
     }
 

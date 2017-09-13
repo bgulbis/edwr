@@ -34,6 +34,7 @@
 \alias{is.procedures}
 \alias{is.radiology}
 \alias{is.services}
+\alias{is.surgery_times}
 \alias{is.surgeries}
 \alias{is.uop}
 \alias{is.vent_settings}
@@ -108,6 +109,8 @@ is.procedures(x)
 is.radiology(x)
 
 is.services(x)
+
+is.surgery_times(x)
 
 is.surgeries(x)
 

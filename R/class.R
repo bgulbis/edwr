@@ -1183,6 +1183,44 @@ as.services <- function(x) {
 
 #' @rdname set_edwr_class
 #' @export
+as.surgery_times <- function(x, varnames = NULL, extras = NULL) {
+    if (missing(x)) x <- character()
+    if (is.vent_times(x)) return(x)
+    if (!is.tbl_edwr(x)) x <- as.tbl_edwr(x)
+
+    # default EDW names
+    if (attr(x, "data") == "edw" & is.null(varnames)) {
+        varnames <- c(val.pie, list(
+            surgery_start = `Start Date/Time`,
+            surgery_stop = `Stop Date/Time`,
+            room_in = `Patient In Room Date/Time`,
+            room_out = `Patient Out Room Date/Time`,
+            recovery_in = `Patient In Recovery Date/Time`,
+            recovery_out = `Patient Out Recovery Date/Time`
+        ))
+    }
+
+    # if extra var names are given, append those to the list
+    if (!is.null(extras)) {
+        varnames <- c(varnames, extras)
+    }
+
+    df <- select_(.data = x, .dots = varnames) %>%
+        dplyr::distinct_() %>%
+        format_dates(c("surgery_start",
+                       "surgery_stop",
+                       "room_in",
+                       "room_out",
+                       "recovery_in",
+                       "recovery_out"))
+
+    after <- match("surgery_times", class(x), nomatch = 0L)
+    class(df) <- append(class(x), "surgery_times", after = after)
+    df
+}
+
+#' @rdname set_edwr_class
+#' @export
 as.surgeries <- function(x) {
     if (missing(x)) stop("Missing object")
     if (is.surgeries(x)) return(x)
@@ -1547,6 +1585,10 @@ is.radiology <- function(x) inherits(x, "radiology")
 #' @rdname is.tbl_edwr
 #' @export
 is.services <- function(x) inherits(x, "services")
+
+#' @rdname is.tbl_edwr
+#' @export
+is.surgery_times <- function(x) inherits(x, "surgery_times")
 
 #' @rdname is.tbl_edwr
 #' @export

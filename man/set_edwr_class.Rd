@@ -64,7 +64,7 @@ as.drg(x)
 
 as.encounters(x, varnames = NULL, extras = NULL)
 
-as.events(x, varnames = NULL, extras = NULL)
+as.events(x, order_var = TRUE, varnames = NULL, extras = NULL)
 
 as.icu_assess(x)
 
@@ -137,6 +137,9 @@ as.warfarin(x, varnames = NULL, extras = NULL)
 name; overrides default names}
 
 \item{extras}{named character list; if given, will append to default varnames}
+
+\item{order_var}{logical indicating if order.id fields are included, defaults
+to TRUE}
 }
 \description{
 Takes an R object and sets class to an edwr type.

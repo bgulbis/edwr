@@ -17,6 +17,8 @@ val.res <- "`Clinical Event Result`"
 #' Takes an R object and sets class to an edwr type.
 #'
 #' @param x object to set class \code{tbl_edwr}
+#' @param order_var logical indicating if order.id fields are included, defaults
+#'   to TRUE
 #' @param varnames named character list, where the name is the desired variable
 #'   name; overrides default names
 #' @param extras named character list; if given, will append to default varnames
@@ -307,7 +309,7 @@ as.encounters <- function(x, varnames = NULL, extras = NULL) {
 
 #' @rdname set_edwr_class
 #' @export
-as.events <- function(x, varnames = NULL, extras = NULL) {
+as.events <- function(x, order_var = TRUE, varnames = NULL, extras = NULL) {
     if (missing(x)) x <- character()
     if (is.events(x)) return(x)
     if (!is.tbl_edwr(x)) x <- as.tbl_edwr(x)
@@ -331,7 +333,12 @@ as.events <- function(x, varnames = NULL, extras = NULL) {
             "event.result.units" = "`Clinical Event Result Units`",
             "event.location" = "`Nurse Unit (Event)`",
             "event.id" = "`Event Id`",
-            "event.parent.id" = "`Parent Event Id`",
+            "event.parent.id" = "`Parent Event Id`"
+        ))
+    }
+
+    if (order_var) {
+        varnames <- c(varnames, list(
             "order.id" = "`Order Id`",
             "order.parent.id" = "`Parent Order Id`"
         ))

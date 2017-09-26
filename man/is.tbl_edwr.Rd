@@ -15,6 +15,7 @@
 \alias{is.labs}
 \alias{is.locations}
 \alias{is.measures}
+\alias{is.meds_admin}
 \alias{is.meds_cont}
 \alias{is.meds_freq}
 \alias{is.meds_home}
@@ -27,6 +28,7 @@
 \alias{is.order_detail}
 \alias{is.order_info}
 \alias{is.order_timing}
+\alias{is.order_verify}
 \alias{is.output}
 \alias{is.pain_scores}
 \alias{is.patients}
@@ -72,6 +74,8 @@ is.locations(x)
 
 is.measures(x)
 
+is.meds_admin(x)
+
 is.meds_cont(x)
 
 is.meds_freq(x)
@@ -95,6 +99,8 @@ is.order_detail(x)
 is.order_info(x)
 
 is.order_timing(x)
+
+is.order_verify(x)
 
 is.output(x)
 

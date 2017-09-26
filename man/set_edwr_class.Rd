@@ -17,6 +17,7 @@
 \alias{as.labs}
 \alias{as.locations}
 \alias{as.measures}
+\alias{as.meds_admin}
 \alias{as.meds_cont}
 \alias{as.meds_freq}
 \alias{as.meds_home}
@@ -29,6 +30,7 @@
 \alias{as.order_detail}
 \alias{as.order_info}
 \alias{as.order_timing}
+\alias{as.order_verify}
 \alias{as.output}
 \alias{as.pain_scores}
 \alias{as.patients}
@@ -76,6 +78,8 @@ as.locations(x, varnames = NULL, extras = NULL)
 
 as.measures(x, varnames = NULL, extras = NULL)
 
+as.meds_admin(x, varnames = NULL, extras = NULL)
+
 as.meds_cont(x)
 
 as.meds_freq(x)
@@ -99,6 +103,8 @@ as.order_detail(x, varnames = NULL, extras = NULL)
 as.order_info(x)
 
 as.order_timing(x)
+
+as.order_verify(x, varnames = NULL, extras = NULL)
 
 as.output(x, varnames = NULL, extras = NULL)
 

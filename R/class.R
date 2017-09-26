@@ -547,6 +547,53 @@ as.measures <- function(x, varnames = NULL, extras = NULL) {
 
 #' @rdname set_edwr_class
 #' @export
+as.meds_admin <- function(x, varnames = NULL, extras = NULL) {
+    if (missing(x)) x <- character()
+    if (is.meds_admin(x)) return(x)
+    if (!is.tbl_edwr(x)) x <- as.tbl_edwr(x)
+
+    # default EDW names
+    if (attr(x, "data") == "edw" & is.null(varnames)) {
+        varnames <- c(val.pie, list(
+            "order.id" = "`Clinical Event Order ID`",
+            "event.id" = "`Event ID`",
+            "med.datetime" = val.dt,
+            "med" = val.ce
+        ))
+
+        # default CDW/MBO names
+    } else if (attr(x, "data") == "mbo" & is.null(varnames)) {
+        varnames <- c(val.mil, list(
+            "med" = "`Medication (Generic)`",
+            "scheduled_datetime" = "`Date and Time - Scheduled`",
+            "admin_datetime" = "`Date and Time - Administration`",
+            "admin_end_datetime" = "`Date and Time - Administration End`",
+            "document_source" = "`Med Documentation Source`",
+            "scan_patient" = "`Scanned Armband (PPID)`",
+            "scan_med" = "`Scanned Medication (PMID)`",
+            "med.location" = "`Nurse Unit (Med)`",
+            "order.id" = "`Order Id`",
+            "order.parent.id" = "`Parent Order Id`"
+        ))
+    }
+
+    # if extra var names are given, append those to the list
+    if (!is.null(extras)) {
+        varnames <- c(varnames, extras)
+    }
+
+    df <- select_(.data = x, .dots = varnames) %>%
+        dplyr::distinct_() %>%
+        purrrlyr::dmap_at("med", stringr::str_to_lower) %>%
+        format_dates(c("scheduled_datetime", "admin_datetime", "admin_end_datetime"))
+
+    after <- match("meds_admin", class(x), nomatch = 0L)
+    class(df) <- append(class(x), "meds_admin", after = after)
+    df
+}
+
+#' @rdname set_edwr_class
+#' @export
 as.meds_cont <- function(x) {
     if (missing(x)) x <- character()
     if (is.meds_cont(x)) return(x)
@@ -935,6 +982,53 @@ as.order_timing <- function(x) {
     class(df) <- append(class(x), "order_timing", after = after)
     df
 }
+
+#' @rdname set_edwr_class
+#' @export
+as.order_verify <- function(x, varnames = NULL, extras = NULL) {
+    if (missing(x)) x <- character()
+    if (is.order_verify(x)) return(x)
+    if (!is.tbl_edwr(x)) x <- as.tbl_edwr(x)
+
+    # default EDW names
+    if (attr(x, "data") == "edw" & is.null(varnames)) {
+        varnames <- c(val.pie, list(
+            "order.id" = "`Clinical Event Order ID`",
+            "event.id" = "`Event ID`",
+            "med.datetime" = val.dt,
+            "med" = val.ce
+        ))
+
+        # default CDW/MBO names
+    } else if (attr(x, "data") == "mbo" & is.null(varnames)) {
+        varnames <- c(val.mil, list(
+            "med" = "`Mnemonic (Primary Generic) FILTER ON`",
+            "order_datetime" = "`Date and Time - Original (Placed)`",
+            "start_datetime" = "`Date and Time - Order Start`",
+            "verify_datetime" = "`Date and Time - Pharmacist Review`",
+            "action.type" = "`Order Action Type`",
+            "order.location" = "`Nurse Unit (Order)`",
+            "order.id" = "`Order Id`",
+            "order.parent.id" = "`Parent Order Id`"
+        ))
+    }
+
+    # if extra var names are given, append those to the list
+    if (!is.null(extras)) {
+        varnames <- c(varnames, extras)
+    }
+
+    df <- select_(.data = x, .dots = varnames) %>%
+        dplyr::distinct_() %>%
+        purrrlyr::dmap_at("med", stringr::str_to_lower) %>%
+        format_dates(c("order_datetime", "start_datetime", "verify_datetime"))
+
+    after <- match("order_verify", class(x), nomatch = 0L)
+    class(df) <- append(class(x), "order_verify", after = after)
+    df
+}
+
+
 
 #' @rdname set_edwr_class
 #' @export
@@ -1519,6 +1613,10 @@ is.measures <- function(x) inherits(x, "measures")
 
 #' @rdname is.tbl_edwr
 #' @export
+is.meds_admin <- function(x) inherits(x, "meds_admin")
+
+#' @rdname is.tbl_edwr
+#' @export
 is.meds_cont <- function(x) inherits(x, "meds_cont")
 
 #' @rdname is.tbl_edwr
@@ -1564,6 +1662,10 @@ is.order_info <- function(x) inherits(x, "order_info")
 #' @rdname is.tbl_edwr
 #' @export
 is.order_timing <- function(x) inherits(x, "order_timing")
+
+#' @rdname is.tbl_edwr
+#' @export
+is.order_verify <- function(x) inherits(x, "order_verify")
 
 #' @rdname is.tbl_edwr
 #' @export

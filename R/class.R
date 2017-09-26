@@ -639,21 +639,40 @@ as.meds_freq <- function(x) {
 
 #' @rdname set_edwr_class
 #' @export
-as.meds_home <- function(x) {
+as.meds_home <- function(x, varnames = NULL, extras = NULL) {
     if (missing(x)) x <- character()
     if (is.meds_home(x)) return(x)
     if (!is.tbl_edwr(x)) x <- as.tbl_edwr(x)
 
-    df <- select_(.data = x, .dots = c(val.pie, list(
-        "med" = "`Order Catalog Short Description`",
-        "order.name" = "`Order Catalog Mnemonic`",
-        "med.type" = "`Orig Orderable Type-Flag Desc`"
-    ))) %>%
-        dplyr::distinct_() %>%
-        mutate_(.dots = set_names(
-            x = list(~stringr::str_to_lower(med)),
-            nm = "med"
+    # default EDW names
+    if (attr(x, "data") == "edw" & is.null(varnames)) {
+        varnames <- c(val.pie, list(
+            "med" = "`Order Catalog Short Description`",
+            "order.name" = "`Order Catalog Mnemonic`",
+            "med.type" = "`Orig Orderable Type-Flag Desc`"
         ))
+
+        # default CDW/MBO names
+    } else if (attr(x, "data") == "mbo" & is.null(varnames)) {
+        varnames <- c(val.mil, list(
+            "order.datetime" = "`Date and Time - Original (Placed)`",
+            "med" = "`Mnemonic (Primary Generic) FILTER ON`",
+            "med.type" = "`Order Type`"
+        ))
+    }
+
+    # if extra var names are given, append those to the list
+    if (!is.null(extras)) {
+        varnames <- c(varnames, extras)
+    }
+
+    df <- select_(.data = x, .dots = varnames) %>%
+        dplyr::distinct_() %>%
+        purrrlyr::dmap_at("med", stringr::str_to_lower)
+
+    if (attr(x, "data") == "mbo") {
+        df <- format_dates(df, "order.datetime")
+    }
 
     after <- match("meds_home", class(x), nomatch = 0L)
     class(df) <- append(class(x), "meds_home", after = after)

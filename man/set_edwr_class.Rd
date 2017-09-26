@@ -84,7 +84,7 @@ as.meds_cont(x)
 
 as.meds_freq(x)
 
-as.meds_home(x)
+as.meds_home(x, varnames = NULL, extras = NULL)
 
 as.meds_inpt(x, varnames = NULL, extras = NULL)
 

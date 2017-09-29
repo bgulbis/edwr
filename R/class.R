@@ -326,8 +326,14 @@ as.events <- function(x, order_var = TRUE, varnames = NULL, extras = NULL) {
 
         # default CDW/MBO names
     } else if (attr(x, "data") == "mbo" & is.null(varnames)) {
+        if (stringr::str_detect(names(x), "Date and Time - Performed")) {
+            dt <- "`Date and Time - Performed`"
+        } else {
+            dt <- "`Date and Time - Scheduled OR Given On`"
+        }
+
         varnames <- c(val.mil, list(
-            "event.datetime" = "`Date and Time - Performed`",
+            "event.datetime" = ,
             "event" = val.ce,
             "event.result" = val.res,
             "event.result.units" = "`Clinical Event Result Units`",

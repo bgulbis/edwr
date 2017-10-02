@@ -326,14 +326,14 @@ as.events <- function(x, order_var = TRUE, varnames = NULL, extras = NULL) {
 
         # default CDW/MBO names
     } else if (attr(x, "data") == "mbo" & is.null(varnames)) {
-        if (stringr::str_detect(names(x), "Date and Time - Performed")) {
+        if (sum(stringr::str_detect(names(x), "Date and Time - Performed")) >= 1) {
             dt <- "`Date and Time - Performed`"
         } else {
             dt <- "`Date and Time - Scheduled OR Given On`"
         }
 
         varnames <- c(val.mil, list(
-            "event.datetime" = ,
+            "event.datetime" = dt,
             "event" = val.ce,
             "event.result" = val.res,
             "event.result.units" = "`Clinical Event Result Units`",
@@ -1361,14 +1361,8 @@ as.surgeries <- function(x) {
         "surg.stop.datetime" = "`Stop Date/Time`"
     ))) %>%
         dplyr::distinct_() %>%
-        mutate_(.dots = set_names(
-            x = list(~format_dates(surg.start.datetime),
-                     ~format_dates(surg.stop.datetime),
-                     ~dplyr::if_else(add.on == 1, TRUE, FALSE),
-                     ~dplyr::if_else(primary.proc == 1, TRUE, FALSE)),
-            nm = list("surg.start.datetime", "surg.stop.datetime", "add.on",
-                      "primary.proc")
-        ))
+        purrrlyr::dmap_at(c("add.on", "primary.proc"), ~ .x == 1) %>%
+        format_dates(c("surg.start.datetime", "surg.stop.datetime"))
 
     names(df) <- stringr::str_to_lower(names(df))
 

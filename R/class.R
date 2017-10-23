@@ -922,6 +922,7 @@ as.order_detail <- function(x, varnames = NULL, extras = NULL) {
             "ingredient.unit" = "`Order Strength Dose Unit`",
             "route" = "`Order Route`",
             "freq" = "Frequency",
+            "prn" = "`PRN Indicator`",
             "order.provider" = "`Ordering Provider LIMITS`",
             "order.provider.position" = "`Ordering Provider Position LIMITS`"
         ))
@@ -1358,7 +1359,8 @@ as.surgeries <- function(x) {
         "surgery" = "Procedure",
         "primary.proc" = "`Primary Procedure Indicator`",
         "surg.start.datetime" = "`Start Date/Time`",
-        "surg.stop.datetime" = "`Stop Date/Time`"
+        "surg.stop.datetime" = "`Stop Date/Time`",
+        "surg.type" = "`Surgical Case Specialty`"
     ))) %>%
         dplyr::distinct_() %>%
         purrrlyr::dmap_at(c("add.on", "primary.proc"), ~ .x == 1) %>%

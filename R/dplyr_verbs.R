@@ -16,15 +16,17 @@ reclass <- function(x, result) {
 
 #' @export
 reclass.default <- function(x, result) {
-    cls <- match("tbl_edwr", class(x), nomatch = 0L)
-    class(result) <- c(class(x)[1:cls], class(result))
-    attr(result, "data") <- attr(x, "data")
+    if (!is.tbl_edwr(result)) {
+        cls <- match("tbl_edwr", class(x), nomatch = 0L)
+        class(result) <- c(class(x)[1:cls], class(result))
+        attr(result, "data") <- attr(x, "data")
+    }
     result
 }
 
 #' @importFrom dplyr arrange
 #' @export
-arrange.tbl_edwr <- function(.data, ..., .dots) {
+arrange.tbl_edwr <- function(.data, ...) {
     result <- NextMethod()
     reclass(.data, result)
 }
@@ -38,7 +40,7 @@ arrange_.tbl_edwr <- function(.data, ..., .dots) {
 
 #' @importFrom dplyr filter
 #' @export
-filter.tbl_edwr <- function(.data, ..., .dots) {
+filter.tbl_edwr <- function(.data, ...) {
     result <- NextMethod()
     reclass(.data, result)
 }
@@ -50,16 +52,16 @@ filter_.tbl_edwr <- function(.data, ..., .dots) {
     reclass(.data, result)
 }
 
-#' @importFrom dplyr mutate_
+#' @importFrom dplyr mutate
 #' @export
-mutate_.tbl_edwr <- function(.data, ..., .dots) {
+mutate.tbl_edwr <- function(.data, ...) {
     result <- NextMethod()
     reclass(.data, result)
 }
 
-#' @importFrom dplyr mutate
+#' @importFrom dplyr mutate_
 #' @export
-mutate.tbl_edwr <- function(.data, ...) {
+mutate_.tbl_edwr <- function(.data, ..., .dots) {
     result <- NextMethod()
     reclass(.data, result)
 }
@@ -73,14 +75,14 @@ rename.tbl_edwr <- function(.data, ..., .dots) {
 
 #' @importFrom dplyr rename_
 #' @export
-rename_.tbl_edwr <- function(.data, ..., .dots) {
+rename_.tbl_edwr <- function(.data, ...) {
     result <- NextMethod()
     reclass(.data, result)
 }
 
 #' @importFrom dplyr select
 #' @export
-select.tbl_edwr <- function(.data, ..., .dots) {
+select.tbl_edwr <- function(.data, ...) {
     result <- NextMethod()
     reclass(.data, result)
 }
@@ -94,7 +96,7 @@ select_.tbl_edwr <- function(.data, ..., .dots) {
 
 #' @importFrom dplyr summarise
 #' @export
-summarise.tbl_edwr <- function(.data, ..., .dots) {
+summarise.tbl_edwr <- function(.data, ...) {
     result <- NextMethod()
     reclass(.data, result)
 }
@@ -138,7 +140,7 @@ group_by_.tbl_edwr <- function(.data, ..., .dots = list(), add = FALSE) {
 #' @export
 ungroup.tbl_edwr <- function(x, ...) {
     result <- NextMethod()
-    reclass(.data, result)
+    reclass(x, result)
 }
 
 #' @importFrom dplyr anti_join

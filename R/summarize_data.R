@@ -100,7 +100,7 @@ summarize_data.meds_cont <- function(x, units = "hours", ...) {
         ))
 
     # get first and max rates and AUC
-    summarise_(cont, .dots = set_names(
+    df <- summarise_(cont, .dots = set_names(
         x = list(~dplyr::first(rate.start),
                  ~dplyr::last(rate.stop),
                  ~sum(med.rate * duration, na.rm = TRUE),
@@ -121,6 +121,8 @@ summarize_data.meds_cont <- function(x, units = "hours", ...) {
             nm = "time.wt.avg"
         )) %>%
         ungroup()
+
+    reclass(x, df)
 }
 
 #' @export
@@ -156,7 +158,7 @@ summarize_data.meds_home <- function(x, ref, pts = NULL, home = TRUE, ...) {
         dots <- list(~med.type == "Prescription / Discharge Order")
     }
 
-    tidy <- filter_(x, .dots = c(dots, list(~med %in% lookup.meds))) %>%
+    df <- filter_(x, .dots = c(dots, list(~med %in% lookup.meds))) %>%
         left_join(meds, by = c("med" = "med.name")) %>%
         mutate_(.dots = set_names(
             x = list(~dplyr::if_else(is.na(med.class), med, med.class),
@@ -166,16 +168,13 @@ summarize_data.meds_home <- function(x, ref, pts = NULL, home = TRUE, ...) {
         distinct_(.dots = list("pie.id", "group", "value")) %>%
         tidyr::spread_("group", "value", fill = FALSE, drop = FALSE)
 
-    # keep original class (needed due to use of tidyr::spread function)
-    class(tidy) <- class(x)
-
     # join with list of all patients, fill in values of FALSE for any patients
     # not in the data set
     if (!is.null(pts)) {
-        tidy <- add_patients(tidy, pts)
+        df <- add_patients(df, pts)
     }
 
-    tidy
+    reclass(x, df)
 }
 
 #' @export
@@ -184,7 +183,7 @@ summarize_data.meds_sched <- function(x, units = "hours", ...) {
     # turn off scientific notation
     options(scipen = 999)
 
-    group_by_(x, .dots = list("pie.id", "med")) %>%
+    df <- group_by_(x, .dots = list("pie.id", "med")) %>%
         dplyr::summarise_(.dots = set_names(
             x = list(~dplyr::first(med.datetime),
                      ~dplyr::last(med.datetime),
@@ -213,6 +212,8 @@ summarize_data.meds_sched <- function(x, units = "hours", ...) {
             nm = "time.wt.avg"
         )) %>%
         ungroup()
+
+    reclass(x, df)
 }
 
 #' @export
@@ -223,7 +224,7 @@ summarize_data.labs <- function(x, units = "hours", ...) {
 
     id <- set_id_name(x)
 
-    group_by_(x, .dots = list(id, "lab")) %>%
+    df <- group_by_(x, .dots = list(id, "lab")) %>%
         summarise_(.dots = set_names(
             x = list(~dplyr::first(lab.datetime),
                      ~dplyr::last(lab.datetime),
@@ -252,6 +253,8 @@ summarize_data.labs <- function(x, units = "hours", ...) {
             nm = "time.wt.avg"
         )) %>%
         ungroup()
+
+    reclass(x, df)
 }
 
 #' @export
@@ -262,7 +265,7 @@ summarize_data.vitals <- function(x, units = "hours", ...) {
 
     id <- set_id_name(x)
 
-    group_by_(x, .dots = list(id, "vital")) %>%
+    df <- group_by_(x, .dots = list(id, "vital")) %>%
         summarise_(.dots = set_names(
             x = list(~dplyr::first(vital.datetime),
                      ~dplyr::last(vital.datetime),
@@ -291,4 +294,6 @@ summarize_data.vitals <- function(x, units = "hours", ...) {
             nm = "time.wt.avg"
         )) %>%
         ungroup()
+
+    reclass(x, df)
 }

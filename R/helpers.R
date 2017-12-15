@@ -14,8 +14,7 @@
 add_patients <- function(tidy, patients) {
     full_join(tidy, patients["pie.id"], by = "pie.id") %>%
         group_by_("pie.id") %>%
-        dplyr::mutate_at(dplyr::vars(),
-                  function(x) dplyr::coalesce(x, FALSE)) %>%
+        mutate_at(dplyr::vars(), function(x) dplyr::coalesce(x, FALSE)) %>%
         ungroup()
 }
 
@@ -50,24 +49,8 @@ format_dates <- function(x, date_col) {
     tzone <- set_timezone(x)
 
     x %>%
-        purrrlyr::dmap_at(date_col, lubridate::ymd_hms, tz = tzone) %>%
-        purrrlyr::dmap_at(date_col, lubridate::with_tz, tzone = "US/Central")
-}
-
-#' Keep edwr class assignments
-#'
-#' @param x tibble with tbl_edwr class(es)
-#' @param y tibble as returned by dplyr manipulation function
-#'
-#' @return tibble
-#'
-#' @keywords internal
-keep_class <- function(x, y) {
-    if (is.tbl_edwr(y)) return(y)
-
-    cls <- match("tbl_edwr", class(x), nomatch = 0L)
-    class(y) <- c(class(x)[1:cls], class(y))
-    y
+        mutate_at(date_col, lubridate::ymd_hms, tz = tzone) %>%
+        mutate_at(date_col, lubridate::with_tz, tzone = "US/Central")
 }
 
 #' Set timezone based on data source

@@ -167,8 +167,7 @@ calc_runtime.meds_cont <- function(x, drip.off = 12, no.doc = 24,
         dplyr::bind_rows(drip.end) %>%
         arrange_(.dots = list(id, "med", "drip.count", "rate.start"))
 
-    attr(df, "data") <- attr(x, "data")
-    df
+    reclass(x, df)
 }
 
 #' @export
@@ -182,7 +181,7 @@ calc_runtime.meds_inpt <- function(x, drip.off = 12, no.doc = 24,
 #' @export
 #' @rdname calc_runtime
 calc_runtime.meds_sched <- function(x, units = "hours", ...) {
-    arrange_(x, .dots = list("pie.id", "med", "med.datetime")) %>%
+    df <- arrange_(x, .dots = list("pie.id", "med", "med.datetime")) %>%
         group_by_(.dots = c("pie.id", "med")) %>%
         dplyr::mutate_(.dots = set_names(
             x = list(~difftime(med.datetime, dplyr::lag(med.datetime),
@@ -194,6 +193,8 @@ calc_runtime.meds_sched <- function(x, units = "hours", ...) {
             nm = list("duration", "duration", "run.time")
         )) %>%
         ungroup()
+
+    reclass(x, df)
 }
 
 #' @export
@@ -214,8 +215,7 @@ calc_runtime.labs <- function(x, units = "hours", ...) {
         )) %>%
         ungroup()
 
-    attr(df, "data") <- attr(x, "data")
-    df
+    reclass(x, df)
 }
 
 #' @export
@@ -236,6 +236,5 @@ calc_runtime.vitals <- function(x, units = "hours", ...) {
         )) %>%
         ungroup()
 
-    attr(df, "data") <- attr(x, "data")
-    df
+    reclass(x, df)
 }

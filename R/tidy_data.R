@@ -110,8 +110,7 @@ tidy_data.diagnosis <- function(x, ...) {
     df <- dplyr::bind_rows(assign, icd_defined, source_default) %>%
         select_(.dots = quote(-icd10))
 
-    attr(df, "data") <- attr(x, "data")
-    df
+    reclass(x, df)
 }
 
 #' @export
@@ -127,10 +126,9 @@ tidy_data.labs <- function(x, censor = TRUE, ...) {
     }
 
     # convert lab results to numeric values
-    df <- purrrlyr::dmap_at(df, "lab.result", as.numeric)
+    df <- mutate_at(df, "lab.result", as.numeric)
 
-    attr(df, "data") <- attr(x, "data")
-    df
+    reclass(x, df)
 }
 
 #' @details For locations, this function accounts for incorrect departure
@@ -237,8 +235,7 @@ tidy_data.locations <- function(x, ...) {
             ))
     }
 
-    attr(df, "data") <- attr(x, "data")
-    df
+    reclass(x, df)
 }
 
 #' @export
@@ -258,10 +255,9 @@ tidy_data.meds_cont <- function(x, ref, sched, ...) {
     df <- anti_join(x, sched, by = "event.id") %>%
         filter_(.dots = list(~med %in% lookup.meds)) %>%
         arrange_(.dots = list("pie.id", "med", "med.datetime")) %>%
-        dplyr::mutate_at("med.rate", as.numeric)
+        mutate_at("med.rate", as.numeric)
 
-    attr(df, "data") <- attr(x, "data")
-    df
+    reclass(x, df)
 }
 
 #' @export
@@ -280,10 +276,9 @@ tidy_data.meds_inpt <- function(x, ref, ...) {
     # then filter to meds in lookup, then sort by pie.id, med, med.datetime
     df <- filter_(x, .dots = list(~med %in% lookup.meds)) %>%
         arrange_(.dots = list("pie.id", "med", "med.datetime")) %>%
-        dplyr::mutate_at("med.dose", as.numeric)
+        mutate_at("med.dose", as.numeric)
 
-    attr(df, "data") <- attr(x, "data")
-    df
+    reclass(x, df)
 }
 
 #' @export
@@ -301,10 +296,9 @@ tidy_data.meds_sched <- function(x, ref, ...) {
     # filter to keep only meds in lookup
     df <- filter_(x, .dots = list(~med %in% lookup.meds)) %>%
         arrange_(.dots = list("pie.id", "med", "med.datetime")) %>%
-        dplyr::mutate_at("med.dose", as.numeric)
+        mutate_at("med.dose", as.numeric)
 
-    attr(df, "data") <- attr(x, "data")
-    df
+    reclass(x, df)
 }
 
 #' @details For services, this function accounts for incorrect end times
@@ -316,7 +310,7 @@ tidy_data.meds_sched <- function(x, ref, ...) {
 #' @export
 #' @rdname tidy_data
 tidy_data.services <- function(x, ...) {
-    arrange_(x, "start.datetime") %>%
+    df <- arrange_(x, "start.datetime") %>%
         group_by_("pie.id") %>%
 
         # determine if they went to a different service, then make a count of
@@ -358,6 +352,8 @@ tidy_data.services <- function(x, ...) {
         ungroup() %>%
         select_(.dots = list(quote(-end.recorded),
                                     quote(-end.calculated)))
+
+    reclass(x, df)
 }
 
 #' @details For vent_times, this function accounts for incorrect start and stop
@@ -371,7 +367,7 @@ tidy_data.vent_times <- function(x, dc, ...) {
     id <- set_id_name(x)
 
     # remove any missing data
-    filter_(x, .dots = list(~!is.na(vent.datetime))) %>%
+    df <- filter_(x, .dots = list(~!is.na(vent.datetime))) %>%
         arrange_("vent.datetime") %>%
         group_by_(id) %>%
 
@@ -414,4 +410,6 @@ tidy_data.vent_times <- function(x, dc, ...) {
             x = list(~difftime(stop.datetime, start.datetime, units = "hours")),
             nm = "vent.duration"
         ))
+
+    reclass(x, df)
 }

@@ -53,8 +53,6 @@
 #'
 #' @return A data frame of class \code{tbl_edwr}
 #'
-#' @seealso \code{\link[readr]{read_csv}}
-#'
 #' @examples
 #' x <- read_data(
 #'   data.dir = paste0(system.file(package = "edwr", "extdata")),

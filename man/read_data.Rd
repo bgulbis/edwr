@@ -76,6 +76,3 @@ y <- as.demographics(x)
 class(y)
 
 }
-\seealso{
-\code{\link[readr]{read_csv}}
-}

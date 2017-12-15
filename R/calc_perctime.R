@@ -85,7 +85,7 @@ perctime <- function(x, thrshld, vars) {
         ))
 
     # get the total duration of data
-    cont <- summarise_(cont, .dots = set_names(
+    df <- summarise_(cont, .dots = set_names(
         x = list(~dplyr::last(run.time)),
         nm = "total.dur"
     )) %>%
@@ -97,4 +97,6 @@ perctime <- function(x, thrshld, vars) {
             nm = list("time.goal", "perc.time")
         )) %>%
         ungroup()
+
+    reclass(x, df)
 }

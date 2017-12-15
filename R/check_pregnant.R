@@ -50,8 +50,7 @@ check_pregnant.diagnosis <- function(x, ...) {
     df <- full_join(preg9[encounter], preg10[encounter], by = encounter) %>%
         distinct_()
 
-    attr(df, "data") <- attr(x, "data")
-    df
+    reclass(x, df)
 }
 
 #' @export
@@ -76,6 +75,5 @@ check_pregnant.labs <- function(x, ...) {
     df <- full_join(preg.test[encounter], bhcg[encounter], by = encounter) %>%
         distinct_()
 
-    attr(df, "data") <- attr(x, "data")
-    df
+    reclass(x, df)
 }

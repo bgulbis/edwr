@@ -53,6 +53,5 @@ lab_change <- function(x, .lab, change.by, FUN, back = 2) {
         filter_(.dots = list(~abs(change) >= abs(change.by))) %>%
         ungroup()
 
-    attr(df, "data") <- attr(x, "data")
-    df
+    reclass(x, df)
 }

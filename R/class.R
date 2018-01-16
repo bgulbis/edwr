@@ -79,7 +79,7 @@ as.admit <- function(x, varnames = NULL, extras = NULL) {
     }
 
     df <- select_(.data = x, .dots = varnames) %>%
-        dplyr::distinct_()
+        distinct_()
 
     after <- match("admit", class(x), nomatch = 0L)
     class(df) <- append(class(x), "admit", after = after)

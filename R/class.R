@@ -946,23 +946,29 @@ as.order_detail <- function(x, varnames = NULL, extras = NULL) {
 
 #' @rdname set_edwr_class
 #' @export
-as.order_info <- function(x) {
+as.order_info <- function(x, varnames = NULL, extras = NULL) {
     if (missing(x)) x <- character()
     if (is.order_info(x)) return(x)
     if (!is.tbl_edwr(x)) x <- as.tbl_edwr(x)
 
-    df <- rename_(.data = x, .dots = c(val.pie, list(
-        "order.id" = "`Source Order ID`",
-        "detail.datetime" = "`Detail Date & Time`",
-        "detail" = "`Detail Display Value`",
-        "detail.descr" = "`Field Description`"
-    ))) %>%
-        dplyr::distinct_() %>%
+    # default EDW names
+    if (attr(x, "data") == "edw" & is.null(varnames)) {
+        varnames <- c(val.pie, list(
+            "order.id" = "`Source Order ID`",
+            "detail.datetime" = "`Detail Date & Time`",
+            "detail" = "`Detail Display Value`",
+            "detail.descr" = "`Field Description`"
+        ))
+    }
+
+    # if extra var names are given, append those to the list
+    if (!is.null(extras)) {
+        varnames <- c(varnames, extras)
+    }
+
+    df <- select_(.data = x, .dots = varnames) %>%
+        distinct_() %>%
         format_dates("detail.datetime")
-        # mutate_(.dots = set_names(
-        #     x = list(~format_dates(detail.datetime)),
-        #     nm = list("detail.datetime")
-        # ))
 
     after <- match("order_info", class(x), nomatch = 0L)
     class(df) <- append(class(x), "order_info", after = after)

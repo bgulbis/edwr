@@ -100,7 +100,7 @@ as.order_by(x)
 
 as.order_detail(x, varnames = NULL, extras = NULL)
 
-as.order_info(x)
+as.order_info(x, varnames = NULL, extras = NULL)
 
 as.order_timing(x)
 

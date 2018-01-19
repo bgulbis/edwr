@@ -18,7 +18,7 @@ calc_runtime(x, ...)
   units = "hours", ...)
 
 \method{calc_runtime}{meds_inpt}(x, drip.off = 12, no.doc = 24,
-  units = "hours", ...)
+  units = "hours", cont = TRUE, ...)
 
 \method{calc_runtime}{meds_sched}(x, units = "hours", ...)
 
@@ -41,6 +41,9 @@ documentation which will be used to indicate a drip has ended, defaults to
 
 \item{units}{An optional character string specifying the time units to use in
 calculations, default is hours}
+
+\item{cont}{A logical, if TRUE (default), treat the medications as continuous
+when summarizing}
 }
 \value{
 A data frame

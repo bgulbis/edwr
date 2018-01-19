@@ -17,7 +17,7 @@ summarize_data(x, ...)
 
 \method{summarize_data}{meds_cont}(x, units = "hours", ...)
 
-\method{summarize_data}{meds_inpt}(x, units = "hours", ...)
+\method{summarize_data}{meds_inpt}(x, units = "hours", cont = TRUE, ...)
 
 \method{summarize_data}{meds_home}(x, ref, pts = NULL, home = TRUE, ...)
 
@@ -35,14 +35,17 @@ summarize_data(x, ...)
 \item{units}{An optional character string specifying the time units to use in
 calculations, default is hours}
 
+\item{cont}{A logical, if TRUE (default), treat the medications as continuous
+when summarizing}
+
 \item{ref}{A data frame with three columns: name, type, and group. See
 details below.}
 
 \item{pts}{An optional data frame with a column pie.id including all patients
 in study}
 
-\item{home}{A logical, if TRUE (default) look for home medications,
-otherwise look for discharge prescriptions}
+\item{home}{A logical, if TRUE (default) look for home medications, otherwise
+look for discharge prescriptions}
 }
 \value{
 A data frame

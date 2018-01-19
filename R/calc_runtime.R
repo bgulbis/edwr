@@ -22,6 +22,8 @@
 #'   24 hours
 #' @param units An optional character string specifying the time units to use in
 #'   calculations, default is hours
+#' @param cont A logical, if TRUE (default), treat the medications as continuous
+#'   when summarizing
 #'
 #' @return A data frame
 #'
@@ -173,16 +175,22 @@ calc_runtime.meds_cont <- function(x, drip.off = 12, no.doc = 24,
 #' @export
 #' @rdname calc_runtime
 calc_runtime.meds_inpt <- function(x, drip.off = 12, no.doc = 24,
-                                   units = "hours", ...) {
+                                   units = "hours", cont = TRUE, ...) {
     # calls method for continuous meds
-    calc_runtime.meds_cont(x, drip.off = drip.off, no.doc = no.doc, units = units, ...)
+    if (cont) {
+        calc_runtime.meds_cont(x, drip.off = drip.off, no.doc = no.doc, units = units, ...)
+    } else {
+        calc_runtime.meds_sched(x, units = units, ...)
+    }
 }
 
 #' @export
 #' @rdname calc_runtime
 calc_runtime.meds_sched <- function(x, units = "hours", ...) {
-    df <- arrange_(x, .dots = list("pie.id", "med", "med.datetime")) %>%
-        group_by_(.dots = c("pie.id", "med")) %>%
+    id <- set_id_name(x)
+
+    df <- arrange_(x, .dots = list(id, "med", "med.datetime")) %>%
+        group_by_(.dots = c(id, "med")) %>%
         dplyr::mutate_(.dots = set_names(
             x = list(~difftime(med.datetime, dplyr::lag(med.datetime),
                                units = units),

@@ -23,8 +23,10 @@
 #'   details below.
 #' @param pts An optional data frame with a column pie.id including all patients
 #'   in study
-#' @param home A logical, if TRUE (default) look for home medications,
-#'   otherwise look for discharge prescriptions
+#' @param home A logical, if TRUE (default) look for home medications, otherwise
+#'   look for discharge prescriptions
+#' @param cont A logical, if TRUE (default), treat the medications as continuous
+#'   when summarizing
 #'
 #' @return A data frame
 #'
@@ -127,8 +129,12 @@ summarize_data.meds_cont <- function(x, units = "hours", ...) {
 
 #' @export
 #' @rdname summarize_data
-summarize_data.meds_inpt <- function(x, units = "hours", ...) {
-    summarize_data.meds_cont(x, units = units, ...)
+summarize_data.meds_inpt <- function(x, units = "hours", cont = TRUE, ...) {
+    if (cont) {
+        summarize_data.meds_cont(x, units = units, ...)
+    } else {
+        summarize_data.meds_sched(x, units = units, ...)
+    }
 }
 
 #' @details The data frame passed to \code{ref} should contain three character
@@ -183,7 +189,9 @@ summarize_data.meds_sched <- function(x, units = "hours", ...) {
     # turn off scientific notation
     options(scipen = 999)
 
-    df <- group_by_(x, .dots = list("pie.id", "med")) %>%
+    id <- set_id_name(x)
+
+    df <- group_by_(x, .dots = list(id, "med")) %>%
         dplyr::summarise_(.dots = set_names(
             x = list(~dplyr::first(med.datetime),
                      ~dplyr::last(med.datetime),
@@ -206,7 +214,7 @@ summarize_data.meds_sched <- function(x, units = "hours", ...) {
         )) %>%
 
         # calculate the time-weighted average
-        group_by_(.dots = list("pie.id", "med")) %>%
+        group_by_(.dots = list(id, "med")) %>%
         mutate_(.dots = set_names(
             x = list(~auc/duration),
             nm = "time.wt.avg"

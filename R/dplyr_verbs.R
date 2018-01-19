@@ -19,8 +19,8 @@ reclass.default <- function(x, result) {
     if (!is.tbl_edwr(result)) {
         cls <- match("tbl_edwr", class(x), nomatch = 0L)
         class(result) <- c(class(x)[1:cls], class(result))
-        attr(result, "data") <- attr(x, "data")
     }
+    attr(result, "data") <- attr(x, "data")
     result
 }
 

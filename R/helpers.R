@@ -85,3 +85,22 @@ set_id_name <- function(x) {
     }
     id
 }
+
+#' Set the name of the id field based on data source as a quosure
+#'
+#' Sets the id name to pie.id for EDW data and millennium.id for MBO data
+#'
+#' @param x A tibble with an attribute of "data"
+#'
+#' @return character vector with the id name
+#'
+#' @importFrom dplyr quo
+#' @keywords internal
+set_id_quo <- function(x) {
+    if (attr(x, "data") == "edw") {
+        quo(pie.id)
+    } else {
+        quo(millennium.id)
+    }
+}
+

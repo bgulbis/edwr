@@ -70,6 +70,8 @@
 #'   summarize_data(meds_home, ref, pts = pts, home = FALSE)
 #' ))
 #'
+#' @importFrom dplyr quos
+#' @importFrom stats median
 #' @export
 summarize_data <- function(x, ...) {
     UseMethod("summarize_data")
@@ -189,37 +191,56 @@ summarize_data.meds_sched <- function(x, units = "hours", ...) {
     # turn off scientific notation
     options(scipen = 999)
 
-    id <- set_id_name(x)
+    id <- set_id_quo(x)
 
-    df <- group_by_(x, .dots = list(id, "med")) %>%
-        dplyr::summarise_(.dots = set_names(
-            x = list(~dplyr::first(med.datetime),
-                     ~dplyr::last(med.datetime),
-                     ~dplyr::first(med.dose),
-                     ~dplyr::last(med.dose),
-                     ~median(med.dose, na.rm = TRUE),
-                     ~max(med.dose, na.rm = TRUE),
-                     ~min(med.dose, na.rm = TRUE),
-                     ~MESS::auc(run.time, med.dose),
-                     ~dplyr::last(run.time)),
-            nm = list("first.datetime",
-                   "last.datetime",
-                   "first.result",
-                   "last.result",
-                   "median.result",
-                   "max.result",
-                   "min.result",
-                   "auc",
-                   "duration")
+    df <- group_by(quos(!!id, !!quo(med))) %>%
+        summarize(!!! list(
+            first.datetime = quo(dplyr::first(med.datetime)),
+            last.datetime = quo(dplyr::last(med.datetime)),
+            first.result = quo(dplyr::first(med.dose)),
+            last.result = quo(dplyr::last(med.dose)),
+            median.result = quo(median(med.dose, na.rm = TRUE)),
+            max.result = quo(max(med.dose, na.rm = TRUE)),
+            min.result = quo(min(med.dose, na.rm = TRUE)),
+            auc = quo(MESS::auc(run.time, med.dose)),
+            duration = quo(dplyr::last(run.time))
         )) %>%
-
-        # calculate the time-weighted average
-        group_by_(.dots = list(id, "med")) %>%
-        mutate_(.dots = set_names(
-            x = list(~auc/duration),
-            nm = "time.wt.avg"
+        group_by(quos(!!id, !!quo(med))) %>%
+        mutate(!!! list(
+            time.wt.avg = quo(auc / duration)
         )) %>%
         ungroup()
+    # id <- set_id_name(x)
+
+    # df <- group_by_(x, .dots = list(id, "med")) %>%
+    #     dplyr::summarise_(.dots = set_names(
+    #         x = list(~dplyr::first(med.datetime),
+    #                  ~dplyr::last(med.datetime),
+    #                  ~dplyr::first(med.dose),
+    #                  ~dplyr::last(med.dose),
+    #                  ~median(med.dose, na.rm = TRUE),
+    #                  ~max(med.dose, na.rm = TRUE),
+    #                  ~min(med.dose, na.rm = TRUE),
+    #                  ~MESS::auc(run.time, med.dose),
+    #                  ~dplyr::last(run.time)),
+    #         nm = list("first.datetime",
+    #                "last.datetime",
+    #                "first.result",
+    #                "last.result",
+    #                "median.result",
+    #                "max.result",
+    #                "min.result",
+    #                "auc",
+    #                "duration")
+    #     )) %>%
+    #
+    #     # calculate the time-weighted average
+    #     group_by_(.dots = list(id, "med")) %>%
+    #     mutate_(.dots = set_names(
+    #         x = list(~auc/duration),
+    #         nm = "time.wt.avg"
+    #     )) %>%
+    #     ungroup()
 
     reclass(x, df)
 }

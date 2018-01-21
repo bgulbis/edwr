@@ -4,16 +4,16 @@
 \alias{summary_fun}
 \title{Performs the summarize operation}
 \usage{
-summary_fun(df, grp, dt_col, val_col)
+summary_fun(x, grp_col, dt_col, val_col)
 }
 \arguments{
-\item{grp}{grouping quosures}
+\item{x}{tibble}
+
+\item{grp_col}{grouping quosures}
 
 \item{dt_col}{datetime column}
 
 \item{val_col}{numeric value column}
-
-\item{x}{tibble}
 }
 \value{
 tibble

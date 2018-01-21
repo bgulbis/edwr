@@ -192,9 +192,11 @@ summarize_data.meds_sched <- function(x, units = "hours", ...) {
     options(scipen = 999)
 
     id <- set_id_quo(x)
+    grp <- quos(!!id, !!quo(med))
 
-    df <- group_by(quos(!!id, !!quo(med))) %>%
-        summarize(!!! list(
+    df <- x %>%
+        group_by(!!!grp) %>%
+        summarize(!!!list(
             first.datetime = quo(dplyr::first(med.datetime)),
             last.datetime = quo(dplyr::last(med.datetime)),
             first.result = quo(dplyr::first(med.dose)),
@@ -205,10 +207,8 @@ summarize_data.meds_sched <- function(x, units = "hours", ...) {
             auc = quo(MESS::auc(run.time, med.dose)),
             duration = quo(dplyr::last(run.time))
         )) %>%
-        group_by(quos(!!id, !!quo(med))) %>%
-        mutate(!!! list(
-            time.wt.avg = quo(auc / duration)
-        )) %>%
+        group_by(!!!grp) %>%
+        mutate(!!!list(time.wt.avg = quo(auc / duration))) %>%
         ungroup()
     # id <- set_id_name(x)
 

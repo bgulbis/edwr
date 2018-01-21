@@ -185,6 +185,38 @@ summarize_data.meds_home <- function(x, ref, pts = NULL, home = TRUE, ...) {
     reclass(x, df)
 }
 
+#' Performs the summarize operation
+#'
+#' @param x tibble
+#' @param grp grouping quosures
+#' @param dt_col datetime column
+#' @param val_col numeric value column
+#'
+#' @return tibble
+#'
+#' @keywords internal
+summary_fun <- function(df, grp, dt_col, val_col) {
+    dt_col <- dplyr::enquo(dt_col)
+    val_col <- dplyr::enquo(val_col)
+
+    df %>%
+        group_by(!!!grp) %>%
+        summarize(!!!list(
+            first.datetime = quo(dplyr::first(!!dt_col)),
+            last.datetime = quo(dplyr::last(!!dt_col)),
+            first.result = quo(dplyr::first(!!val_col)),
+            last.result = quo(dplyr::last(!!val_col)),
+            median.result = quo(median(!!val_col, na.rm = TRUE)),
+            max.result = quo(max(!!val_col, na.rm = TRUE)),
+            min.result = quo(min(!!val_col, na.rm = TRUE)),
+            auc = quo(MESS::auc(run.time, !!val_col)),
+            duration = quo(dplyr::last(run.time))
+        )) %>%
+        group_by(!!!grp) %>%
+        mutate(!!!list(time.wt.avg = quo(auc / duration))) %>%
+        ungroup()
+}
+
 #' @export
 #' @rdname summarize_data
 summarize_data.meds_sched <- function(x, units = "hours", ...) {
@@ -194,22 +226,23 @@ summarize_data.meds_sched <- function(x, units = "hours", ...) {
     id <- set_id_quo(x)
     grp <- quos(!!id, !!quo(med))
 
-    df <- x %>%
-        group_by(!!!grp) %>%
-        summarize(!!!list(
-            first.datetime = quo(dplyr::first(med.datetime)),
-            last.datetime = quo(dplyr::last(med.datetime)),
-            first.result = quo(dplyr::first(med.dose)),
-            last.result = quo(dplyr::last(med.dose)),
-            median.result = quo(median(med.dose, na.rm = TRUE)),
-            max.result = quo(max(med.dose, na.rm = TRUE)),
-            min.result = quo(min(med.dose, na.rm = TRUE)),
-            auc = quo(MESS::auc(run.time, med.dose)),
-            duration = quo(dplyr::last(run.time))
-        )) %>%
-        group_by(!!!grp) %>%
-        mutate(!!!list(time.wt.avg = quo(auc / duration))) %>%
-        ungroup()
+    df <- summary_fun(x, grp, med.datetime, med.dose)
+    # df <- x %>%
+    #     group_by(!!!grp) %>%
+    #     summarize(!!!list(
+    #         first.datetime = quo(dplyr::first(med.datetime)),
+    #         last.datetime = quo(dplyr::last(med.datetime)),
+    #         first.result = quo(dplyr::first(med.dose)),
+    #         last.result = quo(dplyr::last(med.dose)),
+    #         median.result = quo(median(med.dose, na.rm = TRUE)),
+    #         max.result = quo(max(med.dose, na.rm = TRUE)),
+    #         min.result = quo(min(med.dose, na.rm = TRUE)),
+    #         auc = quo(MESS::auc(run.time, med.dose)),
+    #         duration = quo(dplyr::last(run.time))
+    #     )) %>%
+    #     group_by(!!!grp) %>%
+    #     mutate(!!!list(time.wt.avg = quo(auc / duration))) %>%
+    #     ungroup()
     # id <- set_id_name(x)
 
     # df <- group_by_(x, .dots = list(id, "med")) %>%

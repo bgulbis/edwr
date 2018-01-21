@@ -17,7 +17,7 @@ integer vector
 \description{
 Takes a vector of POSIXct and counts the number of rows which would fall
 within the specified time frame. Typically called from
-\code{\link[dplyr]{mutate}} and the results are passed on to
-\code{\link[zoo]{rollapplyr}}.
+\code{mutate} and the results are passed on to
+\code{rollapplyr}.
 }
 \keyword{internal}

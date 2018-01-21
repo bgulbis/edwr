@@ -22,8 +22,8 @@ add_patients <- function(tidy, patients) {
 #'
 #' Takes a vector of POSIXct and counts the number of rows which would fall
 #' within the specified time frame. Typically called from
-#' \code{\link[dplyr]{mutate}} and the results are passed on to
-#' \code{\link[zoo]{rollapplyr}}.
+#' \code{mutate} and the results are passed on to
+#' \code{rollapplyr}.
 #'
 #' @param x = vector of type POSIXct
 #' @param back = integer indicating the number of days back to include

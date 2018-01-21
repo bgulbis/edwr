@@ -13,7 +13,7 @@ lab_change(x, .lab, change.by, FUN, back = 2)
 
 \item{change.by}{A numeric indicating the threshold for lab changes}
 
-\item{FUN}{A function for \code{\link[zoo]{rollapplyr}}, most commonly max or
+\item{FUN}{A function for \code{rollapplyr}, most commonly max or
 min}
 
 \item{back}{An optional numeric specifying the number of days back to go.

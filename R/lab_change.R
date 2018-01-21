@@ -13,7 +13,7 @@
 #' @param x A data frame with lab data
 #' @param .lab A character string indicating the name of the lab to evaluate
 #' @param change.by A numeric indicating the threshold for lab changes
-#' @param FUN A function for \code{\link[zoo]{rollapplyr}}, most commonly max or
+#' @param FUN A function for \code{rollapplyr}, most commonly max or
 #'   min
 #' @param back An optional numeric specifying the number of days back to go.
 #'   Defaults to 2 days.

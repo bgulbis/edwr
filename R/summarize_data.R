@@ -70,8 +70,6 @@
 #'   summarize_data(meds_home, ref, pts = pts, home = FALSE)
 #' ))
 #'
-#' @importFrom dplyr quos
-#' @importFrom stats median
 #' @export
 summarize_data <- function(x, ...) {
     UseMethod("summarize_data")
@@ -199,39 +197,28 @@ summary_fun <- function(x, grp_col, dt_col, val_col) {
     # turn off scientific notation
     options(scipen = 999)
 
-    grp_col <- dplyr::enquo(grp_col)
-    dt_col <- dplyr::enquo(dt_col)
-    val_col <- dplyr::enquo(val_col)
+    grp_col <- enquo(grp_col)
+    dt_col <- enquo(dt_col)
+    val_col <- enquo(val_col)
 
     id <- set_id_quo(x)
     grp <- quos(!!id, !!grp_col)
 
-    first_datetime <- "first.datetime"
-    last_datetime <- "last.datetime"
-    first_result <- "first.result"
-    last_result <- "last.result"
-    median_result <- "median.result"
-    max_result <- "max.result"
-    min_result <- "min.result"
-    auc_nm <- "auc"
-    duration <- "duration"
-    time_wt_avg <- "time.wt.avg"
-
     df <- x %>%
         group_by(!!!grp) %>%
         summarize(
-            !!first_datetime := dplyr::first(!!dt_col),
-            !!last_datetime := dplyr::last(!!dt_col),
-            !!first_result := dplyr::first(!!val_col),
-            !!last_result := dplyr::last(!!val_col),
-            !!median_result := median(!!val_col, na.rm = TRUE),
-            !!max_result := max(!!val_col, na.rm = TRUE),
-            !!min_result := min(!!val_col, na.rm = TRUE),
-            !!auc_nm := MESS::auc(run.time, !!val_col),
-            !!duration := dplyr::last(run.time)
+            !!"first.result" := dplyr::first(!!dt_col),
+            !!"last.datetime" := dplyr::last(!!dt_col),
+            !!"first.result" := dplyr::first(!!val_col),
+            !!"last.result" := dplyr::last(!!val_col),
+            !!"median.result" := stats::median(!!val_col, na.rm = TRUE),
+            !!"max.result" := max(!!val_col, na.rm = TRUE),
+            !!"min.result" := min(!!val_col, na.rm = TRUE),
+            !!"auc" := MESS::auc(!!sym("run.time"), !!val_col),
+            !!"duration" := dplyr::last(!!sym("run.time"))
         ) %>%
         group_by(!!!grp) %>%
-        mutate(!!time_wt_avg := auc / duration) %>%
+        mutate(!!"time.wt.avg" := (!!sym("auc")) / (!!sym("duration"))) %>%
         ungroup()
 
     reclass(x, df)
@@ -240,17 +227,29 @@ summary_fun <- function(x, grp_col, dt_col, val_col) {
 #' @export
 #' @rdname summarize_data
 summarize_data.meds_sched <- function(x, units = "hours", ...) {
-    summary_fun(x, med, med.datetime, med.dose)
+    summary_fun(x,
+                !!sym("med"),
+                !!sym("med.datetime"),
+                !!sym("med.dose")
+    )
 }
 
 #' @export
 #' @rdname summarize_data
 summarize_data.labs <- function(x, units = "hours", ...) {
-    summary_fun(x, lab, lab.datetime, lab.result)
+    summary_fun(x,
+                !!sym("lab"),
+                !!sym("lab.datetime"),
+                !!sym("lab.result")
+    )
 }
 
 #' @export
 #' @rdname summarize_data
 summarize_data.vitals <- function(x, units = "hours", ...) {
-    summary_fun(x, vital, vital.datetime, vital.result)
+    summary_fun(x,
+                !!sym("vital"),
+                !!sym("vital.datetime"),
+                !!sym("vital.result")
+    )
 }

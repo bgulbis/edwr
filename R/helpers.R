@@ -94,13 +94,12 @@ set_id_name <- function(x) {
 #'
 #' @return character vector with the id name
 #'
-#' @importFrom dplyr quo
 #' @keywords internal
 set_id_quo <- function(x) {
     if (attr(x, "data") == "edw") {
-        quo(pie.id)
+        quo(!!sym("pie.id"))
     } else {
-        quo(millennium.id)
+        quo(!!sym("millennium.id"))
     }
 }
 

@@ -88,40 +88,39 @@ summarize_data.meds_cont <- function(x, units = "hours", ...) {
     # turn off scientific notation
     options(scipen = 999)
 
-    id <- set_id_name(x)
-    cont <- group_by_(x, .dots = list(id, "med", "drip.count")) %>%
-        filter_(.dots = list(~run.time > 0))
+    id <- set_id_quo(x)
+    grp_by <- quos(!!id, !!sym("med"), !!sym("drip.count"))
+    med.rate <- sym("med.rate")
+
+    cont <- x %>%
+        group_by(!!!grp_by) %>%
+            filter(!!sym("run.time") > 0)
 
     # get last and min non-zero rate
-    nz.rate <- filter_(cont, .dots = ~(med.rate > 0)) %>%
-        summarise_(.dots = set_names(
-            x = list(~dplyr::last(med.rate),
-                     ~min(med.rate, na.rm = TRUE),
-                     ~sum(duration, na.rm = TRUE)),
-            nm = list("last.rate", "min.rate", "run.time")
-        ))
+    nz.rate <- cont %>%
+        filter(!!med.rate > 0) %>%
+        summarize(
+            !!"last.rate" := dplyr::last(!!med.rate),
+            !!"min.rate" := min(!!med.rate, na.rm = TRUE),
+            !!"run.time" := sum(!!sym("duration"), na.rm = TRUE)
+        )
 
     # get first and max rates and AUC
-    df <- summarise_(cont, .dots = set_names(
-        x = list(~dplyr::first(rate.start),
-                 ~dplyr::last(rate.stop),
-                 ~sum(med.rate * duration, na.rm = TRUE),
-                 ~dplyr::first(med.rate),
-                 ~max(med.rate, na.rm = TRUE),
-                 ~MESS::auc(run.time, med.rate),
-                 ~dplyr::last(run.time)),
-        nm = list("start.datetime", "stop.datetime", "cum.dose", "first.rate",
-                  "max.rate", "auc", "duration")
-    )) %>%
-
+    df <- cont %>%
+        summarize(
+            !!"start.datetime" := dplyr::first(!!sym("rate.start")),
+            !!"stop.datetime" := dplyr::last(!!sym("rate.stop")),
+            !!"cum.dose" := sum(!!rlang::parse_expr("med.rate * duration"), na.rm = TRUE),
+            !!"first.rate" := dplyr::first(!!med.rate),
+            !!"max.rate" := max(!!med.rate, na.rm = TRUE),
+            !!"auc" := MESS::auc(!!sym("run.time"), !!med.rate),
+            !!"duration" := dplyr::last(!!sym("run.time"))
+        ) %>%
         # join the last and min data, then calculate the time-weighted average
         # and interval
-        inner_join(nz.rate, by = c(id, "med", "drip.count")) %>%
-        group_by_(.dots = list(id, "med", "drip.count")) %>%
-        dplyr::mutate_(.dots = set_names(
-            x = list(~auc/duration),
-            nm = "time.wt.avg"
-        )) %>%
+        inner_join(nz.rate, by = c(rlang::quo_text(id), "med", "drip.count")) %>%
+        group_by(!!!grp_by) %>%
+        mutate(!!"time.wt.avg" := !!rlang::parse_expr("auc / duration")) %>%
         ungroup()
 
     reclass(x, df)
@@ -218,7 +217,7 @@ summary_fun <- function(x, grp_col, dt_col, val_col) {
             !!"duration" := dplyr::last(!!sym("run.time"))
         ) %>%
         group_by(!!!grp) %>%
-        mutate(!!"time.wt.avg" := (!!sym("auc")) / (!!sym("duration"))) %>%
+        mutate(!!"time.wt.avg" := !!rlang::parse_expr("auc / duration")) %>%
         ungroup()
 
     reclass(x, df)

@@ -241,40 +241,5 @@ summarize_data.labs <- function(x, units = "hours", ...) {
 #' @export
 #' @rdname summarize_data
 summarize_data.vitals <- function(x, units = "hours", ...) {
-    # turn off scientific notation
-    options(scipen = 999)
-
-    id <- set_id_name(x)
-
-    df <- group_by_(x, .dots = list(id, "vital")) %>%
-        summarise_(.dots = set_names(
-            x = list(~dplyr::first(vital.datetime),
-                     ~dplyr::last(vital.datetime),
-                     ~dplyr::first(vital.result),
-                     ~dplyr::last(vital.result),
-                     ~median(vital.result, na.rm = TRUE),
-                     ~max(vital.result, na.rm = TRUE),
-                     ~min(vital.result, na.rm = TRUE),
-                     ~MESS::auc(run.time, vital.result),
-                     ~dplyr::last(run.time)),
-            nm = list("first.datetime",
-                      "last.datetime",
-                      "first.result",
-                      "last.result",
-                      "median.result",
-                      "max.result",
-                      "min.result",
-                      "auc",
-                      "duration")
-        )) %>%
-
-        # calculate the time-weighted average and interval
-        group_by_(.dots = list(id, "vital")) %>%
-        mutate_(.dots = set_names(
-            x = list(~auc/duration),
-            nm = "time.wt.avg"
-        )) %>%
-        ungroup()
-
-    reclass(x, df)
+    summary_fun(x, vital, vital.datetime, vital.result)
 }

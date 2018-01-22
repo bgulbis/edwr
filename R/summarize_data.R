@@ -206,21 +206,32 @@ summary_fun <- function(x, grp_col, dt_col, val_col) {
     id <- set_id_quo(x)
     grp <- quos(!!id, !!grp_col)
 
+    first_datetime <- "first.datetime"
+    last_datetime <- "last.datetime"
+    first_result <- "first.result"
+    last_result <- "last.result"
+    median_result <- "median.result"
+    max_result <- "max.result"
+    min_result <- "min.result"
+    auc_nm <- "auc"
+    duration <- "duration"
+    time_wt_avg <- "time.wt.avg"
+
     df <- x %>%
         group_by(!!!grp) %>%
-        summarize(!!!list(
-            first.datetime = quo(dplyr::first(!!dt_col)),
-            last.datetime = quo(dplyr::last(!!dt_col)),
-            first.result = quo(dplyr::first(!!val_col)),
-            last.result = quo(dplyr::last(!!val_col)),
-            median.result = quo(median(!!val_col, na.rm = TRUE)),
-            max.result = quo(max(!!val_col, na.rm = TRUE)),
-            min.result = quo(min(!!val_col, na.rm = TRUE)),
-            auc = quo(MESS::auc(run.time, !!val_col)),
-            duration = quo(dplyr::last(run.time))
-        )) %>%
+        summarize(
+            !!first_datetime := dplyr::first(!!dt_col),
+            !!last_datetime := dplyr::last(!!dt_col),
+            !!first_result := dplyr::first(!!val_col),
+            !!last_result := dplyr::last(!!val_col),
+            !!median_result := median(!!val_col, na.rm = TRUE),
+            !!max_result := max(!!val_col, na.rm = TRUE),
+            !!min_result := min(!!val_col, na.rm = TRUE),
+            !!auc_nm := MESS::auc(run.time, !!val_col),
+            !!duration := dplyr::last(run.time)
+        ) %>%
         group_by(!!!grp) %>%
-        mutate(!!!list(time.wt.avg = quo(auc / duration))) %>%
+        mutate(!!time_wt_avg := auc / duration) %>%
         ungroup()
 
     reclass(x, df)

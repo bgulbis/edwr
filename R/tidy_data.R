@@ -126,7 +126,7 @@ tidy_data.labs <- function(x, censor = TRUE, ...) {
     }
 
     # convert lab results to numeric values
-    df <- mutate_at(df, "lab.result", as.numeric)
+    df <- dplyr::mutate_at(df, "lab.result", as.numeric)
 
     reclass(x, df)
 }
@@ -255,7 +255,7 @@ tidy_data.meds_cont <- function(x, ref, sched, ...) {
     df <- anti_join(x, sched, by = "event.id") %>%
         filter_(.dots = list(~med %in% lookup.meds)) %>%
         arrange_(.dots = list("pie.id", "med", "med.datetime")) %>%
-        mutate_at("med.rate", as.numeric)
+        dplyr::mutate_at("med.rate", as.numeric)
 
     reclass(x, df)
 }
@@ -276,7 +276,7 @@ tidy_data.meds_inpt <- function(x, ref, ...) {
     # then filter to meds in lookup, then sort by pie.id, med, med.datetime
     df <- filter_(x, .dots = list(~med %in% lookup.meds)) %>%
         arrange_(.dots = list("pie.id", "med", "med.datetime")) %>%
-        mutate_at("med.dose", as.numeric)
+        dplyr::mutate_at("med.dose", as.numeric)
 
     reclass(x, df)
 }
@@ -296,7 +296,7 @@ tidy_data.meds_sched <- function(x, ref, ...) {
     # filter to keep only meds in lookup
     df <- filter_(x, .dots = list(~med %in% lookup.meds)) %>%
         arrange_(.dots = list("pie.id", "med", "med.datetime")) %>%
-        mutate_at("med.dose", as.numeric)
+        dplyr::mutate_at("med.dose", as.numeric)
 
     reclass(x, df)
 }

@@ -14,7 +14,7 @@
 add_patients <- function(tidy, patients) {
     full_join(tidy, patients["pie.id"], by = "pie.id") %>%
         group_by_("pie.id") %>%
-        mutate_at(dplyr::vars(), function(x) dplyr::coalesce(x, FALSE)) %>%
+        dplyr::mutate_at(dplyr::vars(), function(x) dplyr::coalesce(x, FALSE)) %>%
         ungroup()
 }
 
@@ -49,8 +49,8 @@ format_dates <- function(x, date_col) {
     tzone <- set_timezone(x)
 
     x %>%
-        mutate_at(date_col, lubridate::ymd_hms, tz = tzone) %>%
-        mutate_at(date_col, lubridate::with_tz, tzone = "US/Central")
+        dplyr::mutate_at(date_col, lubridate::ymd_hms, tz = tzone) %>%
+        dplyr::mutate_at(date_col, lubridate::with_tz, tzone = "US/Central")
 }
 
 #' Set timezone based on data source

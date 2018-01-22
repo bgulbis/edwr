@@ -132,7 +132,7 @@ as.blood <- function(x, varnames = NULL, extras = NULL) {
 
     df <- select_(.data = x, .dots = varnames) %>%
         dplyr::distinct_() %>%
-        dmap_at("blood.prod", stringr::str_replace_all, pattern = prods) %>%
+        purrrlyr::dmap_at("blood.prod", stringr::str_replace_all, pattern = prods) %>%
         format_dates("blood.datetime")
 
     after <- match("blood", class(x), nomatch = 0L)

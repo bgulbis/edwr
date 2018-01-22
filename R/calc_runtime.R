@@ -132,7 +132,7 @@ calc_runtime.meds_cont <- function(x, drip.off = 12, no.doc = 24,
             ),
             nm = list("duration", "drip.stop", "drip.start", "drip.count")
         )) %>%
-        mutate_at("duration", as.numeric) %>%
+        dplyr::mutate_at("duration", as.numeric) %>%
 
         # calculate run time
         group_by_(.dots = list(id, "med", "drip.count")) %>%

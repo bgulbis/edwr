@@ -101,7 +101,7 @@ calc_runtime.meds_cont <- function(x, drip.off = 12, no.doc = 24,
 
         # calculate how long the drip was at each rate
         group_by_(.dots = list(id, "med", "change.num")) %>%
-        dplyr::summarize_(.dots = set_names(
+        summarize_(.dots = set_names(
             x = list(~dplyr::first(rate),
                      ~dplyr::first(med.datetime),
                      ~dplyr::last(med.datetime),

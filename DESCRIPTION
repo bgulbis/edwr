@@ -23,6 +23,7 @@ Imports:
     stringr,
     tibble (>= 1.1),
     tidyr,
-    zoo
+    zoo,
+    rlang
 RoxygenNote: 6.0.1
 Suggests: testthat

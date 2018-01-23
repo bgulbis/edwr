@@ -110,7 +110,7 @@ summarize_data.meds_cont <- function(x, units = "hours", ...) {
         summarize(
             !!"start.datetime" := dplyr::first(!!sym("rate.start")),
             !!"stop.datetime" := dplyr::last(!!sym("rate.stop")),
-            !!"cum.dose" := sum(!!rlang::parse_expr("med.rate * duration"), na.rm = TRUE),
+            !!"cum.dose" := sum(!!parse_expr("med.rate * duration"), na.rm = TRUE),
             !!"first.rate" := dplyr::first(!!med.rate),
             !!"max.rate" := max(!!med.rate, na.rm = TRUE),
             !!"auc" := MESS::auc(!!sym("run.time"), !!med.rate),
@@ -120,7 +120,7 @@ summarize_data.meds_cont <- function(x, units = "hours", ...) {
         # and interval
         inner_join(nz.rate, by = c(rlang::quo_text(id), "med", "drip.count")) %>%
         group_by(!!!grp_by) %>%
-        mutate(!!"time.wt.avg" := !!rlang::parse_expr("auc / duration")) %>%
+        mutate(!!"time.wt.avg" := !!parse_expr("auc / duration")) %>%
         ungroup()
 
     reclass(x, df)
@@ -146,32 +146,37 @@ summarize_data.meds_inpt <- function(x, units = "hours", cont = TRUE, ...) {
 #' @export
 #' @rdname summarize_data
 summarize_data.meds_home <- function(x, ref, pts = NULL, home = TRUE, ...) {
+    id <- set_id_quo(x)
+
     # for any med classes, lookup the meds included in the class
-    y <- filter(ref, !!sym("type") == "class")
+    y <- filter(ref, !!parse_expr("type == 'class'"))
     meds <- med_lookup(y$name)
 
     # join the list of meds with any indivdual meds included
-    y <- filter(ref, !!sym("type") == "med")
+    y <- filter(ref, !!parse_expr("type == 'med'"))
     lookup.meds <- c(y$name, meds$med.name)
 
     # filter to either home medications or discharge medications, then use the
     # medication name or class to group by, then remove any duplicate patient /
     # group combinations, then convert the data to wide format
-    if (home == TRUE) {
-        dots <- list(~med.type == "Recorded / Home Meds")
+    if (home) {
+        f <- parse_expr("med.type == 'Recorded / Home Meds'")
     } else {
-        dots <- list(~med.type == "Prescription / Discharge Order")
+        f <- parse_expr("med.type == 'Prescription / Discharge Order'")
     }
 
-    df <- filter_(x, .dots = c(dots, list(~med %in% lookup.meds))) %>%
+    df <- x %>%
+        filter(
+            !!f,
+            !!parse_expr("med %in% lookup.meds")
+        ) %>%
         left_join(meds, by = c("med" = "med.name")) %>%
-        mutate_(.dots = set_names(
-            x = list(~dplyr::if_else(is.na(med.class), med, med.class),
-                     lazyeval::interp("y", y = TRUE)),
-            nm = c("group", "value")
-        )) %>%
-        distinct_(.dots = list("pie.id", "group", "value")) %>%
-        tidyr::spread_("group", "value", fill = FALSE, drop = FALSE)
+        mutate(
+            !!"group" := !!parse_expr("dplyr::if_else(is.na(med.class), med, med.class)"),
+            !!"value" := TRUE
+        ) %>%
+        distinct(!!!quos(!!id, !!sym("group"), !!sym("value"))) %>%
+        tidyr::spread(!!sym("group"), !!sym("value"), fill = FALSE, drop = FALSE)
 
     # join with list of all patients, fill in values of FALSE for any patients
     # not in the data set
@@ -217,7 +222,7 @@ summary_fun <- function(x, grp_col, dt_col, val_col) {
             !!"duration" := dplyr::last(!!sym("run.time"))
         ) %>%
         group_by(!!!grp) %>%
-        mutate(!!"time.wt.avg" := !!rlang::parse_expr("auc / duration")) %>%
+        mutate(!!"time.wt.avg" := !!parse_expr("auc / duration")) %>%
         ungroup()
 
     reclass(x, df)

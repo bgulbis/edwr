@@ -1301,13 +1301,11 @@ as.services <- function(x) {
     ))) %>%
         dplyr::distinct_() %>%
         mutate_(.dots = set_names(
-            x = list(~format_dates(start.datetime),
-                     ~format_dates(end.datetime),
-                     ~dplyr::na_if(service, ""),
+            x = list(~dplyr::na_if(service, ""),
                      ~dplyr::na_if(service.from, "")),
-            nm = list("start.datetime", "end.datetime", "service",
-                      "service.from")
-        ))
+            nm = list("service", "service.from")
+        )) %>%
+        format_dates(c("start.datetime", "end.datetime"))
 
     after <- match("services", class(x), nomatch = 0L)
     class(df) <- append(class(x), "services", after = after)

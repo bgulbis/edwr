@@ -116,13 +116,15 @@ tidy_data.diagnosis <- function(x, ...) {
 #' @export
 #' @rdname tidy_data
 tidy_data.labs <- function(x, censor = TRUE, ...) {
+    df <- x
     # create a column noting if data was censored
     if (censor == TRUE) {
-        df <- mutate_(x, .dots = set_names(
-            x = list(~stringr::str_detect(lab.result, "<"),
-                     ~stringr::str_detect(lab.result, ">")),
-            nm = list("censor.low", "censor.high")
-        ))
+        lab.result <- sym("lab.result")
+        df <- df %>%
+            mutate(
+                !!"censor.low" := stringr::str_detect(!!lab.result, "<"),
+                !!"censor.high" := stringr::str_detect(!!lab.result, ">")
+            )
     }
 
     # convert lab results to numeric values

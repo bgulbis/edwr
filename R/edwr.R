@@ -22,6 +22,7 @@
 #' @importFrom purrr set_names
 #' @importFrom rlang :=
 #' @importFrom rlang enquo
+#' @importFrom rlang parse_expr
 #' @importFrom rlang quo
 #' @importFrom rlang quos
 #' @importFrom rlang sym

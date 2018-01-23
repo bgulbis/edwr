@@ -1461,25 +1461,48 @@ as.vent_times <- function(x, varnames = NULL, extras = NULL) {
 
 #' @rdname set_edwr_class
 #' @export
-as.visits <- function(x) {
+as.visits <- function(x, varnames = NULL, extras = NULL) {
     if (missing(x)) x <- character()
     if (is.visits(x)) return(x)
     if (!is.tbl_edwr(x)) x <- as.tbl_edwr(x)
 
-    df <- rename_(.data = x, .dots = c(val.pie, list(
-        "arrival.datetime" = "`Arrival Date & Time`",
-        "admit.datetime" = "`Admit Date & Time`",
-        "discharge.datetime" = "`Discharge Date & Time`",
-        "visit.type" = "`Encounter Type`",
-        "admit.source" = "`Admit Source`",
-        "admit.type" = "`Admit Type`",
-        "facility" = "`Person Location- Facility (Curr)`",
-        "nurse.unit.admit" = "`Person Location- Nurse Unit (Admit)`"
-    ))) %>%
+    # default EDW names
+    if (attr(x, "data") == "edw" & is.null(varnames)) {
+        varnames <- c(val.pie, list(
+            "arrival.datetime" = "`Arrival Date & Time`",
+            "admit.datetime" = "`Admit Date & Time`",
+            "discharge.datetime" = "`Discharge Date & Time`",
+            "visit.type" = "`Encounter Type`",
+            "admit.source" = "`Admit Source`",
+            "admit.type" = "`Admit Type`",
+            "facility" = "`Person Location- Facility (Curr)`",
+            "nurse.unit.admit" = "`Person Location- Nurse Unit (Admit)`"
+        ))
+
+        # default CDW/MBO names
+    } else if (attr(x, "data") == "mbo" & is.null(varnames)) {
+        varnames <- c(val.mil, list(
+            "arrival.datetime" = "`Date and Time - Arrival`",
+            "admit.datetime" = "`Date and Time - Admit`",
+            "discharge.datetime" = "`Date and Time - Discharge`",
+            "visit.type" = "`Encounter Class Type`",
+            "visit.subtype" = "`Encounter Class Subtype`",
+            "admit.source" = "`Admit Source`",
+            "admit.type" = "`Admit Type`",
+            "facility" = "`Facility (Curr)`",
+            "nurse.unit" = "`Nurse Unit (Curr)`",
+            "nurse.unit.admit" = "`Nurse Unit (Inpatient Admit) LIMITS`"
+        ))
+    }
+
+    # if extra var names are given, append those to the list
+    if (!is.null(extras)) {
+        varnames <- c(varnames, extras)
+    }
+
+    df <- select_(.data = x, .dots = varnames) %>%
         dplyr::distinct_() %>%
-        format_dates("arrival.datetime") %>%
-        format_dates("admit.datetime") %>%
-        format_dates("discharge.datetime")
+        format_dates(c("arrival.datetime", "admit.datetime", "discharge.datetime"))
 
     after <- match("visits", class(x), nomatch = 0L)
     class(df) <- append(class(x), "visits", after = after)

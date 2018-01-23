@@ -130,7 +130,7 @@ as.vent_settings(x)
 
 as.vent_times(x, varnames = NULL, extras = NULL)
 
-as.visits(x)
+as.visits(x, varnames = NULL, extras = NULL)
 
 as.vitals(x, varnames = NULL, extras = NULL)
 

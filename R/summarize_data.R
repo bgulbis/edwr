@@ -147,11 +147,11 @@ summarize_data.meds_inpt <- function(x, units = "hours", cont = TRUE, ...) {
 #' @rdname summarize_data
 summarize_data.meds_home <- function(x, ref, pts = NULL, home = TRUE, ...) {
     # for any med classes, lookup the meds included in the class
-    y <- filter_(ref, .dots = list(~type == "class"))
+    y <- filter(ref, !!sym("type") == "class")
     meds <- med_lookup(y$name)
 
     # join the list of meds with any indivdual meds included
-    y <- filter_(ref, .dots = list(~type == "med"))
+    y <- filter(ref, !!sym("type") == "med")
     lookup.meds <- c(y$name, meds$med.name)
 
     # filter to either home medications or discharge medications, then use the

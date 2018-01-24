@@ -150,25 +150,18 @@ as.blood <- function(x, extras = NULL) {
         ))
     }
 
-    # if extra var names are given, append those to the list
-    if (!is.null(extras)) {
-        varnames <- c(varnames, extras)
-    }
-
     prods <- c("Cryo(.*)" = "cryo",
                "FFP(.*)" = "ffp",
                "(P)?RBC(.*)" = "prbc",
                "Platelet(.*)" = "platelet")
 
-    df <- x %>%
-        rename(!!!varnames) %>%
-        distinct() %>%
+    x %>%
+        assign_names(varnames, extras) %>%
         dplry::mutate_at("blood.prod",
                          stringr::str_replace_all,
                          pattern = prods) %>%
-        format_dates("blood.datetime")
-
-    assign_class(x, df, "blood")
+        format_dates("blood.datetime") %>%
+        assign_class(x, "blood")
 }
 
 #' @rdname set_edwr_class
@@ -188,16 +181,9 @@ as.charges <- function(x, extras = NULL) {
         # default CDW/MBO names
     }
 
-    # if extra var names are given, append those to the list
-    if (!is.null(extras)) {
-        varnames <- c(varnames, extras)
-    }
-
-    df <- x %>%
-        rename(!!!varnames) %>%
-        distinct()
-
-    assign_class(x, df, "charges")
+    x %>%
+        assign_names(varnames, extras) %>%
+        assign_class(x, "charges")
 }
 
 #' @rdname set_edwr_class
@@ -232,17 +218,10 @@ as.demographics <- function(x, extras = NULL) {
         ))
     }
 
-    # if extra var names are given, append those to the list
-    if (!is.null(extras)) {
-        varnames <- c(varnames, extras)
-    }
-
-    df <- x %>%
-        rename(!!!varnames) %>%
-        distinct() %>%
-        dplyr::mutate_at(c("age", "length.stay"), as.numeric)
-
-    assign_class(x, df, "demographics")
+    x %>%
+        assign_names(varnames, extras) %>%
+        dplyr::mutate_at(c("age", "length.stay"), as.numeric) %>%
+        assign_class(x, "demographics")
 }
 
 #' @rdname set_edwr_class
@@ -272,16 +251,9 @@ as.diagnosis <- function(x, extras = NULL) {
         ))
     }
 
-    # if extra var names are given, append those to the list
-    if (!is.null(extras)) {
-        varnames <- c(varnames, extras)
-    }
-
-    df <- x %>%
-        rename(!!!varnames) %>%
-        distinct()
-
-    assign_class(x, df, "diagnosis")
+    x %>%
+        assign_names(varnames, extras) %>%
+        assign_class(x, "diagnosis")
 }
 
 #' @rdname set_edwr_class
@@ -301,186 +273,159 @@ as.drg <- function(x, extras = NULL) {
         # default CDW/MBO names
     }
 
-    # if extra var names are given, append those to the list
-    if (!is.null(extras)) {
-        varnames <- c(varnames, extras)
-    }
-
-    df <- x %>%
-        rename(!!!varnames) %>%
-        distinct()
-
-    assign_class(x, df, "drg")
+    x %>%
+        assign_names(varnames, extras) %>%
+        assign_class(x, "drg")
 }
 
 #' @rdname set_edwr_class
 #' @export
-as.encounters <- function(x, varnames = NULL, extras = NULL) {
+as.encounters <- function(x, extras = NULL) {
     if (missing(x)) stop("Missing object")
     if (is.encounters(x)) return(x)
     if (!is.tbl_edwr(x)) x <- as.tbl_edwr(x)
 
     # default EDW names
-    if (attr(x, "data") == "edw" & is.null(varnames)) {
-        varnames <- c(val.pie, list(
-            "millennium.id" = "`Millennium Encounter ID`",
-            "person.id" = "`Person ID`",
-            "admit.datetime" = "`Admit Date & Time`",
-            "visit.type" = "`Encounter Type`",
-            "facility" = "`Person Location- Facility (Curr)`",
-            "disposition" = "`Discharge Disposition`"
+    if (attr(x, "data") == "edw") {
+        varnames <- c(edw_id, list(
+            "millennium.id" = "Millennium Encounter ID",
+            "person.id" = "Person ID",
+            "admit.datetime" = "Admit Date & Time",
+            "visit.type" = "Encounter Type",
+            "facility" = "Person Location- Facility (Curr)",
+            "disposition" = "Discharge Disposition"
         ))
 
         # default CDW/MBO names
-    } else if (attr(x, "data") == "mbo" & is.null(varnames)) {
-        varnames <- c(val.mil, list(
-            "admit.datetime" = "`Date and Time - Admit`",
-            "visit.type" = "`Encounter Class Subtype`",
-            "facility" = "`Facility (Curr)`",
-            "disposition" = "`Discharge Disposition`"
+    } else {
+        varnames <- c(mbo_id, list(
+            "admit.datetime" = "Date and Time - Admit",
+            "visit.type" = "Encounter Class Subtype",
+            "facility" = "Facility (Curr)",
+            "disposition" = "Discharge Disposition"
         ))
     }
 
-    # if extra var names are given, append those to the list
-    if (!is.null(extras)) {
-        varnames <- c(varnames, extras)
-    }
-
-    df <- select_(.data = x, .dots = varnames) %>%
-        dplyr::distinct_() %>%
-        format_dates("admit.datetime")
-
-    assign_class(x, df, "encounters")
+    x %>%
+        assign_names(varnames, extras) %>%
+        format_dates("admit.datetime") %>%
+        assign_class(x, "encounters")
 }
 
 #' @rdname set_edwr_class
 #' @export
-as.events <- function(x, order_var = TRUE, varnames = NULL, extras = NULL) {
+as.events <- function(x, extras = NULL, order_var = TRUE) {
     if (missing(x)) x <- character()
     if (is.events(x)) return(x)
     if (!is.tbl_edwr(x)) x <- as.tbl_edwr(x)
 
     # default EDW names
-    if (attr(x, "data") == "edw" & is.null(varnames)) {
-        varnames <- c(val.pie, list(
-            "event.datetime" = val.dt,
-            "event" = val.ce,
-            "event.result" = val.res,
-            "event.location" = "`Nurse Unit of Clinical Event`",
-            "order.id" = "`Clinical Event Order ID`"
+    if (attr(x, "data") == "edw") {
+        varnames <- c(edw_id, list(
+            "event.datetime" = event_dt,
+            "event" = event_nm,
+            "event.result" = event_val,
+            "event.location" = "Nurse Unit of Clinical Event",
+            "order.id" = "Clinical Event Order ID"
         ))
 
         # default CDW/MBO names
-    } else if (attr(x, "data") == "mbo" & is.null(varnames)) {
+    } else {
         if (sum(stringr::str_detect(names(x), "Date and Time - Performed")) >= 1) {
-            dt <- "`Date and Time - Performed`"
+            dt <- "Date and Time - Performed"
         } else {
-            dt <- "`Date and Time - Scheduled OR Given On`"
+            dt <- "Date and Time - Scheduled OR Given On"
         }
 
-        varnames <- c(val.mil, list(
+        varnames <- c(mbo_id, list(
             "event.datetime" = dt,
-            "event" = val.ce,
-            "event.result" = val.res,
-            "event.result.units" = "`Clinical Event Result Units`",
-            "event.location" = "`Nurse Unit (Event)`",
-            "event.id" = "`Event Id`",
-            "event.parent.id" = "`Parent Event Id`"
+            "event" = event_nm,
+            "event.result" = event_val,
+            "event.result.units" = "Clinical Event Result Units",
+            "event.location" = "Nurse Unit (Event)",
+            "event.id" = "Event Id",
+            "event.parent.id" = "Parent Event Id"
         ))
     }
 
     if (order_var) {
         varnames <- c(varnames, list(
-            "order.id" = "`Order Id`",
-            "order.parent.id" = "`Parent Order Id`"
+            "order.id" = "Order Id",
+            "order.parent.id" = "Parent Order Id"
         ))
     }
 
-    # if extra var names are given, append those to the list
-    if (!is.null(extras)) {
-        varnames <- c(varnames, extras)
-    }
-
-    df <- select_(.data = x, .dots = varnames) %>%
-        dplyr::distinct_() %>%
+    x %>%
+        assign_names(varnames, extras) %>%
+        dplyr::mutate_at("event", stringr::str_to_lower) %>%
         format_dates("event.datetime") %>%
-        purrrlyr::dmap_at("event", stringr::str_to_lower)
-
-    assign_class(x, df, "events")
+        assign_class(x, "events")
 }
 
 #' @rdname set_edwr_class
 #' @export
-as.icu_assess <- function(x) {
+as.icu_assess <- function(x, extras = NULL) {
     # inherits from events class
     if (missing(x)) x <- character()
     if (is.icu_assess(x)) return(x)
     if (!is.tbl_edwr(x)) x <- as.tbl_edwr(x)
-    if (!is.events(x)) x <- as.events(x)
+    if (!is.events(x)) x <- as.events(x, extras)
 
-    df <- rename_(.data = x, .dots = list(
-        "assess.datetime" = "event.datetime",
-        "assessment" = "event",
-        "assess.result" = "event.result"
-    ))
-
-    assign_class(x, df, "icu_assess")
+    x %>%
+        rename(!!!list(
+            "assess.datetime" = "event.datetime",
+            "assessment" = "event",
+            "assess.result" = "event.result"
+        )) %>%
+        assign_class(x, "icu_assess")
 }
-
 
 #' @rdname set_edwr_class
 #' @export
-as.id <- function(x, varnames = NULL, extras = NULL) {
+as.id <- function(x, extras = NULL) {
     if (missing(x)) stop("Missing object")
     if (is.id(x)) return(x)
     if (!is.tbl_edwr(x)) x <- as.tbl_edwr(x)
 
     # default EDW names
-    if (attr(x, "data") == "edw" & is.null(varnames)) {
+    if (attr(x, "data") == "edw") {
         varnames <- c(val.pie, list(
-            "millennium.id" = "`Millennium Encounter ID`",
-            "fin" = "`Formatted Financial Nbr`",
-            "person.id" = "`Person ID`"
+            "millennium.id" = "Millennium Encounter ID",
+            "fin" = "Formatted Financial Nbr",
+            "person.id" = "Person ID"
         ))
 
         # default CDW/MBO names
-    } else if (attr(x, "data") == "mbo" & is.null(varnames)) {
+    } else {
         varnames <- c(val.mil, list(
-            "fin" = "`Financial Number`"
+            "fin" = "Financial Number"
         ))
     }
 
-    # if extra var names are given, append those to the list
-    if (!is.null(extras)) {
-        varnames <- c(varnames, extras)
-    }
-
-    df <- select_(.data = x, .dots = varnames) %>%
-        dplyr::distinct_()
-
-    assign_class(x, df, "id")
+    x %>%
+        assign_names(varnames, extras) %>%
+        assign_class(x, "id")
 }
 
 #' @rdname set_edwr_class
 #' @export
-as.labs <- function(x, varnames = NULL, extras = NULL) {
+as.labs <- function(x, extras = NULL) {
     # inherits from events class
     if (missing(x)) x <- character()
     if (is.labs(x)) return(x)
     if (!is.tbl_edwr(x)) x <- as.tbl_edwr(x)
 
     # default EDW names
-    if (attr(x, "data") == "edw" & is.null(varnames)) {
+    if (attr(x, "data") == "edw") {
         # if (!is.events(x)) x <- as.events(x)
-        varnames <- c(val.pie, list(
-            "lab.datetime" = val.dt,
-            "lab" = val.ce,
-            "lab.result" = val.res
+        varnames <- c(edw_id, list(
+            "lab.datetime" = event_dt,
+            "lab" = event_nm,
+            "lab.result" = event_val
         ))
-
-        # default CDW/MBO names
-    } else if (attr(x, "data") == "mbo" & is.null(varnames)) {
-        varnames <- c(val.mil, list(
+    # default CDW/MBO names
+    } else {
+        varnames <- c(mbo_id, list(
             "lab.datetime" = "`Date and Time - Nurse Draw`",
             "lab" = "`Lab Event (FILTER ON)`",
             "lab.result" = "`Lab Result`",
@@ -490,226 +435,201 @@ as.labs <- function(x, varnames = NULL, extras = NULL) {
         ))
     }
 
-    # if extra var names are given, append those to the list
-    if (!is.null(extras)) {
-        varnames <- c(varnames, extras)
-    }
-
-    df <- select_(.data = x, .dots = varnames) %>%
-        dplyr::distinct_() %>%
-        purrrlyr::dmap_at("lab", stringr::str_to_lower) %>%
-        format_dates("lab.datetime")
-
-    assign_class(x, df, "labs")
+    x %>%
+        assign_names(varnames, extras) %>%
+        dplyr::mutate_at("lab", stringr::str_to_lower) %>%
+        format_dates("lab.datetime") %>%
+        assign_class(x, "labs")
 }
 
 #' @rdname set_edwr_class
 #' @export
-as.locations <- function(x, varnames = NULL, extras = NULL) {
+as.locations <- function(x, extras = NULL) {
     if (missing(x)) x <- character()
     if (is.locations(x)) return(x)
     if (!is.tbl_edwr(x)) x <- as.tbl_edwr(x)
 
     # default EDW names
-    if (attr(x, "data") == "edw" & is.null(varnames)) {
+    if (attr(x, "data") == "edw") {
         varnames <- c(val.pie, list(
-            "arrive.datetime" = "`Location Arrival Date & Time`",
-            "depart.datetime" = "`Location Depart Date & Time`",
-            "unit.to" = "`Person Location - Nurse Unit (To)`",
-            "unit.from" = "`Person Location - Nurse Unit (From)`"
+            "arrive.datetime" = "Location Arrival Date & Time",
+            "depart.datetime" = "Location Depart Date & Time",
+            "unit.to" = "Person Location - Nurse Unit (To)",
+            "unit.from" = "Person Location - Nurse Unit (From)"
         ))
 
         # default CDW/MBO names
-    } else if (attr(x, "data") == "mbo" & is.null(varnames)) {
+    } else {
         varnames <- c(val.mil, list(
-            "arrive.datetime" = "`Date and Time - Nurse Unit Begin`",
-            "depart.datetime" = "`Date and Time - Nurse Unit End`",
-            "unit.name" = "`Nurse Unit All`"
+            "arrive.datetime" = "Date and Time - Nurse Unit Begin",
+            "depart.datetime" = "Date and Time - Nurse Unit End",
+            "unit.name" = "Nurse Unit All"
         ))
     }
 
-    # if extra var names are given, append those to the list
-    if (!is.null(extras)) {
-        varnames <- c(varnames, extras)
-    }
-
-    df <- select_(.data = x, .dots = varnames) %>%
-        dplyr::distinct_() %>%
-        format_dates(c("arrive.datetime", "depart.datetime"))
-
-    # if (attr(x, "data") == "edw") {
-    #     df <- purrrlyr::dmap_at(df, dplyr::na_if, y = "")
-    # }
-
-    assign_class(x, df, "locations")
+    x %>%
+        assign_names(varnames, extras) %>%
+        format_dates(c("arrive.datetime", "depart.datetime")) %>%
+        assign_class(x, "locations")
 }
 
 #' @rdname set_edwr_class
 #' @export
-as.measures <- function(x, varnames = NULL, extras = NULL) {
+as.measures <- function(x, extras = NULL) {
     # inherits from events class
     if (missing(x)) x <- character()
     if (is.measures(x)) return(x)
     if (!is.tbl_edwr(x)) x <- as.tbl_edwr(x)
 
     # default EDW names
-    if (attr(x, "data") == "edw" & is.null(varnames)) {
+    if (attr(x, "data") == "edw") {
         if (!is.events(x)) x <- as.events(x)
-        varnames <- c(val.pie, list(
+        varnames <- c(edw_id, list(
             "measure.datetime" = "event.datetime",
             "measure" = "event",
             "measure.result" = "event.result",
-            "measure.units" = "`Clinical Event Result Units`"
+            "measure.units" = "Clinical Event Result Units"
         ))
 
         # default CDW/MBO names
-    } else if (attr(x, "data") == "mbo" & is.null(varnames)) {
-        varnames <- c(val.mil, list(
-            "measure.datetime" = "`Date and Time - Performed`",
-            "measure" = "`Clinical Event`",
-            "measure.result" = "`Clinical Event Result`",
-            "measure.units" = "`Clinical Event Result Units`"
+    } else {
+        varnames <- c(mbo_id, list(
+            "measure.datetime" = "Date and Time - Performed",
+            "measure" = "Clinical Event",
+            "measure.result" = "Clinical Event Result",
+            "measure.units" = "Clinical Event Result Units"
         ))
     }
 
-    # if extra var names are given, append those to the list
-    if (!is.null(extras)) {
-        varnames <- c(varnames, extras)
-    }
-
-    df <- select_(.data = x, .dots = varnames) %>%
-        dplyr::distinct_() %>%
-        purrrlyr::dmap_at("measure", stringr::str_to_lower) %>%
-        purrrlyr::dmap_at("measure.result", as.numeric) %>%
-        format_dates("measure.datetime")
-
-    assign_class(x, df, "measures")
+    x %>%
+        assign_names(varnames, extras) %>%
+        dplyr::mutate_at("measure", stringr::str_to_lower) %>%
+        dplyr::mutate_at("measure.result", as.numeric) %>%
+        format_dates("measure.datetime") %>%
+        assign_class(x, "measures")
 }
 
 #' @rdname set_edwr_class
 #' @export
-as.meds_admin <- function(x, varnames = NULL, extras = NULL) {
+as.meds_admin <- function(x, extras = NULL) {
     if (missing(x)) x <- character()
     if (is.meds_admin(x)) return(x)
     if (!is.tbl_edwr(x)) x <- as.tbl_edwr(x)
 
     # default EDW names
-    if (attr(x, "data") == "edw" & is.null(varnames)) {
-        varnames <- c(val.pie, list(
-            "order.id" = "`Clinical Event Order ID`",
-            "event.id" = "`Event ID`",
-            "med.datetime" = val.dt,
-            "med" = val.ce
+    if (attr(x, "data") == "edw") {
+        varnames <- c(edw_id, list(
+            "order.id" = "Clinical Event Order ID",
+            "event.id" = "Event ID",
+            "med.datetime" = event_dt,
+            "med" = event_nm
         ))
 
         # default CDW/MBO names
-    } else if (attr(x, "data") == "mbo" & is.null(varnames)) {
-        varnames <- c(val.mil, list(
-            "med" = "`Medication (Generic)`",
-            "scheduled_datetime" = "`Date and Time - Scheduled`",
-            "admin_datetime" = "`Date and Time - Administration`",
-            "admin_end_datetime" = "`Date and Time - Administration End`",
-            "document_source" = "`Med Documentation Source`",
-            "scan_patient" = "`Scanned Armband (PPID)`",
-            "scan_med" = "`Scanned Medication (PMID)`",
-            "med.location" = "`Nurse Unit (Med)`",
-            "order.id" = "`Order Id`",
-            "order.parent.id" = "`Parent Order Id`"
+    } else {
+        varnames <- c(mbo_id, list(
+            "med" = "Medication (Generic)",
+            "scheduled_datetime" = "Date and Time - Scheduled",
+            "admin_datetime" = "Date and Time - Administration",
+            "admin_end_datetime" = "Date and Time - Administration End",
+            "document_source" = "Med Documentation Source",
+            "scan_patient" = "Scanned Armband (PPID)",
+            "scan_med" = "Scanned Medication (PMID)",
+            "med.location" = "Nurse Unit (Med)",
+            "order.id" = "Order Id",
+            "order.parent.id" = "Parent Order Id"
         ))
     }
 
-    # if extra var names are given, append those to the list
-    if (!is.null(extras)) {
-        varnames <- c(varnames, extras)
-    }
-
-    df <- select_(.data = x, .dots = varnames) %>%
-        dplyr::distinct_() %>%
-        purrrlyr::dmap_at("med", stringr::str_to_lower) %>%
-        format_dates(c("scheduled_datetime", "admin_datetime", "admin_end_datetime"))
-
-    assign_class(x, df, "meds_admin")
+    x %>%
+        assign_names(varnames, extras) %>%
+        dplyr::mutate_at("med", stringr::str_to_lower) %>%
+        format_dates(c("scheduled_datetime",
+                       "admin_datetime",
+                       "admin_end_datetime")) %>%
+        assign_class(x, "meds_admin")
 }
 
 #' @rdname set_edwr_class
 #' @export
-as.meds_cont <- function(x) {
+as.meds_cont <- function(x, extras = NULL) {
     if (missing(x)) x <- character()
     if (is.meds_cont(x)) return(x)
     if (!is.tbl_edwr(x)) x <- as.tbl_edwr(x)
 
-    df <- rename_(.data = x, .dots = c(val.pie, list(
-        "order.id" = "`Clinical Event Order ID`",
-        "event.id" = "`Event ID`",
-        "med.datetime" = val.dt,
-        "med" = val.ce,
-        "med.rate" = "`Infusion Rate`",
-        "med.rate.units" = "`Infusion Rate Unit`",
-        "route" = "`Route of Administration - Short`",
-        "event.tag" = "`Event Tag`"
-    ))) %>%
-        dplyr::distinct_() %>%
-        purrrlyr::dmap_at("med", stringr::str_to_lower) %>%
-        purrrlyr::dmap_at("med.rate.units", dplyr::na_if, y = "") %>%
-        format_dates("med.datetime")
+    # default EDW names
+    if (attr(x, "data") == "edw") {
+        varnames <- c(edw_id, list(
+            "order.id" = "Clinical Event Order ID",
+            "event.id" = "Event ID",
+            "med.datetime" = event_dt,
+            "med" = event_nm,
+            "med.rate" = "Infusion Rate",
+            "med.rate.units" = "Infusion Rate Unit",
+            "route" = "Route of Administration - Short",
+            "event.tag" = "Event Tag"
+        ))
+    }
 
-    assign_class(x, df, "meds_cont")
+    x %>%
+        assign_names(varnames, extras) %>%
+        dplyr::mutate_at("med", stringr::str_to_lower) %>%
+        dplyr::mutate_at("med.rate.units", dplyr::na_if, y = "") %>%
+        format_dates("med.datetime") %>%
+        assign_class(x, "meds_cont")
 }
 
 #' @rdname set_edwr_class
 #' @export
-as.meds_freq <- function(x) {
+as.meds_freq <- function(x, extras = NULL) {
     # inherits from meds_sched class
     if (missing(x)) x <- character()
     if (is.meds_freq(x)) return(x)
     if (!is.tbl_edwr(x)) x <- as.tbl_edwr(x)
-    if (!is.meds_sched(x)) x <- as.meds_sched(x)
+    if (!is.meds_sched(x)) x <- as.meds_sched(x, extras)
 
-    df <- rename_(.data = x, .dots = list(
-        "freq" = "`Parent Order Frequency Description`"
-    ))
-
-    assign_class(x, df, "meds_freq")
+    x %>%
+        rename(!!!(list("freq" = "Parent Order Frequency Description"))) %>%
+        assign_class(x, "meds_freq")
 }
 
 #' @rdname set_edwr_class
 #' @export
-as.meds_home <- function(x, varnames = NULL, extras = NULL) {
+as.meds_home <- function(x, extras = NULL) {
+
+    fx <- function(df, x) {
+        if (attr(x, "data") == "mbo") {
+            df <- format_dates(df, "order.datetime")
+        }
+        df
+    }
+
     if (missing(x)) x <- character()
     if (is.meds_home(x)) return(x)
     if (!is.tbl_edwr(x)) x <- as.tbl_edwr(x)
 
     # default EDW names
-    if (attr(x, "data") == "edw" & is.null(varnames)) {
-        varnames <- c(val.pie, list(
-            "med" = "`Order Catalog Short Description`",
-            "order.name" = "`Order Catalog Mnemonic`",
-            "med.type" = "`Orig Orderable Type-Flag Desc`"
+    if (attr(x, "data") == "edw") {
+        varnames <- c(edw_id, list(
+            "med" = "Order Catalog Short Description",
+            "order.name" = "Order Catalog Mnemonic",
+            "med.type" = "Orig Orderable Type-Flag Desc"
         ))
 
         # default CDW/MBO names
-    } else if (attr(x, "data") == "mbo" & is.null(varnames)) {
-        varnames <- c(val.mil, list(
-            "order.datetime" = "`Date and Time - Original (Placed)`",
-            "med" = "`Mnemonic (Primary Generic) FILTER ON`",
-            "med.type" = "`Order Type`"
+    } else {
+        varnames <- c(mbo_id, list(
+            "order.datetime" = "Date and Time - Original (Placed)",
+            "med" = "Mnemonic (Primary Generic) FILTER ON",
+            "med.type" = "Order Type"
         ))
     }
 
-    # if extra var names are given, append those to the list
-    if (!is.null(extras)) {
-        varnames <- c(varnames, extras)
-    }
-
-    df <- select_(.data = x, .dots = varnames) %>%
-        dplyr::distinct_() %>%
-        purrrlyr::dmap_at("med", stringr::str_to_lower)
-
-    if (attr(x, "data") == "mbo") {
-        df <- format_dates(df, "order.datetime")
-    }
-
-    assign_class(x, df, "meds_home")
+    x %>%
+        assign_names(varnames, extras) %>%
+        dplyr::mutate_at("med", stringr::str_to_lower) %>%
+        fx(x) %>%
+        assign_class(x, "meds_home")
 }
 
 #' @rdname set_edwr_class
@@ -762,7 +682,7 @@ as.meds_inpt <- function(x, varnames = NULL, extras = NULL) {
         # purrrlyr::dmap_at("med.rate.units", ~dplyr::na_if(.x, "")) %>%
         format_dates("med.datetime")
 
-    assign_class(x, df, "med_inpt")
+    assign_class(df, x,  "meds_inpt")
 }
 
 #' @rdname set_edwr_class
@@ -786,7 +706,7 @@ as.meds_sched <- function(x) {
         purrrlyr::dmap_at("med", stringr::str_to_lower) %>%
         format_dates("med.datetime")
 
-    assign_class(x, df, "meds_sched")
+    assign_class(df, x,  "meds_sched")
 }
 
 #' @rdname set_edwr_class
@@ -802,7 +722,7 @@ as.mrn <- function(x) {
     )) %>%
         dplyr::distinct_()
 
-    assign_class(x, df, "mrn")
+    assign_class(df, x,  "mrn")
 }
 
 #' @rdname set_edwr_class
@@ -817,7 +737,7 @@ as.mpp <- function(x) {
     ))) %>%
         dplyr::distinct_()
 
-    assign_class(x, df, "mpp")
+    assign_class(df, x,  "mpp")
 }
 
 #' @rdname set_edwr_class
@@ -866,7 +786,7 @@ as.order_action <- function(x, varnames = NULL, extras = NULL) {
         dplyr::distinct_() %>%
         format_dates("action.datetime")
 
-    assign_class(x, df, "order_action")
+    assign_class(df, x,  "order_action")
 }
 
 
@@ -901,7 +821,7 @@ as.order_by <- function(x) {
         dplyr::distinct_() %>%
         format_dates("action.datetime")
 
-    assign_class(x, df, "order_by")
+    assign_class(df, x,  "order_by")
 }
 
 #' @rdname set_edwr_class
@@ -954,7 +874,7 @@ as.order_detail <- function(x, varnames = NULL, extras = NULL) {
         dplyr::distinct_() %>%
         format_dates(dt_name)
 
-    assign_class(x, df, "order_detail")
+    assign_class(df, x,  "order_detail")
 }
 
 #' @rdname set_edwr_class
@@ -983,7 +903,7 @@ as.order_info <- function(x, varnames = NULL, extras = NULL) {
         distinct_() %>%
         format_dates("detail.datetime")
 
-    assign_class(x, df, "order_info")
+    assign_class(df, x,  "order_info")
 }
 
 #' @rdname set_edwr_class
@@ -1021,7 +941,7 @@ as.order_timing <- function(x) {
         format_dates(dtm)
         # purrrlyr::dmap_at(dtm, format_dates)
 
-    assign_class(x, df, "order_timing")
+    assign_class(df, x,  "order_timing")
 }
 
 #' @rdname set_edwr_class
@@ -1064,7 +984,7 @@ as.order_verify <- function(x, varnames = NULL, extras = NULL) {
         purrrlyr::dmap_at("med", stringr::str_to_lower) %>%
         format_dates(c("order_datetime", "start_datetime", "verify_datetime"))
 
-    assign_class(x, df, "order_verify")
+    assign_class(df, x,  "order_verify")
 }
 
 
@@ -1109,7 +1029,7 @@ as.output <- function(x, varnames = NULL, extras = NULL) {
         purrrlyr::dmap_at("output.result", as.numeric) %>%
         format_dates("output.datetime")
 
-    assign_class(x, df, "output")
+    assign_class(df, x,  "output")
 }
 
 #' @rdname set_edwr_class
@@ -1153,7 +1073,7 @@ as.pain_scores <- function(x, varnames = NULL, extras = NULL) {
         format_dates("event.datetime") %>%
         purrrlyr::dmap_at("event", stringr::str_to_lower)
 
-    assign_class(x, df, "events")
+    assign_class(df, x,  "events")
 }
 
 #' @rdname set_edwr_class
@@ -1213,7 +1133,7 @@ as.problems <- function(x) {
             nm = list("onset.datetime", "life.cycle.datetime")
         ))
 
-    assign_class(x, df, "problems")
+    assign_class(df, x,  "problems")
 }
 
 #' @rdname set_edwr_class
@@ -1251,7 +1171,7 @@ as.procedures <- function(x, varnames = NULL, extras = NULL) {
         dplyr::distinct_() %>%
         format_dates("proc.date")
 
-    assign_class(x, df, "procedures")
+    assign_class(df, x,  "procedures")
 }
 
 #' @rdname set_edwr_class
@@ -1271,7 +1191,7 @@ as.radiology <- function(x) {
             nm = "rad.datetime"
         ))
 
-    assign_class(x, df, "radiology")
+    assign_class(df, x,  "radiology")
 }
 
 #' @rdname set_edwr_class
@@ -1295,7 +1215,7 @@ as.services <- function(x) {
         )) %>%
         format_dates(c("start.datetime", "end.datetime"))
 
-    assign_class(x, df, "services")
+    assign_class(df, x,  "services")
 }
 
 #' @rdname set_edwr_class
@@ -1331,7 +1251,7 @@ as.surgery_times <- function(x, varnames = NULL, extras = NULL) {
                        "recovery_in",
                        "recovery_out"))
 
-    assign_class(x, df, "surgery_times")
+    assign_class(df, x,  "surgery_times")
 }
 
 #' @rdname set_edwr_class
@@ -1356,7 +1276,7 @@ as.surgeries <- function(x) {
 
     names(df) <- stringr::str_to_lower(names(df))
 
-    assign_class(x, df, "surgeries")
+    assign_class(df, x,  "surgeries")
 }
 
 #' @rdname set_edwr_class
@@ -1374,7 +1294,7 @@ as.uop <- function(x) {
         "uop.result" = "event.result"
     ))
 
-    assign_class(x, df, "uop")
+    assign_class(df, x,  "uop")
 }
 
 #' @rdname set_edwr_class
@@ -1392,7 +1312,7 @@ as.vent_settings <- function(x) {
         "vent.result" = "event.result"
     ))
 
-    assign_class(x, df, "vent_settings")
+    assign_class(df, x,  "vent_settings")
 }
 
 #' @rdname set_edwr_class
@@ -1432,7 +1352,7 @@ as.vent_times <- function(x, varnames = NULL, extras = NULL) {
         purrrlyr::dmap_at("vent.event", stringr::str_to_lower) %>%
         format_dates("vent.datetime")
 
-    assign_class(x, df, "vent_times")
+    assign_class(df, x,  "vent_times")
 }
 
 #' @rdname set_edwr_class
@@ -1480,7 +1400,7 @@ as.visits <- function(x, varnames = NULL, extras = NULL) {
         dplyr::distinct_() %>%
         format_dates(c("arrival.datetime", "admit.datetime", "discharge.datetime"))
 
-    assign_class(x, df, "visits")
+    assign_class(df, x,  "visits")
 }
 
 #' @rdname set_edwr_class
@@ -1525,7 +1445,7 @@ as.vitals <- function(x, varnames = NULL, extras = NULL) {
         purrrlyr::dmap_at("vital.result", as.numeric) %>%
         format_dates("vital.datetime")
 
-    assign_class(x, df, "vitals")
+    assign_class(df, x,  "vitals")
 }
 
 #' @rdname set_edwr_class
@@ -1564,7 +1484,7 @@ as.warfarin <- function(x, varnames = NULL, extras = NULL) {
         purrrlyr::dmap_at("warfarin.event", stringr::str_to_lower) %>%
         format_dates("warfarin.datetime")
 
-    assign_class(x, df, "warfarin")
+    assign_class(df, x,  "warfarin")
 }
 
 # class test functions ---------------------------------

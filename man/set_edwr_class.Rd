@@ -64,27 +64,27 @@ as.diagnosis(x, extras = NULL)
 
 as.drg(x, extras = NULL)
 
-as.encounters(x, varnames = NULL, extras = NULL)
+as.encounters(x, extras = NULL)
 
-as.events(x, order_var = TRUE, varnames = NULL, extras = NULL)
+as.events(x, extras = NULL, order_var = TRUE)
 
-as.icu_assess(x)
+as.icu_assess(x, extras = NULL)
 
-as.id(x, varnames = NULL, extras = NULL)
+as.id(x, extras = NULL)
 
-as.labs(x, varnames = NULL, extras = NULL)
+as.labs(x, extras = NULL)
 
-as.locations(x, varnames = NULL, extras = NULL)
+as.locations(x, extras = NULL)
 
-as.measures(x, varnames = NULL, extras = NULL)
+as.measures(x, extras = NULL)
 
-as.meds_admin(x, varnames = NULL, extras = NULL)
+as.meds_admin(x, extras = NULL)
 
-as.meds_cont(x)
+as.meds_cont(x, extras = NULL)
 
-as.meds_freq(x)
+as.meds_freq(x, extras = NULL)
 
-as.meds_home(x, varnames = NULL, extras = NULL)
+as.meds_home(x, extras = NULL)
 
 as.meds_inpt(x, varnames = NULL, extras = NULL)
 
@@ -141,11 +141,11 @@ as.warfarin(x, varnames = NULL, extras = NULL)
 
 \item{extras}{named character list; if given, will append to default varnames}
 
-\item{varnames}{named character list, where the name is the desired variable
-name; overrides default names}
-
 \item{order_var}{logical indicating if order.id fields are included, defaults
 to TRUE}
+
+\item{varnames}{named character list, where the name is the desired variable
+name; overrides default names}
 }
 \description{
 Takes an R object and sets class to an edwr type.

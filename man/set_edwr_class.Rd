@@ -86,19 +86,19 @@ as.meds_freq(x, extras = NULL)
 
 as.meds_home(x, extras = NULL)
 
-as.meds_inpt(x, varnames = NULL, extras = NULL)
+as.meds_inpt(x, extras = NULL)
 
-as.meds_sched(x)
+as.meds_sched(x, extras = NULL)
 
-as.mrn(x)
+as.mrn(x, extras = NULL)
 
-as.mpp(x)
+as.mpp(x, extras = NULL)
 
-as.order_action(x, varnames = NULL, extras = NULL)
+as.order_action(x, extras = NULL)
 
-as.order_by(x)
+as.order_by(x, extras = NULL)
 
-as.order_detail(x, varnames = NULL, extras = NULL)
+as.order_detail(x, extras = NULL)
 
 as.order_info(x, varnames = NULL, extras = NULL)
 

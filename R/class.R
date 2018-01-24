@@ -12,6 +12,9 @@ val.res <- "`Clinical Event Result`"
 
 edw_id <- list("pie.id" = "PowerInsight Encounter Id")
 mbo_id <- list("millennium.id" = "Encounter Identifier")
+event_dt <- "Clinical Event End Date/Time"
+event_nm <- "Clinical Event"
+event_val <- "Clinical Event Result"
 
 # constructor functions --------------------------------
 
@@ -164,34 +167,33 @@ as.charges <- function(x) {
 
 #' @rdname set_edwr_class
 #' @export
-as.demographics <- function(x, varnames = NULL, extras = NULL) {
+as.demographics <- function(x, extras = NULL) {
     if (missing(x)) stop("Missing object")
     if (is.demographics(x)) return(x)
     if (!is.tbl_edwr(x)) x <- as.tbl_edwr(x)
 
     # default EDW names
-    if (attr(x, "data") == "edw" & is.null(varnames)) {
-        varnames <- c(val.pie, list(
-            "age" = "`Age- Years (Visit)`",
+    if (attr(x, "data") == "edw") {
+        varnames <- c(edw_id, list(
+            "age" = "Age- Years (Visit)",
             "gender" = "Sex",
             "race" = "Race",
-            "disposition" = "`Discharge Disposition`",
-            "length.stay" = "`LOS (Actual)`",
-            "visit.type" = "`Encounter Type`",
-            "person.id" = "`Person ID`",
-            "facility" = "`Person Location- Facility (Curr)`"
+            "disposition" = "Discharge Disposition",
+            "length.stay" = "LOS (Actual)",
+            "visit.type" = "Encounter Type",
+            "person.id" = "Person ID",
+            "facility" = "Person Location- Facility (Curr)"
         ))
-
-        # default CDW/MBO names
-    } else if (attr(x, "data") == "mbo" & is.null(varnames)) {
-        varnames <- c(val.mil, list(
-            "age" = "`Age- Years (At Admit)`",
+    # default CDW/MBO names
+    } else {
+        varnames <- c(mbo_id, list(
+            "age" = "Age- Years (At Admit)",
             "gender" = "Gender",
             "race" = "Race",
-            "disposition" = "`Discharge Disposition`",
-            "length.stay" = "`LOS (Curr)`",
-            "visit.type" = "`Encounter Class Subtype`",
-            "facility" = "`Facility (Curr)`"
+            "disposition" = "Discharge Disposition",
+            "length.stay" = "LOS (Curr)",
+            "visit.type" = "Encounter Class Subtype",
+            "facility" = "Facility (Curr)"
         ))
     }
 
@@ -200,9 +202,10 @@ as.demographics <- function(x, varnames = NULL, extras = NULL) {
         varnames <- c(varnames, extras)
     }
 
-    df <- select_(.data = x, .dots = varnames) %>%
-        dplyr::distinct_() %>%
-        purrrlyr::dmap_at(c("age", "length.stay"), as.numeric)
+    df <- x %>%
+        rename(!!!varnames) %>%
+        distinct() %>%
+        dplyr::mutate_at(c("age", "length.stay"), as.numeric)
 
     after <- match("demographics", class(x), nomatch = 0L)
     class(df) <- append(class(x), "demographics", after = after)
@@ -1158,45 +1161,39 @@ as.pain_scores <- function(x, varnames = NULL, extras = NULL) {
 
 #' @rdname set_edwr_class
 #' @export
-as.patients <- function(x, varnames = NULL, extras = NULL) {
+as.patients <- function(x, extras = NULL) {
     if (missing(x)) stop("Missing object")
     if (is.patients(x)) return(x)
     if (!is.tbl_edwr(x)) x <- as.tbl_edwr(x)
 
     # default EDW names
-    if (attr(x, "data") == "edw" & is.null(varnames)) {
-        cols <- c(edw_id, list(
+    if (attr(x, "data") == "edw") {
+        varnames <- c(edw_id, list(
             "age" = "Age- Years (Visit)",
             "discharge.datetime" = "Discharge Date & Time",
             "visit.type" = "Encounter Type",
             "facility" = "Person Location- Facility (Curr)"
         ))
     # default CDW/MBO names
-    } else if (attr(x, "data") == "mbo" & is.null(varnames)) {
-        cols <- c(mbo_id, list(
+    } else {
+        varnames <- c(mbo_id, list(
             "age" = "Age- Years (At Admit)",
             "discharge.datetime" = "Date and Time - Discharge",
             "visit.type" = "Encounter Class Subtype",
             "facility" = "Facility (Curr)"
         ))
-    } else {
-        cols <- varnames
     }
 
     # if extra var names are given, append those to the list
     if (!is.null(extras)) {
-        cols <- c(cols, extras)
+        varnames <- c(varnames, extras)
     }
 
-    if (is.null(varnames)) {
-        df <- x %>%
-            rename(!!!cols) %>%
-            distinct() %>%
-            dplyr::mutate_at("age", as.numeric) %>%
-            format_dates("discharge.datetime")
-    } else {
-        df <- x
-    }
+    df <- x %>%
+        rename(!!!varnames) %>%
+        distinct() %>%
+        dplyr::mutate_at("age", as.numeric) %>%
+        format_dates("discharge.datetime")
 
     after <- match("patients", class(x), nomatch = 0L)
     class(df) <- append(class(x), "patients", after = after)

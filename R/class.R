@@ -22,7 +22,7 @@ event_val <- "Clinical Event Result"
 #' @param df new data_frame
 #' @param new_class string with new class name
 #'
-#' @return
+#' @return data frame
 #'
 #' @keywords internal
 assign_class <- function(x, df, new_class) {
@@ -31,7 +31,19 @@ assign_class <- function(x, df, new_class) {
     df
 }
 
-
+#' Assign desired names to columns
+#'
+#' @param x data frame
+#' @param varnames named list
+#'
+#' @return data frame
+#'
+#' @keywords internal
+assign_names <- function(x, varnames) {
+    x %>%
+        rename(!!!varnames) %>%
+        distinct()
+}
 
 # constructor functions --------------------------------
 
@@ -100,10 +112,7 @@ as.admit <- function(x, extras = NULL) {
         varnames <- c(varnames, extras)
     }
 
-    df <- x %>%
-        rename(!!!varnames) %>%
-        distinct()
-
+    df <- assign_names(x, varnames)
     assign_class(x, df, "admit")
 }
 

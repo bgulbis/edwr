@@ -10,6 +10,9 @@ val.dt <- "`Clinical Event End Date/Time`"
 val.ce <- "`Clinical Event`"
 val.res <- "`Clinical Event Result`"
 
+edw_id <- list("pie.id" = "PowerInsight Encounter Id")
+mbo_id <- list("millennium.id" = "Encounter Identifier")
+
 # constructor functions --------------------------------
 
 #' Construct edwr data types
@@ -1162,32 +1165,38 @@ as.patients <- function(x, varnames = NULL, extras = NULL) {
 
     # default EDW names
     if (attr(x, "data") == "edw" & is.null(varnames)) {
-        varnames <- c(val.pie, list(
-            "age" = "`Age- Years (Visit)`",
-            "discharge.datetime" = "`Discharge Date & Time`",
-            "visit.type" = "`Encounter Type`",
-            "facility" = "`Person Location- Facility (Curr)`"
+        cols <- c(edw_id, list(
+            "age" = "Age- Years (Visit)",
+            "discharge.datetime" = "Discharge Date & Time",
+            "visit.type" = "Encounter Type",
+            "facility" = "Person Location- Facility (Curr)"
         ))
-
     # default CDW/MBO names
     } else if (attr(x, "data") == "mbo" & is.null(varnames)) {
-        varnames <- c(val.mil, list(
-            "age" = "`Age- Years (At Admit)`",
-            "discharge.datetime" = "`Date and Time - Discharge`",
-            "visit.type" = "`Encounter Class Subtype`",
-            "facility" = "`Facility (Curr)`"
+        cols <- c(mbo_id, list(
+            "age" = "Age- Years (At Admit)",
+            "discharge.datetime" = "Date and Time - Discharge",
+            "visit.type" = "Encounter Class Subtype",
+            "facility" = "Facility (Curr)"
         ))
+    } else {
+        cols <- varnames
     }
 
     # if extra var names are given, append those to the list
     if (!is.null(extras)) {
-        varnames <- c(varnames, extras)
+        cols <- c(cols, extras)
     }
 
-    df <- rename_(.data = x, .dots = varnames) %>%
-        dplyr::distinct_() %>%
-        purrrlyr::dmap_at("age", as.numeric) %>%
-        format_dates("discharge.datetime")
+    if (is.null(varnames)) {
+        df <- x %>%
+            rename(!!!cols) %>%
+            distinct() %>%
+            dplyr::mutate_at("age", as.numeric) %>%
+            format_dates("discharge.datetime")
+    } else {
+        df <- x
+    }
 
     after <- match("patients", class(x), nomatch = 0L)
     class(df) <- append(class(x), "patients", after = after)

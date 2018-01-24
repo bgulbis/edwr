@@ -18,14 +18,14 @@ event_val <- "Clinical Event Result"
 
 #' Assign edwr class type
 #'
-#' @param x initial data_frame
 #' @param df new data_frame
+#' @param x initial data_frame
 #' @param new_class string with new class name
 #'
 #' @return data frame
 #'
 #' @keywords internal
-assign_class <- function(x, df, new_class) {
+assign_class <- function(df, x, new_class) {
     after <- match(new_class, class(x), nomatch = 0L)
     class(df) <- append(class(x), new_class, after = after)
     df
@@ -34,12 +34,18 @@ assign_class <- function(x, df, new_class) {
 #' Assign desired names to columns
 #'
 #' @param x data frame
-#' @param varnames named list
+#' @param varnames named list of standard column names for given class
+#' @param extras optional named list of additional column names
 #'
 #' @return data frame
 #'
 #' @keywords internal
-assign_names <- function(x, varnames) {
+assign_names <- function(x, varnames, extras = NULL) {
+    # if extra var names are given, append those to the list
+    if (!is.null(extras)) {
+        varnames <- c(varnames, extras)
+    }
+
     x %>%
         rename(!!!varnames) %>%
         distinct()
@@ -107,13 +113,9 @@ as.admit <- function(x, extras = NULL) {
         ))
     }
 
-    # if extra var names are given, append those to the list
-    if (!is.null(extras)) {
-        varnames <- c(varnames, extras)
-    }
-
-    df <- assign_names(x, varnames)
-    assign_class(x, df, "admit")
+    x %>%
+        assign_names(varnames, extras) %>%
+        assign_class(x, "admit")
 }
 
 
@@ -1179,18 +1181,11 @@ as.patients <- function(x, extras = NULL) {
         ))
     }
 
-    # if extra var names are given, append those to the list
-    if (!is.null(extras)) {
-        varnames <- c(varnames, extras)
-    }
-
-    df <- x %>%
-        rename(!!!varnames) %>%
-        distinct() %>%
+    x %>%
+        assign_names(varnames, extras) %>%
         dplyr::mutate_at("age", as.numeric) %>%
-        format_dates("discharge.datetime")
-
-    assign_class(x, df, "patients")
+        format_dates("discharge.datetime") %>%
+        assign_class(x, "patients")
 }
 
 #' @rdname set_edwr_class

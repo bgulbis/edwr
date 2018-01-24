@@ -52,17 +52,17 @@ tbl_edwr(x)
 
 as.tbl_edwr(x)
 
-as.admit(x, varnames = NULL, extras = NULL)
+as.admit(x, extras = NULL)
 
-as.blood(x, varnames = NULL, extras = NULL)
+as.blood(x, extras = NULL)
 
-as.charges(x)
+as.charges(x, extras = NULL)
 
-as.demographics(x, varnames = NULL, extras = NULL)
+as.demographics(x, extras = NULL)
 
-as.diagnosis(x, varnames = NULL, extras = NULL)
+as.diagnosis(x, extras = NULL)
 
-as.drg(x)
+as.drg(x, extras = NULL)
 
 as.encounters(x, varnames = NULL, extras = NULL)
 
@@ -110,7 +110,7 @@ as.output(x, varnames = NULL, extras = NULL)
 
 as.pain_scores(x, varnames = NULL, extras = NULL)
 
-as.patients(x, varnames = NULL, extras = NULL)
+as.patients(x, extras = NULL)
 
 as.problems(x)
 
@@ -139,10 +139,10 @@ as.warfarin(x, varnames = NULL, extras = NULL)
 \arguments{
 \item{x}{object to set class \code{tbl_edwr}}
 
+\item{extras}{named character list; if given, will append to default varnames}
+
 \item{varnames}{named character list, where the name is the desired variable
 name; overrides default names}
-
-\item{extras}{named character list; if given, will append to default varnames}
 
 \item{order_var}{logical indicating if order.id fields are included, defaults
 to TRUE}

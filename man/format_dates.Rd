@@ -4,12 +4,15 @@
 \alias{format_dates}
 \title{Convert date/time variables to POSIXct}
 \usage{
-format_dates(x, date_col)
+format_dates(x, date_col, tz = NULL)
 }
 \arguments{
 \item{x}{character vector of date/time data}
 
 \item{date_col}{character of column names to be converted}
+
+\item{tz}{optional string with a properly formatted time zone; if given, will
+override the default time zone assignments for EDW and MBO data}
 }
 \value{
 A tibble
@@ -17,4 +20,3 @@ A tibble
 \description{
 Converts date/time variables to POSIXct and adjusts to US/Central timezone.
 }
-\keyword{internal}

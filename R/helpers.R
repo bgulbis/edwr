@@ -41,12 +41,19 @@ count_rowsback <- function(x, back = 2) {
 #'
 #' @param x character vector of date/time data
 #' @param date_col character of column names to be converted
+#' @param tz optional string with a properly formatted time zone; if given, will
+#'   override the default time zone assignments for EDW and MBO data
 #'
 #' @return A tibble
 #'
-#' @keywords internal
-format_dates <- function(x, date_col) {
-    tzone <- set_timezone(x)
+#' @export
+format_dates <- function(x, date_col, tz = NULL) {
+    if (is.null(tz)) {
+        tzone <- "US/Central"
+        if (attr(x, "data") == "mbo") tzone <- "UTC"
+    } else {
+        tzone <- tz
+    }
 
     x %>%
         dplyr::mutate_at(date_col, lubridate::ymd_hms, tz = tzone) %>%

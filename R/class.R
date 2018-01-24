@@ -58,24 +58,24 @@ as.tbl_edwr <- function(x) {
 
 #' @rdname set_edwr_class
 #' @export
-as.admit <- function(x, varnames = NULL, extras = NULL) {
+as.admit <- function(x, extras = NULL) {
     if (missing(x)) stop("Missing object")
     if (is.admit(x)) return(x)
     if (!is.tbl_edwr(x)) x <- as.tbl_edwr(x)
 
     # default EDW names
-    if (attr(x, "data") == "edw" & is.null(varnames)) {
-        varnames <- c(val.pie, list(
-            "visit.type" = "`Encounter Type`",
-            "visit.type.class" = "`Encounter Type Class`",
-            "admit.type" = "`Admit Type`",
-            "admit.source" = "`Admit Source`"
+    if (attr(x, "data") == "edw") {
+        varnames <- c(edw_id, list(
+            "visit.type" = "Encounter Type",
+            "visit.type.class" = "Encounter Type Class",
+            "admit.type" = "Admit Type",
+            "admit.source" = "Admit Source"
         ))
 
         # default CDW/MBO names
-    } else if (attr(x, "data") == "mbo" & is.null(varnames)) {
-        varnames <- c(val.mil, list(
-            "visit.type" = "`Encounter Class Subtype`"
+    } else {
+        varnames <- c(mbo_id, list(
+            "visit.type" = "Encounter Class Subtype"
         ))
     }
 
@@ -84,8 +84,9 @@ as.admit <- function(x, varnames = NULL, extras = NULL) {
         varnames <- c(varnames, extras)
     }
 
-    df <- select_(.data = x, .dots = varnames) %>%
-        distinct_()
+    df <- x %>%
+        rename(!!!varnames) %>%
+        distinct()
 
     after <- match("admit", class(x), nomatch = 0L)
     class(df) <- append(class(x), "admit", after = after)
@@ -95,34 +96,32 @@ as.admit <- function(x, varnames = NULL, extras = NULL) {
 
 #' @rdname set_edwr_class
 #' @export
-as.blood <- function(x, varnames = NULL, extras = NULL) {
+as.blood <- function(x, extras = NULL) {
     # inherits from events class
     if (missing(x)) x <- character()
     if (is.blood(x)) return(x)
     if (!is.tbl_edwr(x)) x <- as.tbl_edwr(x)
 
     # default EDW names
-    if (attr(x, "data") == "edw" & is.null(varnames)) {
+    if (attr(x, "data") == "edw") {
         if (!is.events(x)) x <- as.events(x)
-        varnames <- c(val.pie, list(
+        varnames <- c(edw_id, list(
             "blood.datetime" = "event.datetime",
             "blood.prod" = "event",
             "blood.type" = "event.result"
         ))
 
         # default CDW/MBO names
-    } else if (attr(x, "data") == "mbo" & is.null(varnames)) {
-        varnames <- c(val.mil, list(
-            "blood.datetime" = "`Date and Time - Performed`",
-            "blood.prod" = "`Clinical Event`",
-            "blood.type" = "`Clinical Event Result`",
-            # "event.result.units" = "`Clinical Event Result Units`",
-            "blood.location" = "`Nurse Unit (Event)`",
-            "event.id" = "`Event Id`",
-            "event.parent.id" = "`Parent Event Id`",
-            "order.id" = "`Order Id`",
-            "order.parent.id" = "`Parent Order Id`"
-
+    } else {
+        varnames <- c(mbo_id, list(
+            "blood.datetime" = "Date and Time - Performed",
+            "blood.prod" = "Clinical Event",
+            "blood.type" = "Clinical Event Result",
+            "blood.location" = "Nurse Unit (Event)",
+            "event.id" = "Event Id",
+            "event.parent.id" = "Parent Event Id",
+            "order.id" = "Order Id",
+            "order.parent.id" = "Parent Order Id"
         ))
     }
 
@@ -136,9 +135,12 @@ as.blood <- function(x, varnames = NULL, extras = NULL) {
                "(P)?RBC(.*)" = "prbc",
                "Platelet(.*)" = "platelet")
 
-    df <- select_(.data = x, .dots = varnames) %>%
-        dplyr::distinct_() %>%
-        purrrlyr::dmap_at("blood.prod", stringr::str_replace_all, pattern = prods) %>%
+    df <- x %>%
+        rename(!!!varnames) %>%
+        distinct() %>%
+        dplry::mutate_at("blood.prod",
+                         stringr::str_replace_all,
+                         pattern = prods) %>%
         format_dates("blood.datetime")
 
     after <- match("blood", class(x), nomatch = 0L)
@@ -148,17 +150,29 @@ as.blood <- function(x, varnames = NULL, extras = NULL) {
 
 #' @rdname set_edwr_class
 #' @export
-as.charges <- function(x) {
+as.charges <- function(x, extras = NULL) {
     if (missing(x)) stop("Missing object")
     if (is.charges(x)) return(x)
     if (!is.tbl_edwr(x)) x <- as.tbl_edwr(x)
 
-    df <- rename_(.data = x, .dots = c(val.pie, list(
-        "cdm.code" = "`Cdm Code`",
-        "service.date" = "`Service Date`",
-        "institution" = "`Institution Desc`"
-    ))) %>%
-        dplyr::distinct_()
+    # default EDW names
+    if (attr(x, "data") == "edw") {
+        varnames <- c(edw_id, list(
+            "cdm.code" = "Cdm Code",
+            "service.date" = "Service Date",
+            "institution" = "Institution Desc"
+        ))
+        # default CDW/MBO names
+    }
+
+    # if extra var names are given, append those to the list
+    if (!is.null(extras)) {
+        varnames <- c(varnames, extras)
+    }
+
+    df <- x %>%
+        rename(!!!varnames) %>%
+        distinct()
 
     after <- match("charges", class(x), nomatch = 0L)
     class(df) <- append(class(x), "charges", after = after)
@@ -214,28 +228,28 @@ as.demographics <- function(x, extras = NULL) {
 
 #' @rdname set_edwr_class
 #' @export
-as.diagnosis <- function(x, varnames = NULL, extras = NULL) {
+as.diagnosis <- function(x, extras = NULL) {
     if (missing(x)) stop("Missing object")
     if (is.diagnosis(x)) return(x)
     if (!is.tbl_edwr(x)) x <- as.tbl_edwr(x)
 
     # default EDW names
-    if (attr(x, "data") == "edw" & is.null(varnames)) {
-        varnames <- c(val.pie, list(
-            "diag.code" = "`Diagnosis Code`",
-            "code.source" = "`Diagnosis Code Source Vocabulary`",
-            "diag.type" = "`Diagnosis Type`",
-            "diag.seq" = "`Diagnosis Code Sequence`",
-            "present.admit" = "`Present on Admission`"
+    if (attr(x, "data") == "edw") {
+        varnames <- c(edw_id, list(
+            "diag.code" = "Diagnosis Code",
+            "code.source" = "Diagnosis Code Source Vocabulary",
+            "diag.type" = "Diagnosis Type",
+            "diag.seq" = "Diagnosis Code Sequence",
+            "present.admit" = "Present on Admission"
         ))
 
     # default CDW/MBO names
-    } else if (attr(x, "data") == "mbo" & is.null(varnames)) {
-        varnames <- c(val.mil, list(
-            "diag.code" = "`Diagnosis Code`",
-            "code.source" = "`Diagnosis Code Source Vocabulary`",
-            "diag.type" = "`Diagnosis Type`",
-            "diag.seq" = "`Diagnosis Code (Primary VS Non Primary)`"
+    } else {
+        varnames <- c(mbo_id, list(
+            "diag.code" = "Diagnosis Code",
+            "code.source" = "Diagnosis Code Source Vocabulary",
+            "diag.type" = "Diagnosis Type",
+            "diag.seq" = "Diagnosis Code (Primary VS Non Primary)"
         ))
     }
 
@@ -244,8 +258,9 @@ as.diagnosis <- function(x, varnames = NULL, extras = NULL) {
         varnames <- c(varnames, extras)
     }
 
-    df <- select_(.data = x, .dots = varnames) %>%
-        dplyr::distinct_()
+    df <- x %>%
+        rename(!!!varnames) %>%
+        distinct()
 
     after <- match("diagnosis", class(x), nomatch = 0L)
     class(df) <- append(class(x), "diagnosis", after = after)
@@ -254,17 +269,29 @@ as.diagnosis <- function(x, varnames = NULL, extras = NULL) {
 
 #' @rdname set_edwr_class
 #' @export
-as.drg <- function(x) {
+as.drg <- function(x, extras = NULL) {
     if (missing(x)) stop("Missing object")
     if (is.drg(x)) return(x)
     if (!is.tbl_edwr(x)) x <- as.tbl_edwr(x)
 
-    df <- select_(.data = x, .dots = c(val.pie, list(
-        "drg" = "`Grouping Code`",
-        "drg.source" = "`Grouping Code Source Vocabulary`",
-        "drg.type" = "`Grouping Code Type`"
-    ))) %>%
-        dplyr::distinct_()
+    # default EDW names
+    if (attr(x, "data") == "edw") {
+        varnames <- c(edw_id, list(
+            "drg" = "Grouping Code",
+            "drg.source" = "Grouping Code Source Vocabulary",
+            "drg.type" = "Grouping Code Type"
+        ))
+        # default CDW/MBO names
+    }
+
+    # if extra var names are given, append those to the list
+    if (!is.null(extras)) {
+        varnames <- c(varnames, extras)
+    }
+
+    df <- x %>%
+        rename(!!!varnames) %>%
+        distinct()
 
     after <- match("drg", class(x), nomatch = 0L)
     class(df) <- append(class(x), "drg", after = after)

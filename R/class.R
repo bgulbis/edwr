@@ -16,6 +16,23 @@ event_dt <- "Clinical Event End Date/Time"
 event_nm <- "Clinical Event"
 event_val <- "Clinical Event Result"
 
+#' Assign edwr class type
+#'
+#' @param x initial data_frame
+#' @param df new data_frame
+#' @param new_class string with new class name
+#'
+#' @return
+#'
+#' @keywords internal
+assign_class <- function(x, df, new_class) {
+    after <- match(new_class, class(x), nomatch = 0L)
+    class(df) <- append(class(x), new_class, after = after)
+    df
+}
+
+
+
 # constructor functions --------------------------------
 
 #' Construct edwr data types
@@ -43,9 +60,8 @@ tbl_edwr <- function(x) {
 as.tbl_edwr <- function(x) {
     if (missing(x)) x <- character()
     if (is.tbl_edwr(x)) return(x)
-    after <- match("tbl_edwr", class(x), nomatch = 0L)
-    class(x) <- append(class(x), "tbl_edwr", after = after)
-    x
+
+    assign_class(x, x, "tbl_edwr")
 }
 
 # create classes which inherit from tbl_edwr class; each class represents a
@@ -88,9 +104,7 @@ as.admit <- function(x, extras = NULL) {
         rename(!!!varnames) %>%
         distinct()
 
-    after <- match("admit", class(x), nomatch = 0L)
-    class(df) <- append(class(x), "admit", after = after)
-    df
+    assign_class(x, df, "admit")
 }
 
 
@@ -143,9 +157,7 @@ as.blood <- function(x, extras = NULL) {
                          pattern = prods) %>%
         format_dates("blood.datetime")
 
-    after <- match("blood", class(x), nomatch = 0L)
-    class(df) <- append(class(x), "blood", after = after)
-    df
+    assign_class(x, df, "blood")
 }
 
 #' @rdname set_edwr_class
@@ -174,9 +186,7 @@ as.charges <- function(x, extras = NULL) {
         rename(!!!varnames) %>%
         distinct()
 
-    after <- match("charges", class(x), nomatch = 0L)
-    class(df) <- append(class(x), "charges", after = after)
-    df
+    assign_class(x, df, "charges")
 }
 
 #' @rdname set_edwr_class
@@ -221,9 +231,7 @@ as.demographics <- function(x, extras = NULL) {
         distinct() %>%
         dplyr::mutate_at(c("age", "length.stay"), as.numeric)
 
-    after <- match("demographics", class(x), nomatch = 0L)
-    class(df) <- append(class(x), "demographics", after = after)
-    df
+    assign_class(x, df, "demographics")
 }
 
 #' @rdname set_edwr_class
@@ -262,9 +270,7 @@ as.diagnosis <- function(x, extras = NULL) {
         rename(!!!varnames) %>%
         distinct()
 
-    after <- match("diagnosis", class(x), nomatch = 0L)
-    class(df) <- append(class(x), "diagnosis", after = after)
-    df
+    assign_class(x, df, "diagnosis")
 }
 
 #' @rdname set_edwr_class
@@ -293,9 +299,7 @@ as.drg <- function(x, extras = NULL) {
         rename(!!!varnames) %>%
         distinct()
 
-    after <- match("drg", class(x), nomatch = 0L)
-    class(df) <- append(class(x), "drg", after = after)
-    df
+    assign_class(x, df, "drg")
 }
 
 #' @rdname set_edwr_class
@@ -335,9 +339,7 @@ as.encounters <- function(x, varnames = NULL, extras = NULL) {
         dplyr::distinct_() %>%
         format_dates("admit.datetime")
 
-    after <- match("encounters", class(x), nomatch = 0L)
-    class(df) <- append(class(x), "encounters", after = after)
-    df
+    assign_class(x, df, "encounters")
 }
 
 #' @rdname set_edwr_class
@@ -393,9 +395,7 @@ as.events <- function(x, order_var = TRUE, varnames = NULL, extras = NULL) {
         format_dates("event.datetime") %>%
         purrrlyr::dmap_at("event", stringr::str_to_lower)
 
-    after <- match("events", class(x), nomatch = 0L)
-    class(df) <- append(class(x), "events", after = after)
-    df
+    assign_class(x, df, "events")
 }
 
 #' @rdname set_edwr_class
@@ -413,10 +413,9 @@ as.icu_assess <- function(x) {
         "assess.result" = "event.result"
     ))
 
-    after <- match("icu_assess", class(x), nomatch = 0L)
-    class(df) <- append(class(x), "icu_assess", after = after)
-    df
+    assign_class(x, df, "icu_assess")
 }
+
 
 #' @rdname set_edwr_class
 #' @export
@@ -448,9 +447,7 @@ as.id <- function(x, varnames = NULL, extras = NULL) {
     df <- select_(.data = x, .dots = varnames) %>%
         dplyr::distinct_()
 
-    after <- match("id", class(x), nomatch = 0L)
-    class(df) <- append(class(x), "id", after = after)
-    df
+    assign_class(x, df, "id")
 }
 
 #' @rdname set_edwr_class
@@ -492,9 +489,7 @@ as.labs <- function(x, varnames = NULL, extras = NULL) {
         purrrlyr::dmap_at("lab", stringr::str_to_lower) %>%
         format_dates("lab.datetime")
 
-    after <- match("labs", class(x), nomatch = 0L)
-    class(df) <- append(class(x), "labs", after = after)
-    df
+    assign_class(x, df, "labs")
 }
 
 #' @rdname set_edwr_class
@@ -535,9 +530,7 @@ as.locations <- function(x, varnames = NULL, extras = NULL) {
     #     df <- purrrlyr::dmap_at(df, dplyr::na_if, y = "")
     # }
 
-    after <- match("locations", class(x), nomatch = 0L)
-    class(df) <- append(class(x), "locations", after = after)
-    df
+    assign_class(x, df, "locations")
 }
 
 #' @rdname set_edwr_class
@@ -579,9 +572,7 @@ as.measures <- function(x, varnames = NULL, extras = NULL) {
         purrrlyr::dmap_at("measure.result", as.numeric) %>%
         format_dates("measure.datetime")
 
-    after <- match("measures", class(x), nomatch = 0L)
-    class(df) <- append(class(x), "measures", after = after)
-    df
+    assign_class(x, df, "measures")
 }
 
 #' @rdname set_edwr_class
@@ -626,9 +617,7 @@ as.meds_admin <- function(x, varnames = NULL, extras = NULL) {
         purrrlyr::dmap_at("med", stringr::str_to_lower) %>%
         format_dates(c("scheduled_datetime", "admin_datetime", "admin_end_datetime"))
 
-    after <- match("meds_admin", class(x), nomatch = 0L)
-    class(df) <- append(class(x), "meds_admin", after = after)
-    df
+    assign_class(x, df, "meds_admin")
 }
 
 #' @rdname set_edwr_class
@@ -653,9 +642,7 @@ as.meds_cont <- function(x) {
         purrrlyr::dmap_at("med.rate.units", dplyr::na_if, y = "") %>%
         format_dates("med.datetime")
 
-    after <- match("meds_cont", class(x), nomatch = 0L)
-    class(df) <- append(class(x), "meds_cont", after = after)
-    df
+    assign_class(x, df, "meds_cont")
 }
 
 #' @rdname set_edwr_class
@@ -671,9 +658,7 @@ as.meds_freq <- function(x) {
         "freq" = "`Parent Order Frequency Description`"
     ))
 
-    after <- match("meds_freq", class(x), nomatch = 0L)
-    class(df) <- append(class(x), "meds_freq", after = after)
-    df
+    assign_class(x, df, "meds_freq")
 }
 
 #' @rdname set_edwr_class
@@ -713,9 +698,7 @@ as.meds_home <- function(x, varnames = NULL, extras = NULL) {
         df <- format_dates(df, "order.datetime")
     }
 
-    after <- match("meds_home", class(x), nomatch = 0L)
-    class(df) <- append(class(x), "meds_home", after = after)
-    df
+    assign_class(x, df, "meds_home")
 }
 
 #' @rdname set_edwr_class
@@ -768,9 +751,7 @@ as.meds_inpt <- function(x, varnames = NULL, extras = NULL) {
         # purrrlyr::dmap_at("med.rate.units", ~dplyr::na_if(.x, "")) %>%
         format_dates("med.datetime")
 
-    after <- match("meds_inpt", class(x), nomatch = 0L)
-    class(df) <- append(class(x), "meds_inpt", after = after)
-    df
+    assign_class(x, df, "med_inpt")
 }
 
 #' @rdname set_edwr_class
@@ -794,9 +775,7 @@ as.meds_sched <- function(x) {
         purrrlyr::dmap_at("med", stringr::str_to_lower) %>%
         format_dates("med.datetime")
 
-    after <- match("meds_sched", class(x), nomatch = 0L)
-    class(df) <- append(class(x), "meds_sched", after = after)
-    df
+    assign_class(x, df, "meds_sched")
 }
 
 #' @rdname set_edwr_class
@@ -812,9 +791,7 @@ as.mrn <- function(x) {
     )) %>%
         dplyr::distinct_()
 
-    after <- match("mrn", class(x), nomatch = 0L)
-    class(df) <- append(class(x), "mrn", after = after)
-    df
+    assign_class(x, df, "mrn")
 }
 
 #' @rdname set_edwr_class
@@ -829,9 +806,7 @@ as.mpp <- function(x) {
     ))) %>%
         dplyr::distinct_()
 
-    after <- match("mpp", class(x), nomatch = 0L)
-    class(df) <- append(class(x), "mpp", after = after)
-    df
+    assign_class(x, df, "mpp")
 }
 
 #' @rdname set_edwr_class
@@ -880,9 +855,7 @@ as.order_action <- function(x, varnames = NULL, extras = NULL) {
         dplyr::distinct_() %>%
         format_dates("action.datetime")
 
-    after <- match("order_action", class(x), nomatch = 0L)
-    class(df) <- append(class(x), "order_action", after = after)
-    df
+    assign_class(x, df, "order_action")
 }
 
 
@@ -917,9 +890,7 @@ as.order_by <- function(x) {
         dplyr::distinct_() %>%
         format_dates("action.datetime")
 
-    after <- match("order_by", class(x), nomatch = 0L)
-    class(df) <- append(class(x), "order_by", after = after)
-    df
+    assign_class(x, df, "order_by")
 }
 
 #' @rdname set_edwr_class
@@ -972,9 +943,7 @@ as.order_detail <- function(x, varnames = NULL, extras = NULL) {
         dplyr::distinct_() %>%
         format_dates(dt_name)
 
-    after <- match("order_detail", class(x), nomatch = 0L)
-    class(df) <- append(class(x), "order_detail", after = after)
-    df
+    assign_class(x, df, "order_detail")
 }
 
 #' @rdname set_edwr_class
@@ -1003,9 +972,7 @@ as.order_info <- function(x, varnames = NULL, extras = NULL) {
         distinct_() %>%
         format_dates("detail.datetime")
 
-    after <- match("order_info", class(x), nomatch = 0L)
-    class(df) <- append(class(x), "order_info", after = after)
-    df
+    assign_class(x, df, "order_info")
 }
 
 #' @rdname set_edwr_class
@@ -1043,9 +1010,7 @@ as.order_timing <- function(x) {
         format_dates(dtm)
         # purrrlyr::dmap_at(dtm, format_dates)
 
-    after <- match("order_timing", class(x), nomatch = 0L)
-    class(df) <- append(class(x), "order_timing", after = after)
-    df
+    assign_class(x, df, "order_timing")
 }
 
 #' @rdname set_edwr_class
@@ -1088,9 +1053,7 @@ as.order_verify <- function(x, varnames = NULL, extras = NULL) {
         purrrlyr::dmap_at("med", stringr::str_to_lower) %>%
         format_dates(c("order_datetime", "start_datetime", "verify_datetime"))
 
-    after <- match("order_verify", class(x), nomatch = 0L)
-    class(df) <- append(class(x), "order_verify", after = after)
-    df
+    assign_class(x, df, "order_verify")
 }
 
 
@@ -1135,9 +1098,7 @@ as.output <- function(x, varnames = NULL, extras = NULL) {
         purrrlyr::dmap_at("output.result", as.numeric) %>%
         format_dates("output.datetime")
 
-    after <- match("output", class(x), nomatch = 0L)
-    class(df) <- append(class(x), "output", after = after)
-    df
+    assign_class(x, df, "output")
 }
 
 #' @rdname set_edwr_class
@@ -1181,9 +1142,7 @@ as.pain_scores <- function(x, varnames = NULL, extras = NULL) {
         format_dates("event.datetime") %>%
         purrrlyr::dmap_at("event", stringr::str_to_lower)
 
-    after <- match("events", class(x), nomatch = 0L)
-    class(df) <- append(class(x), "events", after = after)
-    df
+    assign_class(x, df, "events")
 }
 
 #' @rdname set_edwr_class
@@ -1222,9 +1181,7 @@ as.patients <- function(x, extras = NULL) {
         dplyr::mutate_at("age", as.numeric) %>%
         format_dates("discharge.datetime")
 
-    after <- match("patients", class(x), nomatch = 0L)
-    class(df) <- append(class(x), "patients", after = after)
-    df
+    assign_class(x, df, "patients")
 }
 
 #' @rdname set_edwr_class
@@ -1252,9 +1209,7 @@ as.problems <- function(x) {
             nm = list("onset.datetime", "life.cycle.datetime")
         ))
 
-    after <- match("problems", class(x), nomatch = 0L)
-    class(df) <- append(class(x), "problems", after = after)
-    df
+    assign_class(x, df, "problems")
 }
 
 #' @rdname set_edwr_class
@@ -1292,9 +1247,7 @@ as.procedures <- function(x, varnames = NULL, extras = NULL) {
         dplyr::distinct_() %>%
         format_dates("proc.date")
 
-    after <- match("procedures", class(x), nomatch = 0L)
-    class(df) <- append(class(x), "procedures", after = after)
-    df
+    assign_class(x, df, "procedures")
 }
 
 #' @rdname set_edwr_class
@@ -1314,9 +1267,7 @@ as.radiology <- function(x) {
             nm = "rad.datetime"
         ))
 
-    after <- match("radiology", class(x), nomatch = 0L)
-    class(df) <- append(class(x), "radiology", after = after)
-    df
+    assign_class(x, df, "radiology")
 }
 
 #' @rdname set_edwr_class
@@ -1340,9 +1291,7 @@ as.services <- function(x) {
         )) %>%
         format_dates(c("start.datetime", "end.datetime"))
 
-    after <- match("services", class(x), nomatch = 0L)
-    class(df) <- append(class(x), "services", after = after)
-    df
+    assign_class(x, df, "services")
 }
 
 #' @rdname set_edwr_class
@@ -1378,9 +1327,7 @@ as.surgery_times <- function(x, varnames = NULL, extras = NULL) {
                        "recovery_in",
                        "recovery_out"))
 
-    after <- match("surgery_times", class(x), nomatch = 0L)
-    class(df) <- append(class(x), "surgery_times", after = after)
-    df
+    assign_class(x, df, "surgery_times")
 }
 
 #' @rdname set_edwr_class
@@ -1405,9 +1352,7 @@ as.surgeries <- function(x) {
 
     names(df) <- stringr::str_to_lower(names(df))
 
-    after <- match("surgeries", class(x), nomatch = 0L)
-    class(df) <- append(class(x), "surgeries", after = after)
-    df
+    assign_class(x, df, "surgeries")
 }
 
 #' @rdname set_edwr_class
@@ -1425,9 +1370,7 @@ as.uop <- function(x) {
         "uop.result" = "event.result"
     ))
 
-    after <- match("uop", class(x), nomatch = 0L)
-    class(df) <- append(class(x), "uop", after = after)
-    df
+    assign_class(x, df, "uop")
 }
 
 #' @rdname set_edwr_class
@@ -1445,9 +1388,7 @@ as.vent_settings <- function(x) {
         "vent.result" = "event.result"
     ))
 
-    after <- match("vent_settings", class(x), nomatch = 0L)
-    class(df) <- append(class(x), "vent_settings", after = after)
-    df
+    assign_class(x, df, "vent_settings")
 }
 
 #' @rdname set_edwr_class
@@ -1487,9 +1428,7 @@ as.vent_times <- function(x, varnames = NULL, extras = NULL) {
         purrrlyr::dmap_at("vent.event", stringr::str_to_lower) %>%
         format_dates("vent.datetime")
 
-    after <- match("vent_times", class(x), nomatch = 0L)
-    class(df) <- append(class(x), "vent_times", after = after)
-    df
+    assign_class(x, df, "vent_times")
 }
 
 #' @rdname set_edwr_class
@@ -1537,9 +1476,7 @@ as.visits <- function(x, varnames = NULL, extras = NULL) {
         dplyr::distinct_() %>%
         format_dates(c("arrival.datetime", "admit.datetime", "discharge.datetime"))
 
-    after <- match("visits", class(x), nomatch = 0L)
-    class(df) <- append(class(x), "visits", after = after)
-    df
+    assign_class(x, df, "visits")
 }
 
 #' @rdname set_edwr_class
@@ -1584,9 +1521,7 @@ as.vitals <- function(x, varnames = NULL, extras = NULL) {
         purrrlyr::dmap_at("vital.result", as.numeric) %>%
         format_dates("vital.datetime")
 
-    after <- match("vitals", class(x), nomatch = 0L)
-    class(df) <- append(class(x), "vitals", after = after)
-    df
+    assign_class(x, df, "vitals")
 }
 
 #' @rdname set_edwr_class
@@ -1625,9 +1560,7 @@ as.warfarin <- function(x, varnames = NULL, extras = NULL) {
         purrrlyr::dmap_at("warfarin.event", stringr::str_to_lower) %>%
         format_dates("warfarin.datetime")
 
-    after <- match("warfarin", class(x), nomatch = 0L)
-    class(df) <- append(class(x), "warfarin", after = after)
-    df
+    assign_class(x, df, "warfarin")
 }
 
 # class test functions ---------------------------------

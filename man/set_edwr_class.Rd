@@ -126,7 +126,7 @@ as.surgeries(x, extras = NULL)
 
 as.uop(x, extras = NULL)
 
-as.vent_settings(x)
+as.vent_settings(x, extras = NULL)
 
 as.vent_times(x, extras = NULL)
 

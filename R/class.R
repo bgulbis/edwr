@@ -151,7 +151,7 @@ as.blood <- function(x, extras = NULL) {
 
     x %>%
         assign_names(varnames, extras) %>%
-        dplry::mutate_at("blood.prod",
+        dplyr::mutate_at("blood.prod",
                          stringr::str_replace_all,
                          pattern = prods) %>%
         format_dates("blood.datetime") %>%
@@ -383,7 +383,7 @@ as.id <- function(x, extras = NULL) {
 
     # default EDW names
     if (attr(x, "data") == "edw") {
-        varnames <- c(val.pie, list(
+        varnames <- c(edw_id, list(
             "millennium.id" = "Millennium Encounter ID",
             "fin" = "Formatted Financial Nbr",
             "person.id" = "Person ID"
@@ -391,7 +391,7 @@ as.id <- function(x, extras = NULL) {
 
         # default CDW/MBO names
     } else {
-        varnames <- c(val.mil, list(
+        varnames <- c(mbo_id, list(
             "fin" = "Financial Number"
         ))
     }
@@ -420,12 +420,12 @@ as.labs <- function(x, extras = NULL) {
     # default CDW/MBO names
     } else {
         varnames <- c(mbo_id, list(
-            "lab.datetime" = "`Date and Time - Nurse Draw`",
-            "lab" = "`Lab Event (FILTER ON)`",
-            "lab.result" = "`Lab Result`",
-            "lab.result.units" = "`Lab Result Units`",
-            "lab.draw.location" = "`Nurse Unit (Lab)`",
-            "lab.id" = "`Lab Event Id`"
+            "lab.datetime" = "Date and Time - Nurse Draw",
+            "lab" = "Lab Event (FILTER ON)",
+            "lab.result" = "Lab Result",
+            "lab.result.units" = "Lab Result Units",
+            "lab.draw.location" = "Nurse Unit (Lab)",
+            "lab.id" = "Lab Event Id"
         ))
     }
 
@@ -445,7 +445,7 @@ as.locations <- function(x, extras = NULL) {
 
     # default EDW names
     if (attr(x, "data") == "edw") {
-        varnames <- c(val.pie, list(
+        varnames <- c(edw_id, list(
             "arrive.datetime" = "Location Arrival Date & Time",
             "depart.datetime" = "Location Depart Date & Time",
             "unit.to" = "Person Location - Nurse Unit (To)",
@@ -454,7 +454,7 @@ as.locations <- function(x, extras = NULL) {
 
         # default CDW/MBO names
     } else {
-        varnames <- c(val.mil, list(
+        varnames <- c(mbo_id, list(
             "arrive.datetime" = "Date and Time - Nurse Unit Begin",
             "depart.datetime" = "Date and Time - Nurse Unit End",
             "unit.name" = "Nurse Unit All"
@@ -634,12 +634,12 @@ as.meds_inpt <- function(x, extras = NULL) {
     if (!is.tbl_edwr(x)) x <- as.tbl_edwr(x)
 
     # default EDW names
-    if (attr(x, "data") == "edw" & is.null(varnames)) {
-        varnames <- c(val.pie, list(
+    if (attr(x, "data") == "edw") {
+        varnames <- c(edw_id, list(
             "order.id" = "Clinical Event Order ID",
             "event.id" = "Event ID",
-            "med.datetime" = val.dt,
-            "med" = val.ce,
+            "med.datetime" = event_dt,
+            "med" = event_nm,
             "med.rate" = "Infusion Rate",
             "med.rate.units" = "Infusion Rate Unit",
             "route" = "Route of Administration - Short",
@@ -647,8 +647,8 @@ as.meds_inpt <- function(x, extras = NULL) {
         ))
 
         # default CDW/MBO names
-    } else if (attr(x, "data") == "mbo" & is.null(varnames)) {
-        varnames <- c(val.mil, list(
+    } else {
+        varnames <- c(mbo_id, list(
             "order.id" = "Order Id",
             "order.parent.id" = "Parent Order Id",
             "event.id" = "Med Event Id",
@@ -935,8 +935,8 @@ as.order_verify <- function(x, extras = NULL) {
         varnames <- c(edw_id, list(
             "order.id" = "Clinical Event Order ID",
             "event.id" = "Event ID",
-            "med.datetime" = val.dt,
-            "med" = val.ce
+            "med.datetime" = event_dt,
+            "med" = event_nm
         ))
 
         # default CDW/MBO names
@@ -1226,7 +1226,7 @@ as.surgeries <- function(x, extras = NULL) {
 
     x %>%
         assign_names(varnames, extras) %>%
-        dplyr::mutate_at(c("add.on", "primary.proc"), funs(. == 1)) %>%
+        dplyr::mutate_at(c("add.on", "primary.proc"), dply::funs(. == 1)) %>%
         format_dates(c("surg.start.datetime", "surg.stop.datetime")) %>%
         assign_class(x, "surgeries")
 }
@@ -1256,7 +1256,7 @@ as.uop <- function(x, extras = NULL) {
 
 #' @rdname set_edwr_class
 #' @export
-as.vent_settings <- function(x) {
+as.vent_settings <- function(x, extras = NULL) {
     # inherits from events class
     if (missing(x)) x <- character()
     if (is.vent_settings(x)) return(x)

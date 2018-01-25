@@ -998,52 +998,46 @@ as.output <- function(x, extras = NULL) {
     x %>%
         assign_names(varnames, extras) %>%
         dplyr::mutate_at("output.result", stringr::str_to_lower) %>%
-        format_dates(c(output.datetime)) %>%
+        format_dates("output.datetime") %>%
         assign_class(x, "output")
 }
 
 #' @rdname set_edwr_class
 #' @export
-as.pain_scores <- function(x, varnames = NULL, extras = NULL) {
+as.pain_scores <- function(x, extras = NULL) {
     if (missing(x)) x <- character()
     if (is.events(x)) return(x)
     if (!is.tbl_edwr(x)) x <- as.tbl_edwr(x)
 
     # default EDW names
-    if (attr(x, "data") == "edw" & is.null(varnames)) {
-        varnames <- c(val.pie, list(
-            "event.datetime" = val.dt,
-            "event" = val.ce,
-            "event.result" = val.res,
-            "event.location" = "`Nurse Unit of Clinical Event`",
-            "order.id" = "`Clinical Event Order ID`"
+    if (attr(x, "data") == "edw") {
+        varnames <- c(edw_id, list(
+            "event.datetime" = event_dt,
+            "event" = event_nm,
+            "event.result" = event_val,
+            "event.location" = "Nurse Unit of Clinical Event",
+            "order.id" = "Clinical Event Order ID"
         ))
 
         # default CDW/MBO names
-    } else if (attr(x, "data") == "mbo" & is.null(varnames)) {
-        varnames <- c(val.mil, list(
-            "event.datetime" = "`Date and Time - Scheduled OR Given On`",
-            "event" = val.ce,
-            "event.result" = val.res,
-            "event.result.units" = "`Clinical Event Result Units`",
-            "event.location" = "`Nurse Unit (Event)`",
-            "event.id" = "`Event Id`",
-            "event.parent.id" = "`Parent Event Id`",
-            "order.id" = "`Clinical Event Order Id`"
+    } else {
+        varnames <- c(mbo_id, list(
+            "event.datetime" = "Date and Time - Scheduled OR Given On",
+            "event" = event_nm,
+            "event.result" = event_val,
+            "event.result.units" = "Clinical Event Result Units",
+            "event.location" = "Nurse Unit (Event)",
+            "event.id" = "Event Id",
+            "event.parent.id" = "Parent Event Id",
+            "order.id" = "Clinical Event Order Id"
         ))
     }
 
-    # if extra var names are given, append those to the list
-    if (!is.null(extras)) {
-        varnames <- c(varnames, extras)
-    }
-
-    df <- select_(.data = x, .dots = varnames) %>%
-        dplyr::distinct_() %>%
+    x %>%
+        assign_names(varnames, extras) %>%
+        dplyr::mutate_at("event", stringr::str_to_lower) %>%
         format_dates("event.datetime") %>%
-        purrrlyr::dmap_at("event", stringr::str_to_lower)
-
-    assign_class(df, x,  "events")
+        assign_class(x, "events")
 }
 
 #' @rdname set_edwr_class
@@ -1080,68 +1074,63 @@ as.patients <- function(x, extras = NULL) {
 
 #' @rdname set_edwr_class
 #' @export
-as.problems <- function(x) {
+as.problems <- function(x, extras = NULL) {
     if (missing(x)) stop("Missing object")
     if (is.problems(x)) return(x)
     if (!is.tbl_edwr(x)) x <- as.tbl_edwr(x)
 
-    df <- rename_(.data = x, .dots = c(val.pie, list(
-        "problem" = "`Problem - Description`",
-        "classification" = "`Problem Classification`",
-        "confirm" = "`Problem Confirmation Status`",
-        "free.text" = "`Problem Free Text`",
-        "severity" = "`Problem Severity`",
-        "active" = "`Problem Source Active Indicator`",
-        "onset.datetime" = "`Problem Onset Date & Time`",
-        "life.cycle.datetime" = "`Problem Life Cycle Date & Time`",
-        "life.cycle" = "`Problem Life Cycle`"
-    ))) %>%
-        dplyr::distinct_() %>%
-        mutate_(.dots = set_names(
-            x = list(~format_dates(onset.datetime),
-                     ~format_dates(life.cycle.datetime)),
-            nm = list("onset.datetime", "life.cycle.datetime")
+    # default EDW names
+    if (attr(x, "data") == "edw") {
+        varnames <- c(edw_id, list(
+            "problem" = "Problem - Description",
+            "classification" = "Problem Classification",
+            "confirm" = "Problem Confirmation Status",
+            "free.text" = "Problem Free Text",
+            "severity" = "Problem Severity",
+            "active" = "Problem Source Active Indicator",
+            "onset.datetime" = "Problem Onset Date & Time",
+            "life.cycle.datetime" = "Problem Life Cycle Date & Time",
+            "life.cycle" = "Problem Life Cycle"
         ))
+        # default CDW/MBO names
+    }
 
-    assign_class(df, x,  "problems")
+    x %>%
+        assign_names(varnames, extras) %>%
+        format_dates(c("onset.datetime", "life.cycle.datetime")) %>%
+        assign_class(x, "problems")
 }
 
 #' @rdname set_edwr_class
 #' @export
-as.procedures <- function(x, varnames = NULL, extras = NULL) {
+as.procedures <- function(x, extras = NULL) {
     if (missing(x)) stop("Missing object")
     if (is.procedures(x)) return(x)
     if (!is.tbl_edwr(x)) x <- as.tbl_edwr(x)
 
     # default EDW names
-    if (attr(x, "data") == "edw" & is.null(varnames)) {
-        varnames <- c(val.pie, list(
-            "proc.date" = "`Procedure Date and Time`",
-            "proc.code" = "`Procedure Code`",
-            "proc.source" = "`Procedure Code Source Vocabulary`",
-            "proc.seq" = "`Procedure Code Sequence`"
+    if (attr(x, "data") == "edw") {
+        varnames <- c(edw_id, list(
+            "proc.date" = "Procedure Date and Time",
+            "proc.code" = "Procedure Code",
+            "proc.source" = "Procedure Code Source Vocabulary",
+            "proc.seq" = "Procedure Code Sequence"
         ))
 
         # default CDW/MBO names
-    } else if (attr(x, "data") == "mbo" & is.null(varnames)) {
-        varnames <- c(val.mil, list(
-            "proc.date" = "`Procedure Date and Time`",
-            "proc.code" = "`Procedure Code`",
-            "proc.source" = "`Diagnosis Code Source Vocabulary`",
-            "proc.seq" = "`Procedure Code Sequence`"
+    } else {
+        varnames <- c(mbo_id, list(
+            "proc.date" = "Procedure Date and Time",
+            "proc.code" = "Procedure Code",
+            "proc.source" = "Diagnosis Code Source Vocabulary",
+            "proc.seq" = "Procedure Code Sequence"
         ))
     }
 
-    # if extra var names are given, append those to the list
-    if (!is.null(extras)) {
-        varnames <- c(varnames, extras)
-    }
-
-    df <- rename_(.data = x, .dots = varnames) %>%
-        dplyr::distinct_() %>%
-        format_dates("proc.date")
-
-    assign_class(df, x,  "procedures")
+    x %>%
+        assign_names(varnames, extras) %>%
+        format_dates("proc.date") %>%
+        assign_class(x, "procedures")
 }
 
 #' @rdname set_edwr_class

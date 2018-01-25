@@ -108,13 +108,13 @@ as.order_verify(x, extras = NULL)
 
 as.output(x, extras = NULL)
 
-as.pain_scores(x, varnames = NULL, extras = NULL)
+as.pain_scores(x, extras = NULL)
 
 as.patients(x, extras = NULL)
 
-as.problems(x)
+as.problems(x, extras = NULL)
 
-as.procedures(x, varnames = NULL, extras = NULL)
+as.procedures(x, extras = NULL)
 
 as.radiology(x)
 

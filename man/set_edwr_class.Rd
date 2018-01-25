@@ -124,17 +124,17 @@ as.surgery_times(x, extras = NULL)
 
 as.surgeries(x, extras = NULL)
 
-as.uop(x)
+as.uop(x, extras = NULL)
 
 as.vent_settings(x)
 
-as.vent_times(x, varnames = NULL, extras = NULL)
+as.vent_times(x, extras = NULL)
 
-as.visits(x, varnames = NULL, extras = NULL)
+as.visits(x, extras = NULL)
 
-as.vitals(x, varnames = NULL, extras = NULL)
+as.vitals(x, extras = NULL)
 
-as.warfarin(x, varnames = NULL, extras = NULL)
+as.warfarin(x, extras = NULL)
 }
 \arguments{
 \item{x}{object to set class \code{tbl_edwr}}

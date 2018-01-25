@@ -1226,7 +1226,8 @@ as.surgeries <- function(x, extras = NULL) {
 
     x %>%
         assign_names(varnames, extras) %>%
-        dplyr::mutate_at(c("add.on", "primary.proc"), dply::funs(. == 1)) %>%
+        dplyr::mutate_at(c("add.on", "primary.proc"),
+                         dplyr::funs(parse_expr(". == 1"))) %>%
         format_dates(c("surg.start.datetime", "surg.stop.datetime")) %>%
         assign_class(x, "surgeries")
 }

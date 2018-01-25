@@ -38,6 +38,14 @@ arrange_.tbl_edwr <- function(.data, ..., .dots) {
     reclass(.data, result)
 }
 
+#' Filter
+#' @param .data Data
+#' @param ... Other args
+#' @name filter
+#' @importFrom dplyr filter
+#' @export filter
+NULL
+
 #' @importFrom dplyr filter
 #' @export
 filter.tbl_edwr <- function(.data, ...) {

@@ -1135,58 +1135,61 @@ as.procedures <- function(x, extras = NULL) {
 
 #' @rdname set_edwr_class
 #' @export
-as.radiology <- function(x) {
+as.radiology <- function(x, extras = NULL) {
     if (missing(x)) stop("Missing object")
     if (is.radiology(x)) return(x)
     if (!is.tbl_edwr(x)) x <- as.tbl_edwr(x)
 
-    df <- rename_(.data = x, .dots = c(val.pie, list(
-        "rad.datetime" = val.dt,
-        "rad.type" = val.ce
-    ))) %>%
-        dplyr::distinct_() %>%
-        mutate_(.dots = set_names(
-            x = list(~format_dates(rad.datetime)),
-            nm = "rad.datetime"
+    # default EDW names
+    if (attr(x, "data") == "edw") {
+        varnames <- c(edw_id, list(
+            "rad.datetime" = event_dt,
+            "rad.type" = event_nm
         ))
+        # default CDW/MBO names
+    }
 
-    assign_class(df, x,  "radiology")
+    x %>%
+        assign_names(varnames, extras) %>%
+        format_dates("rad.datetime") %>%
+        assign_class(x, "radiology")
 }
 
 #' @rdname set_edwr_class
 #' @export
-as.services <- function(x) {
+as.services <- function(x, extras = NULL) {
     if (missing(x)) x <- character()
     if (is.services(x)) return(x)
     if (!is.tbl_edwr(x)) x <- as.tbl_edwr(x)
 
-    df <- rename_(.data = x, .dots = c(val.pie, list(
-        "start.datetime" = "`Medical Service Begin Date & Time`",
-        "end.datetime" = "`Medical Service End Date & Time`",
-        "service" = "`Medical Service`",
-        "service.from" = "`Previous Medical Service`"
-    ))) %>%
-        dplyr::distinct_() %>%
-        mutate_(.dots = set_names(
-            x = list(~dplyr::na_if(service, ""),
-                     ~dplyr::na_if(service.from, "")),
-            nm = list("service", "service.from")
-        )) %>%
-        format_dates(c("start.datetime", "end.datetime"))
+    # default EDW names
+    if (attr(x, "data") == "edw") {
+        varnames <- c(edw_id, list(
+            "start.datetime" = "Medical Service Begin Date & Time",
+            "end.datetime" = "Medical Service End Date & Time",
+            "service" = "Medical Service",
+            "service.from" = "Previous Medical Service"
+        ))
+        # default CDW/MBO names
+    }
 
-    assign_class(df, x,  "services")
+    x %>%
+        assign_names(varnames, extras) %>%
+        dplyr::mutate_at(c("service", "service.from"), dplyr::na_if, y = "") %>%
+        format_dates(c("start.datetime", "end.datetime")) %>%
+        assign_class(x, "services")
 }
 
 #' @rdname set_edwr_class
 #' @export
-as.surgery_times <- function(x, varnames = NULL, extras = NULL) {
+as.surgery_times <- function(x, extras = NULL) {
     if (missing(x)) x <- character()
     if (is.surgery_times(x)) return(x)
     if (!is.tbl_edwr(x)) x <- as.tbl_edwr(x)
 
     # default EDW names
-    if (attr(x, "data") == "edw" & is.null(varnames)) {
-        varnames <- c(val.pie, list(
+    if (attr(x, "data") == "edw") {
+        varnames <- c(edw_id, list(
             "surgery_start" = "`Start Date/Time`",
             "surgery_stop" = "`Stop Date/Time`",
             "room_in" = "`Patient In Room Date/Time`",
@@ -1196,46 +1199,43 @@ as.surgery_times <- function(x, varnames = NULL, extras = NULL) {
         ))
     }
 
-    # if extra var names are given, append those to the list
-    if (!is.null(extras)) {
-        varnames <- c(varnames, extras)
-    }
-
-    df <- select_(.data = x, .dots = varnames) %>%
-        dplyr::distinct_() %>%
+    x %>%
+        assign_names(varnames, extras) %>%
         format_dates(c("surgery_start",
                        "surgery_stop",
                        "room_in",
                        "room_out",
                        "recovery_in",
-                       "recovery_out"))
-
-    assign_class(df, x,  "surgery_times")
+                       "recovery_out")) %>%
+        assign_class(x, "surgery_times")
 }
 
 #' @rdname set_edwr_class
 #' @export
-as.surgeries <- function(x) {
+as.surgeries <- function(x, extras = NULL) {
     if (missing(x)) stop("Missing object")
     if (is.surgeries(x)) return(x)
     if (!is.tbl_edwr(x)) x <- as.tbl_edwr(x)
 
-    df <- rename_(.data = x, .dots = c(val.pie, list(
-        "asa.class" = "`ASA Class Description`",
-        "add.on" = "`Add On Indicator`",
-        "surgery" = "Procedure",
-        "primary.proc" = "`Primary Procedure Indicator`",
-        "surg.start.datetime" = "`Start Date/Time`",
-        "surg.stop.datetime" = "`Stop Date/Time`",
-        "surg.type" = "`Surgical Case Specialty`"
-    ))) %>%
-        dplyr::distinct_() %>%
-        purrrlyr::dmap_at(c("add.on", "primary.proc"), ~ .x == 1) %>%
-        format_dates(c("surg.start.datetime", "surg.stop.datetime"))
+    # default EDW names
+    if (attr(x, "data") == "edw") {
+        varnames <- c(edw_id, list(
+            "asa.class" = "ASA Class Description",
+            "add.on" = "Add On Indicator",
+            "surgery" = "Procedure",
+            "primary.proc" = "Primary Procedure Indicator",
+            "surg.start.datetime" = "Start Date/Time",
+            "surg.stop.datetime" = "Stop Date/Time",
+            "surg.type" = "Surgical Case Specialty"
+        ))
+        # default CDW/MBO names
+    }
 
-    names(df) <- stringr::str_to_lower(names(df))
-
-    assign_class(df, x,  "surgeries")
+    x %>%
+        assign_names(varnames, extras) %>%
+        dplyr::mutate_at(c("add.on", "primary.proc"), funs(. == 1)) %>%
+        format_dates(c("surg.start.datetime", "surg.stop.datetime")) %>%
+        assign_class(x, "surgeries")
 }
 
 #' @rdname set_edwr_class

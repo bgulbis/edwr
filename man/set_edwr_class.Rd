@@ -116,13 +116,13 @@ as.problems(x, extras = NULL)
 
 as.procedures(x, extras = NULL)
 
-as.radiology(x)
+as.radiology(x, extras = NULL)
 
-as.services(x)
+as.services(x, extras = NULL)
 
-as.surgery_times(x, varnames = NULL, extras = NULL)
+as.surgery_times(x, extras = NULL)
 
-as.surgeries(x)
+as.surgeries(x, extras = NULL)
 
 as.uop(x)
 

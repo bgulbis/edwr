@@ -100,13 +100,13 @@ as.order_by(x, extras = NULL)
 
 as.order_detail(x, extras = NULL)
 
-as.order_info(x, varnames = NULL, extras = NULL)
+as.order_info(x, extras = NULL)
 
-as.order_timing(x)
+as.order_timing(x, extras = NULL)
 
-as.order_verify(x, varnames = NULL, extras = NULL)
+as.order_verify(x, extras = NULL)
 
-as.output(x, varnames = NULL, extras = NULL)
+as.output(x, extras = NULL)
 
 as.pain_scores(x, varnames = NULL, extras = NULL)
 

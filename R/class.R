@@ -1161,8 +1161,8 @@ as.services <- function(x, extras = NULL) {
         varnames <- c(edw_id, list(
             "start.datetime" = "Medical Service Begin Date & Time",
             "end.datetime" = "Medical Service End Date & Time",
-            "service" = "Medical Service",
-            "service.from" = "Previous Medical Service"
+            "service" = "Medical Service"
+            # "service.from" = "Previous Medical Service"
         ))
         # default CDW/MBO names
     }

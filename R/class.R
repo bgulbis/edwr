@@ -1169,7 +1169,7 @@ as.services <- function(x, extras = NULL) {
 
     x %>%
         assign_names(varnames, extras) %>%
-        dplyr::mutate_at(c("service", "service.from"), dplyr::na_if, y = "") %>%
+        dplyr::mutate_at("service", dplyr::na_if, y = "") %>%
         format_dates(c("start.datetime", "end.datetime")) %>%
         assign_class(x, "services")
 }

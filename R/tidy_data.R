@@ -312,48 +312,33 @@ tidy_data.meds_sched <- function(x, ref, ...) {
 #' @export
 #' @rdname tidy_data
 tidy_data.services <- function(x, ...) {
-    df <- arrange_(x, "start.datetime") %>%
-        group_by_("pie.id") %>%
+    df <- x %>%
+        arrange(!!sym("start.datetime")) %>%
+        group_by(!!sym("pie.id")) %>%
 
         # determine if they went to a different service, then make a count of
         # different services
-        mutate_(.dots = set_names(
-            x = list(~dplyr::if_else(is.na(service) |
-                                         is.na(dplyr::lag(service)) |
-                                         service != dplyr::lag(service),
-                                     TRUE, FALSE),
-                     ~cumsum(diff.service)),
-            nm = list("diff.service", "service.count")
-        )) %>%
+        mutate(
+            !!"diff.service" := !!parse_expr("dplyr::if_else(is.na(service) | is.na(dplyr::lag(service)) | service != dplyr::lag(service), TRUE, FALSE)"),
+            !!"service.count" := cumsum(!!sym("diff.service"))
+        ) %>%
 
         # use the service.count to group multiple rows of the same service
         # together and combine data
-        group_by_(.dots = list("pie.id", "service.count")) %>%
-        summarise_(.dots = set_names(
-            x = list(~dplyr::first(service),
-                     ~dplyr::first(start.datetime),
-                     ~dplyr::last(end.datetime)),
-            nm = list("service", "start.datetime", "end.recorded")
-        )) %>%
+        group_by(!!sym("pie.id"), !!sym("service.count")) %>%
+        summarize(
+            !!"service" := dplyr::first(!!sym("service")),
+            !!"start.datetime" := dplyr::first(!!sym("start.datetime")),
+            !!"end.recorded" := dplyr::last(!!sym("end.datetime"))
+        ) %>%
 
         # use the start time for the next service to calculate an end time
-        group_by_("pie.id") %>%
-        mutate_(.dots = set_names(
-            x = list(~dplyr::lead(start.datetime),
-                     ~dplyr::if_else(is.na(end.calculated),
-                                     difftime(end.recorded,
-                                              start.datetime,
-                                              units = "days"),
-                                     difftime(end.calculated,
-                                              start.datetime,
-                                              units = "days")
-                     )),
-            nm = list("end.calculated", "service.duration")
-        )) %>%
-
+        group_by(!!sym("pie.id")) %>%
+        mutate(!!"end.datetime" := dplyr::lead(!!sym("start.datetime")),
+               !!"end.datetime" := dplyr::coalesce(!!sym("end.datetime"), !!sym("end.recorded")),
+               !!"service.duration" := difftime(!!sym("end.datetime"), !!sym("start.datetime"), units = "days")) %>%
         ungroup() %>%
-        select_(.dots = list(quote(-end.recorded),
-                                    quote(-end.calculated)))
+        select(-!!sym("end.recorded"))
 
     reclass(x, df)
 }

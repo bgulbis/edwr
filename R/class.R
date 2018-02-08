@@ -487,8 +487,14 @@ as.measures <- function(x, extras = NULL) {
 
         # default CDW/MBO names
     } else {
+        if (sum(stringr::str_detect(names(x), "Date and Time - Performed")) >= 1) {
+            dt <- "Date and Time - Performed"
+        } else {
+            dt <- "Date and Time - Scheduled OR Given On"
+        }
+
         varnames <- c(mbo_id, list(
-            "measure.datetime" = "Date and Time - Performed",
+            "measure.datetime" = dt,
             "measure" = "Clinical Event",
             "measure.result" = "Clinical Event Result",
             "measure.units" = "Clinical Event Result Units"

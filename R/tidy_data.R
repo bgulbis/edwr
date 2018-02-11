@@ -319,10 +319,9 @@ tidy_data.services <- function(x, ...) {
         # determine if they went to a different service, then make a count of
         # different services
         mutate(
-            !!"diff.service" := !!parse_expr("dplyr::if_else(is.na(service) |
+            !!"diff.service" := !!parse_expr("is.na(service) |
                                              is.na(dplyr::lag(service)) |
-                                             service != dplyr::lag(service),
-                                             TRUE, FALSE)"),
+                                             service != dplyr::lag(service)"),
             !!"service.count" := cumsum(!!sym("diff.service"))
         ) %>%
 
@@ -338,8 +337,11 @@ tidy_data.services <- function(x, ...) {
         # use the start time for the next service to calculate an end time
         group_by(!!sym("pie.id")) %>%
         mutate(!!"end.datetime" := dplyr::lead(!!sym("start.datetime")),
-               !!"end.datetime" := dplyr::coalesce(!!sym("end.datetime"), !!sym("end.recorded")),
-               !!"service.duration" := difftime(!!sym("end.datetime"), !!sym("start.datetime"), units = "days")) %>%
+               !!"end.datetime" := dplyr::coalesce(!!sym("end.datetime"),
+                                                   !!sym("end.recorded")),
+               !!"service.duration" := difftime(!!sym("end.datetime"),
+                                                !!sym("start.datetime"),
+                                                units = "days")) %>%
         ungroup() %>%
         select(-!!sym("end.recorded"))
 
@@ -354,52 +356,51 @@ tidy_data.services <- function(x, ...) {
 #' @rdname tidy_data
 tidy_data.vent_times <- function(x, dc, ...) {
 
-    id <- set_id_name(x)
+    id <- set_id_quo(x)
 
     # remove any missing data
-    df <- filter_(x, .dots = list(~!is.na(vent.datetime))) %>%
-        arrange_("vent.datetime") %>%
-        group_by_(id) %>%
+    df <- x %>%
+        filter(!is.na(!!sym("vent.datetime"))) %>%
+        arrange(!!sym("vent.datetime")) %>%
+        group_by(!!id) %>%
 
         # if it's the first event or the next event is a stop, then count as a
         # new vent event
-        mutate_(.dots = set_names(
-            x = list(~is.na(dplyr::lag(vent.event)) |
-                         vent.event != lag(vent.event),
-                     ~cumsum(diff.event)),
-            nm = list("diff.event", "event.count")
-        )) %>%
+        muteate(!!"diff.event" := !!parse_expr("is.na(dplyr::lag(vent.event)) |
+                                               vent.event != lag(vent.event)"),
+                !!"event.count" := cumsum(!!sym("diff.event"))
+        ) %>%
 
         # for each event count, get the first and last date/time
-        group_by_(.dots = list(id, "event.count")) %>%
-        summarise_(.dots = set_names(
-            x = list(~dplyr::first(vent.event),
-                     ~dplyr::first(vent.datetime),
-                     ~dplyr::last(vent.datetime)),
-            nm = list("event", "first.event.datetime", "last.event.datetime")
-        )) %>%
+        group_by(!!!quos(!!id, !!sym("event.count"))) %>%
+        summarize(
+            !!"event" := dplyr::first(!!sym("vent.event")),
+            !!"first.event.datetime" := dplyr::first(!!sym("vent.datetime")),
+            !!"last.event.datetime" := dplyr::last(!!sym("vent.datetime"))
+        ) %>%
 
         # use the last date/time of the next event as stop date/time; this would
         # be the last stop event if there are multiple stop events in a row. if
         # there isn't a stop date/time because there was start with no stop, use
         # the discharge date/time as stop date/time
         left_join(dc[c(id, "discharge.datetime")], by = id) %>%
-        group_by_(id) %>%
-        mutate_(.dots = set_names(
-            x = list(~dplyr::lead(last.event.datetime),
-                     ~dplyr::coalesce(stop.datetime, discharge.datetime)),
-            nm = list("stop.datetime", "stop.datetime")
-        )) %>%
+        group_by(!!id) %>%
+        mutate(
+            !!"stop.datetime" := dplyr::lead(!!sym("last.event.datetime")),
+            !!"stop.datetime" := dplyr::coalesce(!!sym("stop.datetime"),
+                                                 !!sym("discharge.datetime"))
+        ) %>%
 
-        filter_(.dots = list(~event == "vent start time")) %>%
-        select_(.dots = list(id,
-                             "start.datetime" = "first.event.datetime",
-                             "stop.datetime")) %>%
+        filter(!!parse_expr('event == "vent start time"')) %>%
+        select(
+            !!id,
+            !!parse_expr('"start.datetime" = "first.event.datetime"'),
+            !!sym("stop.datetime")
+        ) %>%
         ungroup() %>%
-        mutate_(.dots = set_names(
-            x = list(~difftime(stop.datetime, start.datetime, units = "hours")),
-            nm = "vent.duration"
-        ))
+        mutate(!!"vent.duration" := difftime(!!sym("stop.datetime"),
+                                             !!sym("start.datetime"),
+                                             units = "hours"))
 
     reclass(x, df)
 }

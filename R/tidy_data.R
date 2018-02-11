@@ -319,7 +319,10 @@ tidy_data.services <- function(x, ...) {
         # determine if they went to a different service, then make a count of
         # different services
         mutate(
-            !!"diff.service" := !!parse_expr("dplyr::if_else(is.na(service) | is.na(dplyr::lag(service)) | service != dplyr::lag(service), TRUE, FALSE)"),
+            !!"diff.service" := !!parse_expr("dplyr::if_else(is.na(service) |
+                                             is.na(dplyr::lag(service)) |
+                                             service != dplyr::lag(service),
+                                             TRUE, FALSE)"),
             !!"service.count" := cumsum(!!sym("diff.service"))
         ) %>%
 

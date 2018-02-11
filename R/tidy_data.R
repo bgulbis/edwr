@@ -76,39 +76,34 @@ tidy_data.default <- function(x, ...) {
 #' @rdname tidy_data
 tidy_data.diagnosis <- function(x, ...) {
     # find codes which are valid
-    valid.codes <- mutate_(x, .dots = set_names(
-        x = list(~icd::icd_is_valid(icd::as.icd9cm(diag.code)),
-                 ~icd::icd_is_valid(icd::as.icd10cm(diag.code))),
-        nm = list("icd9", "icd10")
-    ))
+    valid_codes <- x %>%
+        mutate(
+            !!"icd9" := icd::icd_is_valid(icd::as.icd9cm(!!sym("diag.code"))),
+            !!"icd10" := icd::icd_is_valid(icd::as.icd10cm(!!sym("diag.code")))
+        )
 
     # if code only valid in one type, then assign it to the correct group
-    assign <- filter_(valid.codes,
-                      .dots = list(~!(icd9 == TRUE & icd10 == TRUE)))
+    assign <-filter(valid_codes, !!parse_expr("!(icd9 & icd10)"))
 
     # find codes which are valid in both ICD9/10 and check if they are defined
-    undefined <- filter_(valid.codes,
-                         .dots = list(~icd9 == TRUE, ~icd10 == TRUE)) %>%
-        mutate_(.dots = set_names(
-            x = list(~icd::icd_is_defined(icd::as.icd9cm(diag.code)),
-                     ~icd::icd_is_defined(icd::as.icd10cm(diag.code))),
-            nm = list("icd9", "icd10")
-        ))
+    undefined <- valid_codes %>%
+        filter(!!sym("icd9"), !!sym("icd10")) %>%
+        mutate(
+            !!"icd9" := icd::icd_is_defined(icd::as.icd9cm(!!sym("diag.code"))),
+            !!"icd10" := icd::icd_is_defined(icd::as.icd10cm(!!sym("diag.code")))
+        )
 
     # if code only defined in one type, assign it to the correct group
-    icd_defined <- filter_(undefined,
-                           .dots = list(~!(icd9 == TRUE & icd10 == TRUE)))
+    icd_defined <- filter(undefined, !!parse_expr("!(icd9 & icd10)"))
 
     # for codes defined in both, use the source assignment from EDW
-    source_default <- filter_(undefined,
-                              .dots = list(~icd9 == TRUE, ~icd10 == TRUE)) %>%
-        mutate_(.dots = set_names(
-            x = list(~code.source == "ICD-9-CM" | code.source == "ICD9"),
-            nm = "icd9"
-        ))
+    source_default <- undefined %>%
+        filter(!!sym("icd9"), !!sym("icd10")) %>%
+        mutate(!!"icd9" := !!parse_expr('code.source == "ICD-9-CM" |
+                                        code.source == "ICD9"'))
 
     df <- dplyr::bind_rows(assign, icd_defined, source_default) %>%
-        select_(.dots = quote(-icd10))
+        select_(-!!sym("icd10"))
 
     reclass(x, df)
 }

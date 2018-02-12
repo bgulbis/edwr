@@ -286,7 +286,7 @@ tidy_data.meds_cont <- function(x, sched, ref = NULL, ...) {
     # remove any rows in continuous data which are actually scheduled doses,
     # then filter to meds in lookup, then sort by pie.id, med, med.datetime
     x %>%
-        anti_join(x, sched, by = "event.id") %>%
+        anti_join(sched, by = "event.id") %>%
         tidy_fun("cont", ref)
 }
 

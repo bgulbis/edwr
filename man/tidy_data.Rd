@@ -23,11 +23,11 @@ tidy_data(x, ...)
 
 \method{tidy_data}{locations}(x, ...)
 
-\method{tidy_data}{meds_cont}(x, ref, sched, ...)
+\method{tidy_data}{meds_cont}(x, sched, ref = NULL, ...)
 
-\method{tidy_data}{meds_inpt}(x, ref, ...)
+\method{tidy_data}{meds_inpt}(x, ref = NULL, ...)
 
-\method{tidy_data}{meds_sched}(x, ref, ...)
+\method{tidy_data}{meds_sched}(x, ref = NULL, ...)
 
 \method{tidy_data}{services}(x, ...)
 
@@ -41,10 +41,10 @@ tidy_data(x, ...)
 \item{censor}{A logical, if TRUE will add a column indicating the data was
 censored (default)}
 
+\item{sched}{A data frame with intermittent medications}
+
 \item{ref}{A data frame with three columns: name, type, and group. See
 details below.}
-
-\item{sched}{A data frame with intermittent medications}
 
 \item{dc}{A data frame with discharge date/times}
 }
@@ -107,7 +107,7 @@ ref <- tibble::tibble(
 
 # tidy continuous medications; will keep only heparin drips
 print(head(
-  tidy_data(meds_cont, ref, meds_sched)
+  tidy_data(meds_cont, meds_sched, ref)
 ))
 
 # tidy intermittent medications; will keep warfarin and antiplatelet agents

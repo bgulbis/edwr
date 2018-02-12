@@ -45,7 +45,7 @@
 #'
 #' # tidy continuous medications; will keep only heparin drips
 #' print(head(
-#'   tidy_data(meds_cont, ref, meds_sched)
+#'   tidy_data(meds_cont, meds_sched, ref)
 #' ))
 #'
 #' # tidy intermittent medications; will keep warfarin and antiplatelet agents
@@ -107,7 +107,7 @@ tidy_data.diagnosis <- function(x, ...) {
                                         code.source == "ICD9"'))
 
     df <- dplyr::bind_rows(assign, icd_defined, source_default) %>%
-        select_(-!!icd10)
+        select(-!!icd10)
 
     reclass(x, df)
 }
@@ -248,26 +248,26 @@ tidy_data.locations <- function(x, ...) {
 #'
 #' @param x tibble
 #' @param group string indicating cont or sched
-#' @param med_col name of the column with medication dose or rate
 #' @param ref
 #'
 #' @return tibble
 #'
 #' @keywords internal
-tidy_fun <- function(x, group, med_col, ref = NULL) {
+tidy_fun <- function(x, group, ref = NULL) {
     id <- set_id_quo(x)
 
     if(!is.null(ref)) {
         # for any med classes, lookup the meds included in the class
-        y <- filter(ref, !!sym("type") == "class", !!sym("group") == group)
+        y <- filter(ref, !!parse_expr(paste0('type == "class" & group == "', group, '"')))
         class_meds <- med_lookup(y$name)
 
         # join the list of meds with any indivdual meds included
-        y <- filter(ref, !!sym("type") == "med", !!sym("group") == group)
+        y <- filter(ref, !!parse_expr(paste0('type == "med" & group == "', group, '"')))
+
         lookup_meds <- c(y$name, class_meds$med.name) %>%
             stringr::str_to_lower()
 
-        df <- filter(x, !!parse_expr("med %in% lookup.meds"))
+        df <- filter(x, !!parse_expr("med %in% lookup_meds"))
     } else {
         df <- x
     }
@@ -275,8 +275,7 @@ tidy_fun <- function(x, group, med_col, ref = NULL) {
     # remove any rows in continuous data which are actually scheduled doses,
     # then filter to meds in lookup, then sort by pie.id, med, med.datetime
     df <- df %>%
-        arrange(!!id, !!sym("med"), !!sym("med.datetime")) %>%
-        dplyr::mutate_at(med_col, as.numeric)
+        arrange(!!id, !!sym("med"), !!sym("med.datetime"))
 
     reclass(x, df)
 }
@@ -288,16 +287,21 @@ tidy_data.meds_cont <- function(x, sched, ref = NULL, ...) {
     # then filter to meds in lookup, then sort by pie.id, med, med.datetime
     x %>%
         anti_join(x, sched, by = "event.id") %>%
-        tidy_fun("cont", "med.rate", ref)
+        tidy_fun("cont", ref)
 }
 
 #' @export
 #' @rdname tidy_data
-tidy_data.meds_inpt <- function(x, ref, ...) {
-    sched <- tidy_fun(x, "sched", "med.dose", ref)
+tidy_data.meds_inpt <- function(x, ref =  NULL, ...) {
+    event_tag <- sym("event.tag")
+
+    sched <- x %>%
+        filter(is.na(!!event_tag)) %>%
+        tidy_fun("sched", ref)
+
     cont <- x %>%
-        filter(!is.na(!!sym("event.tag"))) %>%
-        tidy_fun("cont", "med.dose", ref)
+        filter(!is.na(!!event_tag)) %>%
+        tidy_fun("cont", ref)
 
     dplyr::bind_rows(sched, cont) %>%
         arrange(!!sym("millennium.id"), !!sym("med.datetime"))
@@ -306,7 +310,7 @@ tidy_data.meds_inpt <- function(x, ref, ...) {
 #' @export
 #' @rdname tidy_data
 tidy_data.meds_sched <- function(x, ref = NULL, ...) {
-    tidy_fun(x, "sched", "med.dose", ref)
+    tidy_fun(x, "sched", ref)
 }
 
 #' @details For services, this function accounts for incorrect end times

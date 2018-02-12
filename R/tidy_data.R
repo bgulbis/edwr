@@ -168,7 +168,7 @@ tidy_data.locations <- function(x, ...) {
             summarize(
                 !!"location" := dplyr::first(!!sym("unit.to")),
                 !!"arrive.datetime" := dplyr::first(!!arrive_datetime),
-                !!"depart.record" := dplyr::last(!!depart_datetime)
+                !!"depart.recorded" := dplyr::last(!!depart_datetime)
             ) %>%
 
             # use the arrival time for the next unit to calculate a depart time; if
@@ -367,16 +367,18 @@ tidy_data.services <- function(x, ...) {
 tidy_data.vent_times <- function(x, dc, ...) {
 
     id <- set_id_quo(x)
+    vent_datetime <- sym("vent.datetime")
+    stop_datetime <- sym("stop.datetime")
 
     # remove any missing data
     df <- x %>%
-        filter(!is.na(!!sym("vent.datetime"))) %>%
-        arrange(!!sym("vent.datetime")) %>%
+        filter(!is.na(!!vent_datetime)) %>%
+        arrange(!!vent_datetime) %>%
         group_by(!!id) %>%
 
         # if it's the first event or the next event is a stop, then count as a
         # new vent event
-        muteate(!!"diff.event" := !!parse_expr("is.na(dplyr::lag(vent.event)) |
+        mutate(!!"diff.event" := !!parse_expr("is.na(dplyr::lag(vent.event)) |
                                                vent.event != lag(vent.event)"),
                 !!"event.count" := cumsum(!!sym("diff.event"))
         ) %>%
@@ -385,30 +387,32 @@ tidy_data.vent_times <- function(x, dc, ...) {
         group_by(!!!quos(!!id, !!sym("event.count"))) %>%
         summarize(
             !!"event" := dplyr::first(!!sym("vent.event")),
-            !!"first.event.datetime" := dplyr::first(!!sym("vent.datetime")),
-            !!"last.event.datetime" := dplyr::last(!!sym("vent.datetime"))
+            !!"first.event.datetime" := dplyr::first(!!vent_datetime),
+            !!"last.event.datetime" := dplyr::last(!!vent_datetime)
         ) %>%
 
         # use the last date/time of the next event as stop date/time; this would
         # be the last stop event if there are multiple stop events in a row. if
         # there isn't a stop date/time because there was start with no stop, use
         # the discharge date/time as stop date/time
-        left_join(dc[c(id, "discharge.datetime")], by = id) %>%
+        left_join(dc[c(rlang::quo_text(id), "discharge.datetime")],
+                  by = rlang::quo_text(id)) %>%
         group_by(!!id) %>%
         mutate(
             !!"stop.datetime" := dplyr::lead(!!sym("last.event.datetime")),
-            !!"stop.datetime" := dplyr::coalesce(!!sym("stop.datetime"),
+            !!"stop.datetime" := dplyr::coalesce(!!stop_datetime,
                                                  !!sym("discharge.datetime"))
         ) %>%
 
         filter(!!parse_expr('event == "vent start time"')) %>%
         select(
             !!id,
-            !!parse_expr('"start.datetime" = "first.event.datetime"'),
-            !!sym("stop.datetime")
+            # !!parse_expr('"start.datetime" = "first.event.datetime"'),
+            !!"start.datetime" := !!sym("first.event.datetime"),
+            !!stop_datetime
         ) %>%
         ungroup() %>%
-        mutate(!!"vent.duration" := difftime(!!sym("stop.datetime"),
+        mutate(!!"vent.duration" := difftime(!!stop_datetime,
                                              !!sym("start.datetime"),
                                              units = "hours"))
 

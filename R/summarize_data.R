@@ -39,20 +39,13 @@
 #' )
 #'
 #' # tidy continuous medications and calculate runtime
-#' x <- tidy_data(meds_cont, ref, meds_sched)
+#' x <- tidy_data(meds_cont, meds_sched, ref)
 #' x <- calc_runtime(x)
 #'
 #' # pass runtime data to summarize
 #' print(head(
 #'   summarize_data(x)
 #' ))
-#'
-#' # make a reference data frame for tidying meds
-#' ref <- tibble::tibble(
-#'   name = c("heparin", "warfarin", "antiplatelet agents"),
-#'   type = c("med", "med", "class"),
-#'   group = c("cont", "sched", "sched")
-#' )
 #'
 #' # tidy home medications
 #' print(head(
@@ -94,17 +87,18 @@ summarize_data.meds_cont <- function(x, units = "hours", ...) {
 
     cont <- x %>%
         group_by(!!!grp_by) %>%
-            filter(!!sym("run.time") > 0)
+        filter(!!parse_expr("run.time > 0"))
 
     # get last and min non-zero rate
     nz.rate <- cont %>%
-        filter(!!med.rate > 0) %>%
+        filter(!!parse_expr("med.rate > 0")) %>%
         summarize(
             !!"last.rate" := dplyr::last(!!med.rate),
             !!"min.rate" := min(!!med.rate, na.rm = TRUE),
             !!"run.time" := sum(!!sym("duration"), na.rm = TRUE)
         )
 
+    return(cont)
     # get first and max rates and AUC
     df <- cont %>%
         summarize(

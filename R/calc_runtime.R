@@ -36,7 +36,7 @@
 #' )
 #'
 #' # tidy continuous medications; will keep only heparin drips
-#' x <- tidy_data(meds_cont, ref, meds_sched)
+#' x <- tidy_data(meds_cont, meds_sched, ref)
 #'
 #' # calculate the runtime for continuous heparin infusion
 #' print(head(

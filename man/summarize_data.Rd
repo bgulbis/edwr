@@ -81,20 +81,13 @@ ref <- tibble::tibble(
 )
 
 # tidy continuous medications and calculate runtime
-x <- tidy_data(meds_cont, ref, meds_sched)
+x <- tidy_data(meds_cont, meds_sched, ref)
 x <- calc_runtime(x)
 
 # pass runtime data to summarize
 print(head(
   summarize_data(x)
 ))
-
-# make a reference data frame for tidying meds
-ref <- tibble::tibble(
-  name = c("heparin", "warfarin", "antiplatelet agents"),
-  type = c("med", "med", "class"),
-  group = c("cont", "sched", "sched")
-)
 
 # tidy home medications
 print(head(

@@ -29,7 +29,7 @@
 #' )
 #'
 #' # tidy continuous medications; will keep only heparin drips
-#' x <- tidy_data(meds_cont, ref, meds_sched)
+#' x <- tidy_data(meds_cont, meds_sched, ref)
 #' y <- calc_runtime(x)
 #'
 #' # calculate the proportion of time the infusion rate was > 10 units/kg/hour

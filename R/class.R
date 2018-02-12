@@ -575,6 +575,7 @@ as.meds_cont <- function(x, extras = NULL) {
         assign_names(varnames, extras) %>%
         dplyr::mutate_at("med", stringr::str_to_lower) %>%
         dplyr::mutate_at("med.rate.units", dplyr::na_if, y = "") %>%
+        dplyr::mutate_at("med.rate", as.numeric) %>%
         format_dates("med.datetime") %>%
         assign_class(x, "meds_cont")
 }
@@ -702,6 +703,7 @@ as.meds_sched <- function(x, extras = NULL) {
     x %>%
         assign_names(varnames, extras) %>%
         dplyr::mutate_at("med", stringr::str_to_lower) %>%
+        dplyr::mutate_at("med.dose", as.numeric) %>%
         format_dates("med.datetime") %>%
         assign_class(x, "meds_sched")
 }

@@ -16,3 +16,8 @@ data_frame
 This takes a data frame with columns: med, med.dose, med.dose.units, and
 route and will convert the med.dose to the morphine equivalent.
 }
+\references{
+Lexicomp - Opiod Agonist Conversion (from drug, to Morphine IM);
+https://www.cms.gov/Medicare/Prescription-Drug-Coverage/PrescriptionDrugCovContra/Downloads/Opioid-Morphine-EQ-Conversion-Factors-March-2015.pdf (note, doses listed in oral mme, converted to iv mme by * 0.3);
+http://clincalc.com/opioids/
+}

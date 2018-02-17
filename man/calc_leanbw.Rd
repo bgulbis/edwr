@@ -23,5 +23,7 @@ patient's lean body weight in kg. For males, the equation is: LBW[kg] = (0.73
 * Height[cm]) - 59.42; for females: LBW[kg] = (0.65 * Height[cm]) - 50.74.
 }
 \references{
-Burton ME, Chow MS, Platt DR, et. al. Accuracy of Bayesian and Sawchuk-Zaske dosing methods for gentamicin. Clin Pharm. 1986 Feb;5(2):143-9
+Burton ME, Chow MS, Platt DR, et. al. Accuracy of Bayesian and
+  Sawchuk-Zaske dosing methods for gentamicin. Clin Pharm. 1986
+  Feb;5(2):143-9
 }

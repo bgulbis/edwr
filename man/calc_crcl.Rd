@@ -21,15 +21,16 @@ calc_crcl(age, sex, scr, weight, height)
 A numeric, creatinine clearance in mL/min
 }
 \description{
-\code{cal_crcl} calculates the creatinine clearance using the
-Cockcroft-Gault equation
+\code{cal_crcl} calculates the creatinine clearance using the Cockcroft-Gault
+equation
 }
 \details{
 This function calculates the creatinine clearance for a patient based on the
 Cockcroft-Gault equation: CrCl[mL/min] = Sex * ((140 - Age[yr]) / Serum
-Creatinine[mg/dL]) * (Lean Body Weight[kg] / 72); where Sex = 1 for Males and Sex =
-0.85 for Females.
+Creatinine[mg/dL]) * (Lean Body Weight[kg] / 72); where Sex = 1 for Males and
+Sex = 0.85 for Females.
 }
 \references{
-Cockcroft DW, Gault MH. Prediction of creatinine clearance from serum creatinine. Nephron. 1976;16(1):31-41
+Cockcroft DW, Gault MH. Prediction of creatinine clearance from
+  serum creatinine. Nephron. 1976;16(1):31-41
 }

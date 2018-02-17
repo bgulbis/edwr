@@ -1,12 +1,12 @@
 #' Caculate the creatinine clearance
 #'
-#' \code{cal_crcl} calculates the creatinine clearance using the
-#' Cockcroft-Gault equation
+#' \code{cal_crcl} calculates the creatinine clearance using the Cockcroft-Gault
+#' equation
 #'
 #' This function calculates the creatinine clearance for a patient based on the
 #' Cockcroft-Gault equation: CrCl[mL/min] = Sex * ((140 - Age[yr]) / Serum
-#' Creatinine[mg/dL]) * (Lean Body Weight[kg] / 72); where Sex = 1 for Males and Sex =
-#' 0.85 for Females.
+#' Creatinine[mg/dL]) * (Lean Body Weight[kg] / 72); where Sex = 1 for Males and
+#' Sex = 0.85 for Females.
 #'
 #'
 #' @param age A numeric with the patient's age
@@ -17,7 +17,8 @@
 #'
 #' @return A numeric, creatinine clearance in mL/min
 #'
-#' @references Cockcroft DW, Gault MH. Prediction of creatinine clearance from serum creatinine. Nephron. 1976;16(1):31-41
+#' @references Cockcroft DW, Gault MH. Prediction of creatinine clearance from
+#'   serum creatinine. Nephron. 1976;16(1):31-41
 #'
 #' @export
 calc_crcl <- function(age, sex, scr, weight, height) {
@@ -54,7 +55,9 @@ calc_crcl <- function(age, sex, scr, weight, height) {
 #'
 #' @return A numeric, ideal body weight, in kg
 #'
-#' @references Burton ME, Chow MS, Platt DR, et. al. Accuracy of Bayesian and Sawchuk-Zaske dosing methods for gentamicin. Clin Pharm. 1986 Feb;5(2):143-9
+#' @references Burton ME, Chow MS, Platt DR, et. al. Accuracy of Bayesian and
+#'   Sawchuk-Zaske dosing methods for gentamicin. Clin Pharm. 1986
+#'   Feb;5(2):143-9
 #'
 calc_leanbw <- function(sex, height) {
     if (sex == "Male") {

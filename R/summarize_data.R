@@ -98,7 +98,6 @@ summarize_data.meds_cont <- function(x, units = "hours", ...) {
             !!"run.time" := sum(!!sym("duration"), na.rm = TRUE)
         )
 
-    return(cont)
     # get first and max rates and AUC
     df <- cont %>%
         summarize(

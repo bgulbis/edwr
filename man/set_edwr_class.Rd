@@ -23,6 +23,7 @@
 \alias{as.meds_home}
 \alias{as.meds_inpt}
 \alias{as.meds_sched}
+\alias{as.md}
 \alias{as.mrn}
 \alias{as.mpp}
 \alias{as.order_action}
@@ -89,6 +90,8 @@ as.meds_home(x, extras = NULL)
 as.meds_inpt(x, extras = NULL)
 
 as.meds_sched(x, extras = NULL)
+
+as.md(x, extras = NULL)
 
 as.mrn(x, extras = NULL)
 

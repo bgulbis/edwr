@@ -21,6 +21,7 @@
 \alias{is.meds_home}
 \alias{is.meds_inpt}
 \alias{is.meds_sched}
+\alias{is.md}
 \alias{is.mpp}
 \alias{is.mrn}
 \alias{is.order_action}
@@ -85,6 +86,8 @@ is.meds_home(x)
 is.meds_inpt(x)
 
 is.meds_sched(x)
+
+is.md(x)
 
 is.mpp(x)
 

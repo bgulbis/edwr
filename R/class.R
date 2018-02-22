@@ -710,6 +710,33 @@ as.meds_sched <- function(x, extras = NULL) {
 
 #' @rdname set_edwr_class
 #' @export
+as.md <- function(x, extras = NULL) {
+    if (missing(x)) stop("Missing object")
+    if (is.md(x)) return(x)
+    if (!is.tbl_edwr(x)) x <- as.tbl_edwr(x)
+
+    # default EDW names
+    if (attr(x, "data") == "edw") {
+        varnames <- c(edw_id, list())
+    } else {
+        varnames <- c(
+            mbo_id,
+            list(
+                "attending" = "Attending Physician-All",
+                "md.start" = "Date and Time - Phys Begin Effective",
+                "md.stop" = "Date and Time - Phys End Effective"
+            )
+        )
+    }
+
+    x %>%
+        assign_names(varnames, extras) %>%
+        format_dates(c("md.start", "md.stop")) %>%
+        assign_class(x, "md")
+}
+
+#' @rdname set_edwr_class
+#' @export
 as.mrn <- function(x, extras = NULL) {
     if (missing(x)) stop("Missing object")
     if (is.mrn(x)) return(x)
@@ -1523,6 +1550,10 @@ is.meds_inpt <- function(x) inherits(x, "meds_inpt")
 #' @rdname is.tbl_edwr
 #' @export
 is.meds_sched <- function(x) inherits(x, "meds_sched")
+
+#' @rdname is.tbl_edwr
+#' @export
+is.md <- function(x) inherits(x, "md")
 
 #' @rdname is.tbl_edwr
 #' @export

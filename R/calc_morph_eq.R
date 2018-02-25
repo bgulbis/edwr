@@ -85,7 +85,7 @@ calc_morph_eq <- function(x) {
                     med.dose
                 )'
             ),
-            !!"dose.freq" := case_when(!!!freq),
+            !!"dose.freq" := dplyr::case_when(!!!freq),
             !!"mme.iv" := dplyr::case_when(!!!convert)
         )
 

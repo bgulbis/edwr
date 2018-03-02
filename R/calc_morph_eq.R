@@ -23,12 +23,14 @@ calc_morph_eq <- function(x) {
 
     products <- quos(
         stringr::str_detect(med.product, "7.5-200mg") ~ 7.5,
-        stringr::str_detect(med.product, "325-10mg") ~ 10,
+        stringr::str_detect(med.product, "10/325|325-10mg") ~ 10,
         stringr::str_detect(med.product, "325-7.5") ~ 7.5,
-        stringr::str_detect(med.product, "325(mg)?-5") ~ 5,
-        stringr::str_detect(med.product, "300-30") ~ 30,
-        stringr::str_detect(med.product, "300-60") ~ 60,
+        stringr::str_detect(med.product, "5/325|325(mg)?-5") ~ 5,
+        stringr::str_detect(med.product, "300( mg)?-15") ~ 15,
+        stringr::str_detect(med.product, "#3|300( mg)?-30") ~ 30,
+        stringr::str_detect(med.product, "#4|300( mg)?-60|325( mg)?-60") ~ 60,
         stringr::str_detect(med.product, "50 mg") ~ 50,
+        stringr::str_detect(med.product, "100 mg") ~ 100,
         stringr::str_detect(med.product, "325 mg -7.5 mg/15ml") ~ 0.5,
         stringr::str_detect(med.product, "5 ml 120-12 mg/5 ml") ~ 2.4,
         stringr::str_detect(med.product, "10 mg/ml") ~ 10,

@@ -250,3 +250,9 @@ summarize_data.vitals <- function(x, units = "hours", ...) {
                 !!sym("vital.result")
     )
 }
+
+#' @export
+#' @rdname summarize_data
+summarize_data.events <- function(x, units = "hours", ...) {
+    summarize_data.labs(x)
+}

@@ -178,7 +178,13 @@ calc_runtime.meds_inpt <- function(x, drip.off = 12, no.doc = 24,
                                    units = "hours", cont = TRUE, ...) {
     # calls method for continuous meds
     if (cont) {
-        calc_runtime.meds_cont(x, drip.off = drip.off, no.doc = no.doc, units = units, ...)
+        calc_runtime.meds_cont(
+            x,
+            drip.off = drip.off,
+            no.doc = no.doc,
+            units = units,
+            ...
+        )
     } else {
         calc_runtime.meds_sched(x, units = units, ...)
     }
@@ -224,6 +230,21 @@ calc_runtime.labs <- function(x, units = "hours", ...) {
         ungroup()
 
     reclass(x, df)
+}
+
+#' @export
+#' @rdname calc_runtime
+calc_runtime.events <- function(x, units = "hours", ...) {
+    x %>%
+        rename(
+            !!"lab.datetime" := !!sym("event.datetime"),
+            !!"lab" := !!sym("event"),
+            !!"lab.result" := !!sym("event.result"),
+            !!"lab.result.units" := !!sym("event.result.units"),
+            !!"lab.draw.location" := !!sym("event.location")
+        ) %>%
+        mutate_at("lab.result", as.numeric) %>%
+        calc_runtime.labs()
 }
 
 #' @export

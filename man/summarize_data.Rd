@@ -9,6 +9,7 @@
 \alias{summarize_data.meds_sched}
 \alias{summarize_data.labs}
 \alias{summarize_data.vitals}
+\alias{summarize_data.events}
 \title{Summary calculations for serial measurement data}
 \usage{
 summarize_data(x, ...)
@@ -26,6 +27,8 @@ summarize_data(x, ...)
 \method{summarize_data}{labs}(x, units = "hours", ...)
 
 \method{summarize_data}{vitals}(x, units = "hours", ...)
+
+\method{summarize_data}{events}(x, units = "hours", ...)
 }
 \arguments{
 \item{x}{A data frame with continuous data}

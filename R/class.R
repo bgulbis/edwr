@@ -1218,24 +1218,31 @@ as.surgery_times <- function(x, extras = NULL) {
 
     # default EDW names
     if (attr(x, "data") == "edw") {
-        varnames <- c(edw_id, list(
-            "surgery_start" = "`Start Date/Time`",
-            "surgery_stop" = "`Stop Date/Time`",
-            "room_in" = "`Patient In Room Date/Time`",
-            "room_out" = "`Patient Out Room Date/Time`",
-            "recovery_in" = "`Patient In Recovery Date/Time`",
-            "recovery_out" = "`Patient Out Recovery Date/Time`"
-        ))
+        varnames <- c(
+            edw_id,
+            list(
+                "surgery_start" = "Start Date/Time",
+                "surgery_stop" = "Stop Date/Time",
+                "room_in" = "Patient In Room Date/Time",
+                "room_out" = "Patient Out Room Date/Time",
+                "recovery_in" = "Patient In Recovery Date/Time",
+                "recovery_out" = "Patient Out Recovery Date/Time"
+            )
+        )
     }
 
     x %>%
         assign_names(varnames, extras) %>%
-        format_dates(c("surgery_start",
-                       "surgery_stop",
-                       "room_in",
-                       "room_out",
-                       "recovery_in",
-                       "recovery_out")) %>%
+        format_dates(
+            c(
+                "surgery_start",
+                "surgery_stop",
+                "room_in",
+                "room_out",
+                "recovery_in",
+                "recovery_out"
+            )
+        ) %>%
         assign_class(x, "surgery_times")
 }
 
@@ -1248,21 +1255,26 @@ as.surgeries <- function(x, extras = NULL) {
 
     # default EDW names
     if (attr(x, "data") == "edw") {
-        varnames <- c(edw_id, list(
-            "asa.class" = "ASA Class Description",
-            "add.on" = "Add On Indicator",
-            "surgery" = "Procedure",
-            "primary.proc" = "Primary Procedure Indicator",
-            "surg.start.datetime" = "Start Date/Time",
-            "surg.stop.datetime" = "Stop Date/Time",
-            "surg.type" = "Surgical Case Specialty"
-        ))
+        varnames <- c(
+            edw_id,
+            list(
+                "asa.class" = "ASA Class Description",
+                "add.on" = "Add On Indicator",
+                "surgery" = "Procedure",
+                "primary.proc" = "Primary Procedure Indicator",
+                "surg.start.datetime" = "Start Date/Time",
+                "surg.stop.datetime" = "Stop Date/Time",
+                "surg.type" = "Surgical Case Specialty"
+            )
+        )
     }
 
     x %>%
         assign_names(varnames, extras) %>%
-        dplyr::mutate_at(c("add.on", "primary.proc"),
-                         dplyr::funs(parse_expr(". == 1"))) %>%
+        dplyr::mutate_at(
+            c("add.on", "primary.proc"),
+            dplyr::funs(!!parse_expr(". == 1"))
+        ) %>%
         format_dates(c("surg.start.datetime", "surg.stop.datetime")) %>%
         assign_class(x, "surgeries")
 }

@@ -265,6 +265,12 @@ as.drg <- function(x, extras = NULL) {
             "drg.type" = "Grouping Code Type"
         ))
         # default CDW/MBO names
+    } else {
+        varnames <- c(mbo_id, list(
+            "drg" = "DRG Code",
+            "drg.desc" = "DRG Description",
+            "drg.priority" = "DRG Priority"
+        ))
     }
 
     x %>%

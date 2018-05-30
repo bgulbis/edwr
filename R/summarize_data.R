@@ -216,6 +216,7 @@ summary_fun <- function(x, grp_col, dt_col, val_col) {
             !!"duration" := dplyr::last(!!sym("run.time"))
         ) %>%
         group_by(!!!grp) %>%
+        mutate_at("duration", as.numeric) %>%
         mutate(!!"time.wt.avg" := !!parse_expr("auc / duration")) %>%
         ungroup()
 

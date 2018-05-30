@@ -113,6 +113,7 @@ summarize_data.meds_cont <- function(x, units = "hours", ...) {
         # and interval
         inner_join(nz.rate, by = c(rlang::quo_text(id), "med", "drip.count")) %>%
         group_by(!!!grp_by) %>%
+        mutate_at("duration", as.numeric) %>%
         mutate(!!"time.wt.avg" := !!parse_expr("auc / duration")) %>%
         ungroup()
 

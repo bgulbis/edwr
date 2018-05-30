@@ -3,8 +3,8 @@
 \name{calc_perctime}
 \alias{calc_perctime}
 \alias{calc_perctime.default}
-\alias{calc_perctime.labs}
 \alias{calc_perctime.meds_cont}
+\alias{calc_perctime.labs}
 \title{Calculate proportion of time above or below a threshold}
 \usage{
 calc_perctime(x, ...)
@@ -48,7 +48,7 @@ ref <- tibble::tibble(
 )
 
 # tidy continuous medications; will keep only heparin drips
-x <- tidy_data(meds_cont, ref, meds_sched)
+x <- tidy_data(meds_cont, meds_sched, ref)
 y <- calc_runtime(x)
 
 # calculate the proportion of time the infusion rate was > 10 units/kg/hour
@@ -57,4 +57,3 @@ print(head(
 ))
 
 }
-

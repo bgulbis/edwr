@@ -13,7 +13,7 @@
 #' @param x A data frame with lab data
 #' @param .lab A character string indicating the name of the lab to evaluate
 #' @param change.by A numeric indicating the threshold for lab changes
-#' @param FUN A function for \code{\link[zoo]{rollapplyr}}, most commonly max or
+#' @param FUN A function for \code{rollapplyr}, most commonly max or
 #'   min
 #' @param back An optional numeric specifying the number of days back to go.
 #'   Defaults to 2 days.
@@ -34,16 +34,24 @@ lab_change <- function(x, .lab, change.by, FUN, back = 2) {
     # calculate the running min/max during the time window, then calculate the
     # change from the running min/max to current value, then filter values which
     # exceed the change.by value
-    filter_(x, .dots = list(~lab %in% .lab)) %>%
-        arrange_(.dots = list("pie.id", "lab", "lab.datetime")) %>%
-        group_by_(.dots = list("pie.id", "lab")) %>%
+    id <- set_id_name(x)
+
+    df <- filter_(x, .dots = list(~lab %in% .lab)) %>%
+        arrange_(.dots = list(id, "lab", "lab.datetime")) %>%
+        group_by_(.dots = list(id, "lab")) %>%
         mutate_(.dots = set_names(
-            x = list(~count_rowsback(lab.datetime, back),
-            ~zoo::rollapplyr(lab.result, rowsback, FUN, fill = NA,
-                             partial = TRUE),
-            ~lab.result - running),
-            nm = list("rowsback", "running", "change")
+            x = list(~count_rowsback(lab.datetime, back)),
+            nm = list("rowsback")
+        )) %>%
+        filter_(.dots = list(~!is.na(rowsback))) %>%
+        mutate_(.dots = set_names(
+            x = list(~zoo::rollapplyr(lab.result, rowsback, FUN, fill = NA,
+                                      partial = TRUE),
+                     ~lab.result - running),
+            nm = list("running", "change")
         )) %>%
         filter_(.dots = list(~abs(change) >= abs(change.by))) %>%
         ungroup()
+
+    reclass(x, df)
 }

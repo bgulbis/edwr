@@ -20,4 +20,3 @@ Makes sure all patients are included in the data frame and the values for
 added patients are \code{FALSE}
 }
 \keyword{internal}
-

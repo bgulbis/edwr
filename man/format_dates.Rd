@@ -2,19 +2,21 @@
 % Please edit documentation in R/helpers.R
 \name{format_dates}
 \alias{format_dates}
-\title{Set the default format for reading date/time variables}
+\title{Convert date/time variables to POSIXct}
 \usage{
-format_dates(x)
+format_dates(x, date_col, tz = NULL)
 }
 \arguments{
 \item{x}{character vector of date/time data}
+
+\item{date_col}{character of column names to be converted}
+
+\item{tz}{optional string with a properly formatted time zone; if given, will
+override the default time zone assignments for EDW and MBO data}
 }
 \value{
-A \code{\link[readr]{parse_datetime}} object
+A tibble
 }
 \description{
-Set the default format for parsing date/time variables when creating
-\code{edwr} classes.
+Converts date/time variables to POSIXct and adjusts to US/Central timezone.
 }
-\keyword{internal}
-

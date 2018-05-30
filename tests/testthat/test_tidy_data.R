@@ -27,7 +27,7 @@ test_that("medical services tidying", {
     x <- readRDS("services.Rds")
     tmp <- tidy_data(x)
     expect_gt(nrow(tmp), 0)
-    expect_equal(length(names(tmp)), 5)
+    expect_equal(length(names(tmp)), 6)
 })
 
 test_that("vent times tidying", {

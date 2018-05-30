@@ -17,20 +17,13 @@
 #' @docType package
 #' @name edwr
 #' @importFrom magrittr %>%
-#' @importFrom dplyr arrange_
-#' @importFrom dplyr filter_
-#' @importFrom dplyr mutate_
-#' @importFrom dplyr rename_
-#' @importFrom dplyr select_
-#' @importFrom dplyr summarise_
-#' @importFrom dplyr distinct_
-#' @importFrom dplyr group_by_
-#' @importFrom dplyr ungroup
-#' @importFrom dplyr anti_join
-#' @importFrom dplyr full_join
-#' @importFrom dplyr inner_join
-#' @importFrom dplyr left_join
-#' @importFrom dplyr right_join
-#' @importFrom dplyr semi_join
+#' @importFrom dplyr summarize
+#' @importFrom dplyr summarize_
 #' @importFrom purrr set_names
+#' @importFrom rlang :=
+#' @importFrom rlang enquo
+#' @importFrom rlang parse_expr
+#' @importFrom rlang quo
+#' @importFrom rlang quos
+#' @importFrom rlang sym
 NULL

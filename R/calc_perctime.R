@@ -29,7 +29,7 @@
 #' )
 #'
 #' # tidy continuous medications; will keep only heparin drips
-#' x <- tidy_data(meds_cont, ref, meds_sched)
+#' x <- tidy_data(meds_cont, meds_sched, ref)
 #' y <- calc_runtime(x)
 #'
 #' # calculate the proportion of time the infusion rate was > 10 units/kg/hour
@@ -53,14 +53,16 @@ calc_perctime.default <- function(x, ...) {
 #' @rdname calc_perctime
 calc_perctime.meds_cont <- function(x, thrshld, ...) {
     # a wrapper for perctime
-    perctime(x, thrshld, vars = c("pie.id", "med", "drip.count"))
+    id <- set_id_name(x)
+    perctime(x, thrshld, vars = c(id, "med", "drip.count"))
 }
 
 #' @export
 #' @rdname calc_perctime
 calc_perctime.labs <- function(x, thrshld, ...) {
     # a wrapper for perctime
-    perctime(x, thrshld, vars = c("pie.id", "lab"))
+    id <- set_id_name(x)
+    perctime(x, thrshld, vars = c(id, "lab"))
 }
 
 #' Calculate percent time above or below a threshold
@@ -83,7 +85,7 @@ perctime <- function(x, thrshld, vars) {
         ))
 
     # get the total duration of data
-    cont <- summarise_(cont, .dots = set_names(
+    df <- summarise_(cont, .dots = set_names(
         x = list(~dplyr::last(run.time)),
         nm = "total.dur"
     )) %>%
@@ -95,4 +97,6 @@ perctime <- function(x, thrshld, vars) {
             nm = list("time.goal", "perc.time")
         )) %>%
         ungroup()
+
+    reclass(x, df)
 }

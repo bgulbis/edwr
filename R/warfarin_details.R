@@ -25,7 +25,7 @@ make_inr_ranges <- function(x) {
                                     ~warfarin.result != ""))
 
     fix_ranges <- function(y, z) {
-        tidy <<- purrr::dmap_at(.d = tidy,
+        tidy <<- purrrlyr::dmap_at(.d = tidy,
                                 .at = "warfarin.result",
                                 .f = stringr::str_replace_all,
                                 pattern = stringr::regex(y, ignore_case = TRUE),
@@ -59,18 +59,16 @@ make_inr_ranges <- function(x) {
     }
 
     # separate the inr range into two columns, goal low and high
-    tidy <- tidyr::extract_(data = tidy, col = "warfarin.result",
+    df <- tidyr::extract_(data = tidy, col = "warfarin.result",
                             into = c("goal.low", "goal.high"),
                             regex = "([0-9\\.]+ ?)-( ?[0-9\\.]+)",
                             remove = FALSE, convert = TRUE) %>%
-        purrr::dmap_at(.at = c("goal.low", "goal.high"), .f = fix_div, n = 100) %>%
-        purrr::dmap_at(.at = c("goal.low", "goal.high"), .f = fix_div, n = 10) %>%
+        purrrlyr::dmap_at(.at = c("goal.low", "goal.high"), .f = fix_div, n = 100) %>%
+        purrrlyr::dmap_at(.at = c("goal.low", "goal.high"), .f = fix_div, n = 10) %>%
         select_(.dots = list(quote(-warfarin.result),
                              quote(-warfarin.event)))
 
-    # keep original class
-    class(tidy) <- class(x)
-    tidy
+    reclass(x, df)
 }
 
 #' Make warfarin indications
@@ -120,13 +118,13 @@ make_indications <- function(x) {
 
     # substitute an alternate string for standard DVT and PE strings, at
     # facilitate identifying other types of thrombosis
-    tidy <- purrr::dmap_at(.d = tidy,
+    df <- purrrlyr::dmap_at(.d = tidy,
                            .at = "warfarin.result",
                            .f = stringr::str_replace_all,
                            pattern = "Deep vein thrombosis",
                            replacement = "D-V-T") %>%
 
-        purrr::dmap_at(.at = "warfarin.result",
+        purrrlyr::dmap_at(.at = "warfarin.result",
                        .f = stringr::str_replace_all,
                        pattern = "Pulmonary embolism",
                        replacement = "P-E") %>%
@@ -155,7 +153,5 @@ make_indications <- function(x) {
         select_(.dots = list(quote(-warfarin.result),
                              quote(-warfarin.event)))
 
-    # keep original class
-    class(tidy) <- class(x)
-    tidy
+    reclass(x, df)
 }

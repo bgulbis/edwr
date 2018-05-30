@@ -14,8 +14,7 @@
 add_patients <- function(tidy, patients) {
     full_join(tidy, patients["pie.id"], by = "pie.id") %>%
         group_by_("pie.id") %>%
-        dplyr::mutate_at(dplyr::vars(),
-                  function(x) dplyr::coalesce(x, FALSE)) %>%
+        dplyr::mutate_at(dplyr::vars(), function(x) dplyr::coalesce(x, FALSE)) %>%
         ungroup()
 }
 
@@ -23,8 +22,8 @@ add_patients <- function(tidy, patients) {
 #'
 #' Takes a vector of POSIXct and counts the number of rows which would fall
 #' within the specified time frame. Typically called from
-#' \code{\link[dplyr]{mutate}} and the results are passed on to
-#' \code{\link[zoo]{rollapplyr}}.
+#' \code{mutate} and the results are passed on to
+#' \code{rollapplyr}.
 #'
 #' @param x = vector of type POSIXct
 #' @param back = integer indicating the number of days back to include
@@ -36,36 +35,78 @@ count_rowsback <- function(x, back = 2) {
     purrr::map_int(x, function(y) sum(x >= y - lubridate::days(back) & x <= y))
 }
 
-#' Set the default format for reading date/time variables
+#' Convert date/time variables to POSIXct
 #'
-#' Set the default format for parsing date/time variables when creating
-#' \code{edwr} classes.
+#' Converts date/time variables to POSIXct and adjusts to US/Central timezone.
 #'
 #' @param x character vector of date/time data
+#' @param date_col character of column names to be converted
+#' @param tz optional string with a properly formatted time zone; if given, will
+#'   override the default time zone assignments for EDW and MBO data
 #'
-#' @return A \code{\link[readr]{parse_datetime}} object
+#' @return A tibble
 #'
-#' @keywords internal
-format_dates <- function(x) {
-    readr::parse_datetime(
-        x = x,
-        format = "%Y/%m/%d %H:%M:%S",
-        locale = readr::locale(tz = "US/Central")
-    )
+#' @export
+format_dates <- function(x, date_col, tz = NULL) {
+    if (is.null(tz)) {
+        tzone <- "US/Central"
+        if (attr(x, "data") == "mbo") tzone <- "UTC"
+    } else {
+        tzone <- tz
+    }
+
+    x %>%
+        dplyr::mutate_at(date_col, lubridate::ymd_hms, tz = tzone) %>%
+        dplyr::mutate_at(date_col, lubridate::with_tz, tzone = "US/Central")
 }
 
-#' Keep edwr class assignments
+#' Set timezone based on data source
 #'
-#' @param x tibble with tbl_edwr class(es)
-#' @param y tibble as returned by dplyr manipulation function
+#' Sets the timezone to US/Central for EDW data, and UTC for MBO data
 #'
-#' @return tibble
+#' @param x A tibble with an attribute of "data"
+#'
+#' @return character vector indicating the timezone
 #'
 #' @keywords internal
-keep_class <- function(x, y) {
-    if (is.tbl_edwr(y)) return(y)
-
-    cls <- match("tbl_edwr", class(x), nomatch = 0L)
-    class(y) <- c(class(x)[1:cls], class(y))
-    y
+set_timezone <- function(x) {
+    tzone <- "US/Central"
+    if (attr(x, "data") == "mbo") tzone <- "UTC"
+    tzone
 }
+
+#' Set the name of the id field based on data source
+#'
+#' Sets the id name to pie.id for EDW data and millennium.id for MBO data
+#'
+#' @param x A tibble with an attribute of "data"
+#'
+#' @return character vector with the id name
+#'
+#' @keywords internal
+set_id_name <- function(x) {
+    if (attr(x, "data") == "edw") {
+        id <- "pie.id"
+    } else {
+        id <- "millennium.id"
+    }
+    id
+}
+
+#' Set the name of the id field based on data source as a quosure
+#'
+#' Sets the id name to pie.id for EDW data and millennium.id for MBO data
+#'
+#' @param x A tibble with an attribute of "data"
+#'
+#' @return character vector with the id name
+#'
+#' @keywords internal
+set_id_quo <- function(x) {
+    if (attr(x, "data") == "edw") {
+        quo(!!sym("pie.id"))
+    } else {
+        quo(!!sym("millennium.id"))
+    }
+}
+

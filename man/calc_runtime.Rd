@@ -3,9 +3,12 @@
 \name{calc_runtime}
 \alias{calc_runtime}
 \alias{calc_runtime.default}
-\alias{calc_runtime.labs}
 \alias{calc_runtime.meds_cont}
+\alias{calc_runtime.meds_inpt}
 \alias{calc_runtime.meds_sched}
+\alias{calc_runtime.labs}
+\alias{calc_runtime.events}
+\alias{calc_runtime.vitals}
 \title{Calculate the running time for serial measurement data}
 \usage{
 calc_runtime(x, ...)
@@ -15,9 +18,16 @@ calc_runtime(x, ...)
 \method{calc_runtime}{meds_cont}(x, drip.off = 12, no.doc = 24,
   units = "hours", ...)
 
+\method{calc_runtime}{meds_inpt}(x, drip.off = 12, no.doc = 24,
+  units = "hours", cont = TRUE, ...)
+
 \method{calc_runtime}{meds_sched}(x, units = "hours", ...)
 
 \method{calc_runtime}{labs}(x, units = "hours", ...)
+
+\method{calc_runtime}{events}(x, units = "hours", ...)
+
+\method{calc_runtime}{vitals}(x, units = "hours", ...)
 }
 \arguments{
 \item{x}{A data frame with serial measurement data}
@@ -34,6 +44,9 @@ documentation which will be used to indicate a drip has ended, defaults to
 
 \item{units}{An optional character string specifying the time units to use in
 calculations, default is hours}
+
+\item{cont}{A logical, if TRUE (default), treat the medications as continuous
+when summarizing}
 }
 \value{
 A data frame
@@ -64,7 +77,7 @@ ref <- tibble::tibble(
 )
 
 # tidy continuous medications; will keep only heparin drips
-x <- tidy_data(meds_cont, ref, meds_sched)
+x <- tidy_data(meds_cont, meds_sched, ref)
 
 # calculate the runtime for continuous heparin infusion
 print(head(
@@ -72,4 +85,3 @@ print(head(
 ))
 
 }
-

@@ -32,4 +32,3 @@ This function takes a data frame of either class diagnosis or labs and
 returns a data frame with a list of all patients who are pregnant. This can
 be used to exclude patients from research studies.
 }
-

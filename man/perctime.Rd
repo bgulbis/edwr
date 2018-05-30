@@ -20,4 +20,3 @@ data_frame
 Calculate percent time above or below a threshold
 }
 \keyword{internal}
-

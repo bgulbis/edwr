@@ -3,10 +3,13 @@
 \name{summarize_data}
 \alias{summarize_data}
 \alias{summarize_data.default}
-\alias{summarize_data.labs}
 \alias{summarize_data.meds_cont}
+\alias{summarize_data.meds_inpt}
 \alias{summarize_data.meds_home}
 \alias{summarize_data.meds_sched}
+\alias{summarize_data.labs}
+\alias{summarize_data.vitals}
+\alias{summarize_data.events}
 \title{Summary calculations for serial measurement data}
 \usage{
 summarize_data(x, ...)
@@ -15,11 +18,17 @@ summarize_data(x, ...)
 
 \method{summarize_data}{meds_cont}(x, units = "hours", ...)
 
+\method{summarize_data}{meds_inpt}(x, units = "hours", cont = TRUE, ...)
+
 \method{summarize_data}{meds_home}(x, ref, pts = NULL, home = TRUE, ...)
 
 \method{summarize_data}{meds_sched}(x, units = "hours", ...)
 
 \method{summarize_data}{labs}(x, units = "hours", ...)
+
+\method{summarize_data}{vitals}(x, units = "hours", ...)
+
+\method{summarize_data}{events}(x, units = "hours", ...)
 }
 \arguments{
 \item{x}{A data frame with continuous data}
@@ -29,14 +38,17 @@ summarize_data(x, ...)
 \item{units}{An optional character string specifying the time units to use in
 calculations, default is hours}
 
+\item{cont}{A logical, if TRUE (default), treat the medications as continuous
+when summarizing}
+
 \item{ref}{A data frame with three columns: name, type, and group. See
 details below.}
 
 \item{pts}{An optional data frame with a column pie.id including all patients
 in study}
 
-\item{home}{A logical, if TRUE (default) look for home medications,
-otherwise look for discharge prescriptions}
+\item{home}{A logical, if TRUE (default) look for home medications, otherwise
+look for discharge prescriptions}
 }
 \value{
 A data frame
@@ -72,20 +84,13 @@ ref <- tibble::tibble(
 )
 
 # tidy continuous medications and calculate runtime
-x <- tidy_data(meds_cont, ref, meds_sched)
+x <- tidy_data(meds_cont, meds_sched, ref)
 x <- calc_runtime(x)
 
 # pass runtime data to summarize
 print(head(
   summarize_data(x)
 ))
-
-# make a reference data frame for tidying meds
-ref <- tibble::tibble(
-  name = c("heparin", "warfarin", "antiplatelet agents"),
-  type = c("med", "med", "class"),
-  group = c("cont", "sched", "sched")
-)
 
 # tidy home medications
 print(head(
@@ -104,4 +109,3 @@ print(head(
 ))
 
 }
-

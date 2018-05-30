@@ -21,4 +21,3 @@ This function takes a character vector of medication generic names and
 returns a data frame with all of the medication classes that contain those
 medications. The data frame will contain two columns: med.class and med.name.
 }
-

@@ -21,4 +21,3 @@ warfarin
 A dataset containing sample warfarin goal data
 }
 \keyword{datasets}
-

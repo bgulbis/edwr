@@ -45,7 +45,7 @@
 #'
 #' # tidy continuous medications; will keep only heparin drips
 #' print(head(
-#'   tidy_data(meds_cont, ref, meds_sched)
+#'   tidy_data(meds_cont, meds_sched, ref)
 #' ))
 #'
 #' # tidy intermittent medications; will keep warfarin and antiplatelet agents
@@ -75,54 +75,61 @@ tidy_data.default <- function(x, ...) {
 #' @export
 #' @rdname tidy_data
 tidy_data.diagnosis <- function(x, ...) {
+    diag_code <- sym("diag.code")
+    icd9 <- sym("icd9")
+    icd10 <- sym("icd10")
+
     # find codes which are valid
-    valid.codes <- mutate_(x, .dots = set_names(
-        x = list(~icd::icd_is_valid(icd::as.icd9cm(diag.code)),
-                 ~icd::icd_is_valid(icd::as.icd10cm(diag.code))),
-        nm = list("icd9", "icd10")
-    ))
+    valid_codes <- x %>%
+        mutate(
+            !!"icd9" := icd::icd_is_valid(icd::as.icd9cm(!!diag_code)),
+            !!"icd10" := icd::icd_is_valid(icd::as.icd10cm(!!diag_code))
+        )
 
     # if code only valid in one type, then assign it to the correct group
-    assign <- filter_(valid.codes,
-                      .dots = list(~!(icd9 == TRUE & icd10 == TRUE)))
+    assign <-filter(valid_codes, !!parse_expr("!(icd9 & icd10)"))
 
     # find codes which are valid in both ICD9/10 and check if they are defined
-    undefined <- filter_(valid.codes,
-                         .dots = list(~icd9 == TRUE, ~icd10 == TRUE)) %>%
-        mutate_(.dots = set_names(
-            x = list(~icd::icd_is_defined(icd::as.icd9cm(diag.code)),
-                     ~icd::icd_is_defined(icd::as.icd10cm(diag.code))),
-            nm = list("icd9", "icd10")
-        ))
+    undefined <- valid_codes %>%
+        filter(!!icd9, !!icd10) %>%
+        mutate(
+            !!"icd9" := icd::icd_is_defined(icd::as.icd9cm(!!diag_code)),
+            !!"icd10" := icd::icd_is_defined(icd::as.icd10cm(!!diag_code))
+        )
 
     # if code only defined in one type, assign it to the correct group
-    icd_defined <- filter_(undefined,
-                           .dots = list(~!(icd9 == TRUE & icd10 == TRUE)))
+    icd_defined <- filter(undefined, !!parse_expr("!(icd9 & icd10)"))
 
     # for codes defined in both, use the source assignment from EDW
-    source_default <- filter_(undefined,
-                              .dots = list(~icd9 == TRUE, ~icd10 == TRUE)) %>%
-        mutate_(.dots = set_names(
-            x = list(~code.source == "ICD-9-CM"),
-            nm = "icd9"
-        ))
+    source_default <- undefined %>%
+        filter(!!icd9, !!icd10) %>%
+        mutate(!!"icd9" := !!parse_expr('code.source == "ICD-9-CM" |
+                                        code.source == "ICD9"'))
 
-    dplyr::bind_rows(assign, icd_defined, source_default) %>%
-        select_(.dots = quote(-icd10))
+    df <- dplyr::bind_rows(assign, icd_defined, source_default) %>%
+        select(-!!icd10)
+
+    reclass(x, df)
 }
 
 #' @export
 #' @rdname tidy_data
 tidy_data.labs <- function(x, censor = TRUE, ...) {
+    df <- x
     # create a column noting if data was censored
     if (censor == TRUE) {
-        x[["censor.low"]] <- stringr::str_detect(x[["lab.result"]], "<")
-        x[["censor.high"]] <- stringr::str_detect(x[["lab.result"]], ">")
+        lab.result <- sym("lab.result")
+        df <- df %>%
+            mutate(
+                !!"censor.low" := stringr::str_detect(!!lab.result, "<"),
+                !!"censor.high" := stringr::str_detect(!!lab.result, ">")
+            )
     }
 
     # convert lab results to numeric values
-    x[["lab.result"]] <- as.numeric(x[["lab.result"]])
-    x
+    df <- dplyr::mutate_at(df, "lab.result", as.numeric)
+
+    reclass(x, df)
 }
 
 #' @details For locations, this function accounts for incorrect departure
@@ -135,84 +142,175 @@ tidy_data.labs <- function(x, censor = TRUE, ...) {
 #' @export
 #' @rdname tidy_data
 tidy_data.locations <- function(x, ...) {
-    arrange_(x, "arrive.datetime") %>%
-        group_by_("pie.id") %>%
+    arrive_datetime <- sym("arrive.datetime")
+    depart_datetime <- sym("depart.datetime")
+    diff_unit <- sym("diff.unit")
+    unit_count <- sym("unit.count")
 
-        # determine if pt went to different unit, count num of different units
-        mutate_(.dots = set_names(
-            x = list(~is.na(unit.to) | is.na(dplyr::lag(unit.to)) |
-                         unit.to != dplyr::lag(unit.to),
-                     ~cumsum(diff.unit)),
-            nm = list("diff.unit", "unit.count")
-        )) %>%
+    if (attr(x, "data") == "edw") {
+        id <- sym("pie.id")
+        depart_recorded <- sym("depart.recorded")
 
-        # use the count to group multiple rows of the same unit together
-        group_by_(.dots = list("pie.id", "unit.count")) %>%
-        summarise_(.dots = set_names(
-            x = list(~dplyr::first(unit.to),
-                     ~dplyr::first(arrive.datetime),
-                     ~dplyr::last(depart.datetime)),
-            nm = list("location", "arrive.datetime", "depart.recorded")
-        )) %>%
+        df <- x %>%
+            arrange(!!id, !!arrive_datetime) %>%
+            group_by(!!id) %>%
 
-        # use the arrival time for the next unit to calculate a depart time; if
-        # there is no arrival time for the next unit then used the depart
-        # date/time from EDW
-        group_by_(.dots = "pie.id") %>%
-        mutate_(.dots = set_names(
-            x = list(~dplyr::lead(arrive.datetime),
-                     ~dplyr::coalesce(depart.datetime, depart.recorded)),
-            nm = list("depart.datetime", "depart.datetime")
-        )) %>%
+            # determine if pt went to different unit, count num of different units
+            mutate(
+                !!"diff.unit" := !!parse_expr("is.na(unit.to) |
+                                              is.na(dplyr::lag(unit.to)) |
+                                              unit.to != dplyr::lag(unit.to)"),
+                !!"unit.count" := cumsum(!!diff_unit)
+            ) %>%
 
-        ungroup() %>%
-        mutate_(.dots = set_names(
-            x = list(~difftime(depart.datetime, arrive.datetime, units = "days")),
-            nm = "unit.length.stay"
-        )) %>%
-        select_(.dots = list(quote(-depart.recorded)))
+            # use the count to group multiple rows of the same unit together
+            group_by(!!id, !!unit_count) %>%
+            summarize(
+                !!"location" := dplyr::first(!!sym("unit.to")),
+                !!"arrive.datetime" := dplyr::first(!!arrive_datetime),
+                !!"depart.recorded" := dplyr::last(!!depart_datetime)
+            ) %>%
+
+            # use the arrival time for the next unit to calculate a depart time; if
+            # there is no arrival time for the next unit then used the depart
+            # date/time from EDW
+            group_by(!!id) %>%
+            mutate(
+                !!"depart.datetime" := dplyr::lead(!!arrive_datetime),
+                !!"depart.datetime" := dplyr::coalesce(!!depart_datetime,
+                                                       !!depart_recorded)
+            ) %>%
+            ungroup() %>%
+            mutate(!!"unit.length.stay" := difftime(!!depart_datetime,
+                                                    !!arrive_datetime,
+                                                    units = "days")) %>%
+            select(-!!depart_recorded)
+    } else {
+        id <- sym("millennium.id")
+
+        # tidy location data from MBO
+        df <- x %>%
+            arrange(!!id, !!arrive_datetime) %>%
+            group_by(!!id) %>%
+            # determine if pt went to different unit, count num of different units
+            mutate(
+                !!"diff.unit" := !!parse_expr("unit.name != dplyr::lag(unit.name)"),
+                !!"diff.unit" := dplyr::coalesce(!!sym("diff.unit"), TRUE),
+                !!"unit.count" := cumsum(!!diff_unit)
+            ) %>%
+            # use the count to group multiple rows of the same unit together
+            group_by(!!id, !!unit_count) %>%
+            summarize(
+                !!"location" := dplyr::first(!!sym("unit.name")),
+                !!"arrive.datetime" := dplyr::first(!!arrive_datetime),
+                !!"depart.datetime" := max(!!depart_datetime)
+            ) %>%
+            # combine location stays that are < 5 minutes
+            mutate(
+                !!"duration" := difftime(!!depart_datetime,
+                                         !!arrive_datetime,
+                                         units = "mins"),
+                !!"diff.unit" := !!parse_expr("duration > 5 |
+                                              is.na(dplyr::lag(duration))"),
+                !!"unit.count" := cumsum(!!diff_unit)
+            ) %>%
+            # use the count to group multiple rows of the same unit together
+            group_by(!!id, !!unit_count) %>%
+            summarize(
+                !!"location" := dplyr::first(!!sym("location")),
+                !!"arrive.datetime" := dplyr::first(!!arrive_datetime),
+                !!"depart.datetime" := max(!!depart_datetime)
+            ) %>%
+            # determine again if pt went to different unit, count num of
+            # different units
+            mutate(
+                !!"diff.unit" := !!parse_expr("location != dplyr::lag(location)"),
+                !!"diff.unit" := dplyr::coalesce(!!diff_unit, TRUE),
+                !!"unit.count" := cumsum(!!diff_unit)
+            ) %>%
+            # final grouping of multiple rows of the same unit together
+            group_by(!!id, !!unit_count) %>%
+            summarize(
+                !!"location" := dplyr::first(!!sym("location")),
+                !!"arrive.datetime" := dplyr::first(!!arrive_datetime),
+                !!"depart.datetime" := max(!!depart_datetime)
+            ) %>%
+            ungroup() %>%
+            mutate(!!"unit.length.stay" := difftime(!!depart_datetime,
+                                                    !!arrive_datetime,
+                                                    units = "days"))
+    }
+
+    reclass(x, df)
 }
 
-#' @export
-#' @rdname tidy_data
-tidy_data.meds_cont <- function(x, ref, sched, ...) {
-    # for any med classes, lookup the meds included in the class
-    y <- filter_(ref, .dots = list(~type == "class", ~group == "cont"))
-    class.meds <- med_lookup(y$name)
+#' Title
+#'
+#' @param x tibble
+#' @param group string indicating cont or sched
+#' @param ref
+#'
+#' @return tibble
+#'
+#' @keywords internal
+tidy_fun <- function(x, group, ref = NULL) {
+    id <- set_id_quo(x)
 
-    # join the list of meds with any indivdual meds included
-    y <- filter_(ref, .dots = list(~type == "med", ~group == "cont"))
-    lookup.meds <- c(y$name, class.meds$med.name)
+    if(!is.null(ref)) {
+        # for any med classes, lookup the meds included in the class
+        y <- filter(ref, !!parse_expr(paste0('type == "class" & group == "', group, '"')))
+        class_meds <- med_lookup(y$name)
+
+        # join the list of meds with any indivdual meds included
+        y <- filter(ref, !!parse_expr(paste0('type == "med" & group == "', group, '"')))
+
+        lookup_meds <- c(y$name, class_meds$med.name) %>%
+            stringr::str_to_lower()
+
+        df <- filter(x, !!parse_expr("med %in% lookup_meds"))
+    } else {
+        df <- x
+    }
 
     # remove any rows in continuous data which are actually scheduled doses,
     # then filter to meds in lookup, then sort by pie.id, med, med.datetime
-    x <- anti_join(x, sched, by = "event.id") %>%
-        filter_(.dots = list(~med %in% lookup.meds)) %>%
-        arrange_(.dots = list("pie.id", "med", "med.datetime"))
+    df <- df %>%
+        arrange(!!id, !!sym("med"), !!sym("med.datetime"))
 
-    # convert rate to numeric values
-    x[["med.rate"]] <- as.numeric(x[["med.rate"]])
-    x
+    reclass(x, df)
 }
 
 #' @export
 #' @rdname tidy_data
-tidy_data.meds_sched <- function(x, ref, ...) {
-    # for any med classes, lookup the meds included in the class
-    y <- filter_(ref, .dots = list(~type == "class", ~group == "sched"))
-    class.meds <- med_lookup(y$name)
+tidy_data.meds_cont <- function(x, sched, ref = NULL, ...) {
+    # remove any rows in continuous data which are actually scheduled doses,
+    # then filter to meds in lookup, then sort by pie.id, med, med.datetime
+    x %>%
+        anti_join(sched, by = "event.id") %>%
+        tidy_fun("cont", ref)
+}
 
-    # join the list of meds with any indivdual meds included
-    y <- filter_(ref, .dots = list(~type == "med", ~group == "sched"))
-    lookup.meds <- c(y$name, class.meds$med.name)
+#' @export
+#' @rdname tidy_data
+tidy_data.meds_inpt <- function(x, ref =  NULL, ...) {
+    event_tag <- sym("event.tag")
 
-    # filter to keep only meds in lookup
-    x <- filter_(x, .dots = list(~med %in% lookup.meds)) %>%
-        arrange_(.dots = list("pie.id", "med", "med.datetime"))
+    sched <- x %>%
+        filter(is.na(!!event_tag)) %>%
+        tidy_fun("sched", ref)
 
-    # convert dose to numeric values
-    x[["med.dose"]] <- as.numeric(x[["med.dose"]])
-    x
+    cont <- x %>%
+        filter(!is.na(!!event_tag)) %>%
+        tidy_fun("cont", ref)
+
+    dplyr::bind_rows(sched, cont) %>%
+        arrange(!!sym("millennium.id"), !!sym("med.datetime"))
+}
+
+#' @export
+#' @rdname tidy_data
+tidy_data.meds_sched <- function(x, ref = NULL, ...) {
+    tidy_fun(x, "sched", ref)
 }
 
 #' @details For services, this function accounts for incorrect end times
@@ -224,48 +322,40 @@ tidy_data.meds_sched <- function(x, ref, ...) {
 #' @export
 #' @rdname tidy_data
 tidy_data.services <- function(x, ...) {
-    arrange_(x, "start.datetime") %>%
-        group_by_("pie.id") %>%
+    df <- x %>%
+        arrange(!!sym("start.datetime")) %>%
+        group_by(!!sym("pie.id")) %>%
 
         # determine if they went to a different service, then make a count of
         # different services
-        mutate_(.dots = set_names(
-            x = list(~dplyr::if_else(is.na(service) |
-                                         is.na(dplyr::lag(service)) |
-                                         service != dplyr::lag(service),
-                                     TRUE, FALSE),
-                     ~cumsum(diff.service)),
-            nm = list("diff.service", "service.count")
-        )) %>%
+        mutate(
+            !!"diff.service" := !!parse_expr("is.na(service) |
+                                             is.na(dplyr::lag(service)) |
+                                             service != dplyr::lag(service)"),
+            !!"service.count" := cumsum(!!sym("diff.service"))
+        ) %>%
 
         # use the service.count to group multiple rows of the same service
         # together and combine data
-        group_by_(.dots = list("pie.id", "service.count")) %>%
-        summarise_(.dots = set_names(
-            x = list(~dplyr::first(service),
-                     ~dplyr::first(start.datetime),
-                     ~dplyr::last(end.datetime)),
-            nm = list("service", "start.datetime", "end.recorded")
-        )) %>%
+        group_by(!!sym("pie.id"), !!sym("service.count")) %>%
+        summarize(
+            !!"service" := dplyr::first(!!sym("service")),
+            !!"start.datetime" := dplyr::first(!!sym("start.datetime")),
+            !!"end.recorded" := dplyr::last(!!sym("end.datetime"))
+        ) %>%
 
         # use the start time for the next service to calculate an end time
-        group_by_("pie.id") %>%
-        mutate_(.dots = set_names(
-            x = list(~dplyr::lead(start.datetime),
-                     ~dplyr::if_else(is.na(end.calculated),
-                                     difftime(end.recorded,
-                                              start.datetime,
-                                              units = "days"),
-                                     difftime(end.calculated,
-                                              start.datetime,
-                                              units = "days")
-                     )),
-            nm = list("end.calculated", "service.duration")
-        )) %>%
-
+        group_by(!!sym("pie.id")) %>%
+        mutate(!!"end.datetime" := dplyr::lead(!!sym("start.datetime")),
+               !!"end.datetime" := dplyr::coalesce(!!sym("end.datetime"),
+                                                   !!sym("end.recorded")),
+               !!"service.duration" := difftime(!!sym("end.datetime"),
+                                                !!sym("start.datetime"),
+                                                units = "days")) %>%
         ungroup() %>%
-        select_(.dots = list(quote(-end.recorded),
-                                    quote(-end.calculated)))
+        select(-!!sym("end.recorded"))
+
+    reclass(x, df)
 }
 
 #' @details For vent_times, this function accounts for incorrect start and stop
@@ -275,48 +365,56 @@ tidy_data.services <- function(x, ...) {
 #' @export
 #' @rdname tidy_data
 tidy_data.vent_times <- function(x, dc, ...) {
+
+    id <- set_id_quo(x)
+    vent_datetime <- sym("vent.datetime")
+    stop_datetime <- sym("stop.datetime")
+
     # remove any missing data
-    filter_(x, .dots = list(~!is.na(vent.datetime))) %>%
-        arrange_("vent.datetime") %>%
-        group_by_("pie.id") %>%
+    df <- x %>%
+        filter(!is.na(!!vent_datetime)) %>%
+        arrange(!!vent_datetime) %>%
+        group_by(!!id) %>%
 
         # if it's the first event or the next event is a stop, then count as a
         # new vent event
-        mutate_(.dots = set_names(
-            x = list(~is.na(dplyr::lag(vent.event)) |
-                         vent.event != lag(vent.event),
-                     ~cumsum(diff.event)),
-            nm = list("diff.event", "event.count")
-        )) %>%
+        mutate(!!"diff.event" := !!parse_expr("is.na(dplyr::lag(vent.event)) |
+                                               vent.event != lag(vent.event)"),
+                !!"event.count" := cumsum(!!sym("diff.event"))
+        ) %>%
 
         # for each event count, get the first and last date/time
-        group_by_(.dots = list("pie.id", "event.count")) %>%
-        summarise_(.dots = set_names(
-            x = list(~dplyr::first(vent.event),
-                     ~dplyr::first(vent.datetime),
-                     ~dplyr::last(vent.datetime)),
-            nm = list("event", "first.event.datetime", "last.event.datetime")
-        )) %>%
+        group_by(!!!quos(!!id, !!sym("event.count"))) %>%
+        summarize(
+            !!"event" := dplyr::first(!!sym("vent.event")),
+            !!"first.event.datetime" := dplyr::first(!!vent_datetime),
+            !!"last.event.datetime" := dplyr::last(!!vent_datetime)
+        ) %>%
 
         # use the last date/time of the next event as stop date/time; this would
         # be the last stop event if there are multiple stop events in a row. if
         # there isn't a stop date/time because there was start with no stop, use
         # the discharge date/time as stop date/time
-        left_join(dc[c("pie.id", "discharge.datetime")], by = "pie.id") %>%
-        group_by_("pie.id") %>%
-        mutate_(.dots = set_names(
-            x = list(~dplyr::lead(last.event.datetime),
-                     ~dplyr::coalesce(stop.datetime, discharge.datetime)),
-            nm = list("stop.datetime", "stop.datetime")
-        )) %>%
+        left_join(dc[c(rlang::quo_text(id), "discharge.datetime")],
+                  by = rlang::quo_text(id)) %>%
+        group_by(!!id) %>%
+        mutate(
+            !!"stop.datetime" := dplyr::lead(!!sym("last.event.datetime")),
+            !!"stop.datetime" := dplyr::coalesce(!!stop_datetime,
+                                                 !!sym("discharge.datetime"))
+        ) %>%
 
-        filter_(.dots = list(~event == "vent start time")) %>%
-        select_(.dots = list("pie.id",
-                             "start.datetime" = "first.event.datetime",
-                             "stop.datetime")) %>%
+        filter(!!parse_expr('event == "vent start time"')) %>%
+        select(
+            !!id,
+            # !!parse_expr('"start.datetime" = "first.event.datetime"'),
+            !!"start.datetime" := !!sym("first.event.datetime"),
+            !!stop_datetime
+        ) %>%
         ungroup() %>%
-        mutate_(.dots = set_names(
-            x = list(~difftime(stop.datetime, start.datetime, units = "hours")),
-            nm = "vent.duration"
-        ))
+        mutate(!!"vent.duration" := difftime(!!stop_datetime,
+                                             !!sym("start.datetime"),
+                                             units = "hours"))
+
+    reclass(x, df)
 }

@@ -17,6 +17,8 @@
 #'
 #' @export
 concat_encounters <- function(encounters, num.split = 900) {
-    split(encounters, ceiling(seq_along(encounters) / num.split)) %>%
+    x <- unique(encounters)
+
+    split(x, ceiling(seq_along(x) / num.split)) %>%
         purrr::map(stringr::str_c, collapse = ";")
 }

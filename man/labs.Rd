@@ -20,4 +20,3 @@ labs
 A dataset containing results for coagulation labs
 }
 \keyword{datasets}
-

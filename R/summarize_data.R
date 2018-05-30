@@ -23,8 +23,10 @@
 #'   details below.
 #' @param pts An optional data frame with a column pie.id including all patients
 #'   in study
-#' @param home A logical, if TRUE (default) look for home medications,
-#'   otherwise look for discharge prescriptions
+#' @param home A logical, if TRUE (default) look for home medications, otherwise
+#'   look for discharge prescriptions
+#' @param cont A logical, if TRUE (default), treat the medications as continuous
+#'   when summarizing
 #'
 #' @return A data frame
 #'
@@ -37,20 +39,13 @@
 #' )
 #'
 #' # tidy continuous medications and calculate runtime
-#' x <- tidy_data(meds_cont, ref, meds_sched)
+#' x <- tidy_data(meds_cont, meds_sched, ref)
 #' x <- calc_runtime(x)
 #'
 #' # pass runtime data to summarize
 #' print(head(
 #'   summarize_data(x)
 #' ))
-#'
-#' # make a reference data frame for tidying meds
-#' ref <- tibble::tibble(
-#'   name = c("heparin", "warfarin", "antiplatelet agents"),
-#'   type = c("med", "med", "class"),
-#'   group = c("cont", "sched", "sched")
-#' )
 #'
 #' # tidy home medications
 #' print(head(
@@ -86,39 +81,53 @@ summarize_data.meds_cont <- function(x, units = "hours", ...) {
     # turn off scientific notation
     options(scipen = 999)
 
-    cont <- group_by_(x, .dots = list("pie.id", "med", "drip.count"))
+    id <- set_id_quo(x)
+    grp_by <- quos(!!id, !!sym("med"), !!sym("drip.count"))
+    med.rate <- sym("med.rate")
+
+    cont <- x %>%
+        group_by(!!!grp_by) %>%
+        filter(!!parse_expr("run.time > 0"))
 
     # get last and min non-zero rate
-    nz.rate <- filter_(cont, .dots = ~(med.rate > 0)) %>%
-        summarise_(.dots = set_names(
-            x = list(~dplyr::last(med.rate),
-                     ~min(med.rate, na.rm = TRUE),
-                     ~sum(duration, na.rm = TRUE)),
-            nm = list("last.rate", "min.rate", "run.time")
-        ))
+    nz.rate <- cont %>%
+        filter(!!parse_expr("med.rate > 0")) %>%
+        summarize(
+            !!"last.rate" := dplyr::last(!!med.rate),
+            !!"min.rate" := min(!!med.rate, na.rm = TRUE),
+            !!"run.time" := sum(!!sym("duration"), na.rm = TRUE)
+        )
 
     # get first and max rates and AUC
-    summarise_(cont, .dots = set_names(
-        x = list(~dplyr::first(rate.start),
-                 ~dplyr::last(rate.stop),
-                 ~sum(med.rate * duration, na.rm = TRUE),
-                 ~dplyr::first(med.rate),
-                 ~max(med.rate, na.rm = TRUE),
-                 ~MESS::auc(run.time, med.rate),
-                 ~dplyr::last(run.time)),
-        nm = list("start.datetime", "stop.datetime", "cum.dose", "first.rate",
-                  "max.rate", "auc", "duration")
-    )) %>%
-
+    df <- cont %>%
+        summarize(
+            !!"start.datetime" := dplyr::first(!!sym("rate.start")),
+            !!"stop.datetime" := dplyr::last(!!sym("rate.stop")),
+            !!"cum.dose" := sum(!!parse_expr("med.rate * duration"), na.rm = TRUE),
+            !!"first.rate" := dplyr::first(!!med.rate),
+            !!"max.rate" := max(!!med.rate, na.rm = TRUE),
+            !!"auc" := MESS::auc(!!sym("run.time"), !!med.rate),
+            !!"duration" := dplyr::last(!!sym("run.time"))
+        ) %>%
         # join the last and min data, then calculate the time-weighted average
         # and interval
-        inner_join(nz.rate, by = c("pie.id", "med", "drip.count")) %>%
-        group_by_(.dots = list("pie.id", "med", "drip.count")) %>%
-        dplyr::mutate_(.dots = set_names(
-            x = list(~auc/duration),
-            nm = "time.wt.avg"
-        )) %>%
+        inner_join(nz.rate, by = c(rlang::quo_text(id), "med", "drip.count")) %>%
+        group_by(!!!grp_by) %>%
+        mutate_at("duration", as.numeric) %>%
+        mutate(!!"time.wt.avg" := !!parse_expr("auc / duration")) %>%
         ungroup()
+
+    reclass(x, df)
+}
+
+#' @export
+#' @rdname summarize_data
+summarize_data.meds_inpt <- function(x, units = "hours", cont = TRUE, ...) {
+    if (cont) {
+        summarize_data.meds_cont(x, units = units, ...)
+    } else {
+        summarize_data.meds_sched(x, units = units, ...)
+    }
 }
 
 #' @details The data frame passed to \code{ref} should contain three character
@@ -131,115 +140,121 @@ summarize_data.meds_cont <- function(x, units = "hours", ...) {
 #' @export
 #' @rdname summarize_data
 summarize_data.meds_home <- function(x, ref, pts = NULL, home = TRUE, ...) {
+    id <- set_id_quo(x)
+
     # for any med classes, lookup the meds included in the class
-    y <- filter_(ref, .dots = list(~type == "class"))
+    y <- filter(ref, !!parse_expr("type == 'class'"))
     meds <- med_lookup(y$name)
 
     # join the list of meds with any indivdual meds included
-    y <- filter_(ref, .dots = list(~type == "med"))
+    y <- filter(ref, !!parse_expr("type == 'med'"))
     lookup.meds <- c(y$name, meds$med.name)
 
     # filter to either home medications or discharge medications, then use the
     # medication name or class to group by, then remove any duplicate patient /
     # group combinations, then convert the data to wide format
-    if (home == TRUE) {
-        dots <- list(~med.type == "Recorded / Home Meds")
+    if (home) {
+        f <- parse_expr("med.type == 'Recorded / Home Meds'")
     } else {
-        dots <- list(~med.type == "Prescription / Discharge Order")
+        f <- parse_expr("med.type == 'Prescription / Discharge Order'")
     }
 
-    tidy <- filter_(x, .dots = c(dots, list(~med %in% lookup.meds))) %>%
+    df <- x %>%
+        filter(
+            !!f,
+            !!parse_expr("med %in% lookup.meds")
+        ) %>%
         left_join(meds, by = c("med" = "med.name")) %>%
-        mutate_(.dots = set_names(
-            x = list(~dplyr::if_else(is.na(med.class), med, med.class),
-                     lazyeval::interp("y", y = TRUE)),
-            nm = c("group", "value")
-        )) %>%
-        distinct_(.dots = list("pie.id", "group", "value")) %>%
-        tidyr::spread_("group", "value", fill = FALSE, drop = FALSE)
-
-    # keep original class (needed due to use of tidyr::spread function)
-    class(tidy) <- class(x)
+        mutate(
+            !!"group" := !!parse_expr("dplyr::if_else(is.na(med.class), med, med.class)"),
+            !!"value" := TRUE
+        ) %>%
+        distinct(!!!quos(!!id, !!sym("group"), !!sym("value"))) %>%
+        tidyr::spread(!!sym("group"), !!sym("value"), fill = FALSE, drop = FALSE)
 
     # join with list of all patients, fill in values of FALSE for any patients
     # not in the data set
     if (!is.null(pts)) {
-        tidy <- add_patients(tidy, pts)
+        df <- add_patients(df, pts)
     }
 
-    tidy
+    reclass(x, df)
+}
+
+#' Performs the summarize operation
+#'
+#' @param x tibble
+#' @param grp_col grouping quosures
+#' @param dt_col datetime column
+#' @param val_col numeric value column
+#'
+#' @return tibble
+#'
+#' @keywords internal
+summary_fun <- function(x, grp_col, dt_col, val_col) {
+    # turn off scientific notation
+    options(scipen = 999)
+
+    grp_col <- enquo(grp_col)
+    dt_col <- enquo(dt_col)
+    val_col <- enquo(val_col)
+
+    id <- set_id_quo(x)
+    grp <- quos(!!id, !!grp_col)
+
+    df <- x %>%
+        group_by(!!!grp) %>%
+        summarize(
+            !!"first.result" := dplyr::first(!!dt_col),
+            !!"last.datetime" := dplyr::last(!!dt_col),
+            !!"first.result" := dplyr::first(!!val_col),
+            !!"last.result" := dplyr::last(!!val_col),
+            !!"median.result" := stats::median(!!val_col, na.rm = TRUE),
+            !!"max.result" := max(!!val_col, na.rm = TRUE),
+            !!"min.result" := min(!!val_col, na.rm = TRUE),
+            !!"auc" := MESS::auc(!!sym("run.time"), !!val_col),
+            !!"duration" := dplyr::last(!!sym("run.time"))
+        ) %>%
+        group_by(!!!grp) %>%
+        mutate_at("duration", as.numeric) %>%
+        mutate(!!"time.wt.avg" := !!parse_expr("auc / duration")) %>%
+        ungroup()
+
+    reclass(x, df)
 }
 
 #' @export
 #' @rdname summarize_data
 summarize_data.meds_sched <- function(x, units = "hours", ...) {
-    # turn off scientific notation
-    options(scipen = 999)
-
-    group_by_(x, .dots = list("pie.id", "med")) %>%
-        dplyr::summarise_(.dots = set_names(
-            x = list(~dplyr::first(med.datetime),
-                     ~dplyr::last(med.datetime),
-                     ~dplyr::first(med.dose),
-                     ~dplyr::last(med.dose),
-                     ~median(med.dose, na.rm = TRUE),
-                     ~max(med.dose, na.rm = TRUE),
-                     ~min(med.dose, na.rm = TRUE),
-                     ~MESS::auc(run.time, med.dose),
-                     ~dplyr::last(run.time)),
-            nm = list("first.datetime",
-                   "last.datetime",
-                   "first.result",
-                   "last.result",
-                   "median.result",
-                   "max.result",
-                   "min.result",
-                   "auc",
-                   "duration")
-        )) %>%
-
-        # calculate the time-weighted average
-        group_by_(.dots = list("pie.id", "med")) %>%
-        mutate_(.dots = set_names(
-            x = list(~auc/duration),
-            nm = "time.wt.avg"
-        )) %>%
-        ungroup()
+    summary_fun(x,
+                !!sym("med"),
+                !!sym("med.datetime"),
+                !!sym("med.dose")
+    )
 }
 
 #' @export
 #' @rdname summarize_data
 summarize_data.labs <- function(x, units = "hours", ...) {
-    # turn off scientific notation
-    options(scipen = 999)
+    summary_fun(x,
+                !!sym("lab"),
+                !!sym("lab.datetime"),
+                !!sym("lab.result")
+    )
+}
 
-    group_by_(x, .dots = list("pie.id", "lab")) %>%
-        summarise_(.dots = set_names(
-            x = list(~dplyr::first(lab.datetime),
-                     ~dplyr::last(lab.datetime),
-                     ~dplyr::first(lab.result),
-                     ~dplyr::last(lab.result),
-                     ~median(lab.result, na.rm = TRUE),
-                     ~max(lab.result, na.rm = TRUE),
-                     ~min(lab.result, na.rm = TRUE),
-                     ~MESS::auc(run.time, lab.result),
-                     ~dplyr::last(run.time)),
-            nm = list("first.datetime",
-                   "last.datetime",
-                   "first.result",
-                   "last.result",
-                   "median.result",
-                   "max.result",
-                   "min.result",
-                   "auc",
-                   "duration")
-        )) %>%
+#' @export
+#' @rdname summarize_data
+summarize_data.vitals <- function(x, units = "hours", ...) {
+    summary_fun(x,
+                !!sym("vital"),
+                !!sym("vital.datetime"),
+                !!sym("vital.result")
+    )
+}
 
-        # calculate the time-weighted average and interval
-        group_by_(.dots = list("pie.id", "lab")) %>%
-        mutate_(.dots = set_names(
-            x = list(~auc/duration),
-            nm = "time.wt.avg"
-        )) %>%
-        ungroup()
+#' @export
+#' @rdname summarize_data
+summarize_data.events <- function(x, units = "hours", ...) {
+    summarize_data.labs(x)
 }

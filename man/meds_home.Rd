@@ -20,4 +20,3 @@ meds_home
 A dataset containing sample home medication data
 }
 \keyword{datasets}
-

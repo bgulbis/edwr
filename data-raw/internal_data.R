@@ -3,7 +3,7 @@
 # data to be used internally in package
 
 # medication classes downloaded from EDW
-# last updated: 6/30/2016
+# last updated: 9/27/2017
 
 library(dplyr)
 library(icd)

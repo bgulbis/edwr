@@ -885,18 +885,32 @@ as.order_detail <- function(x, extras = NULL) {
 
         # default CDW/MBO names
     } else {
-        varnames <- c(mbo_id, list(
-            "order.id" = "Order Id",
-            "order.datetime" = "Date and Time - Original (Placed)",
-            "order" = "Mnemonic (Primary Generic) FILTER ON",
-            "ingredient.dose" = "Order Strength Dose",
-            "ingredient.unit" = "Order Strength Dose Unit",
-            "route" = "Order Route",
-            "freq" = "Frequency",
-            "prn" = "PRN Indicator",
-            "order.provider" = "Ordering Provider LIMITS",
-            "order.provider.position" = "Ordering Provider Position LIMITS"
-        ))
+        if ("Order Strength Dose" %in% colnames(x)) {
+            dose_name <- list(
+                "ingredient.dose" = "Order Strength Dose",
+                "ingredient.unit" = "Order Strength Dose Unit"
+            )
+        } else {
+            dose_name <- list(
+                "ingredient.dose" = "Order Volume Dose",
+                "ingredient.unit" = "Order Volume Dose Unit"
+            )
+        }
+
+        varnames <- c(
+            mbo_id,
+            list(
+                "order.id" = "Order Id",
+                "order.datetime" = "Date and Time - Original (Placed)",
+                "order" = "Mnemonic (Primary Generic) FILTER ON",
+                "route" = "Order Route",
+                "freq" = "Frequency",
+                "prn" = "PRN Indicator",
+                "order.provider" = "Ordering Provider LIMITS",
+                "order.provider.position" = "Ordering Provider Position LIMITS"
+            ),
+            dose_name
+        )
 
         dt_name <- "order.datetime"
     }

@@ -22,13 +22,13 @@ summarize_data(x, ...)
 
 \method{summarize_data}{meds_home}(x, ref, pts = NULL, home = TRUE, ...)
 
-\method{summarize_data}{meds_sched}(x, units = "hours", ...)
+\method{summarize_data}{meds_sched}(x, ..., units = "hours")
 
-\method{summarize_data}{labs}(x, units = "hours", ...)
+\method{summarize_data}{labs}(x, ..., units = "hours")
 
-\method{summarize_data}{vitals}(x, units = "hours", ...)
+\method{summarize_data}{vitals}(x, ..., units = "hours")
 
-\method{summarize_data}{events}(x, units = "hours", ...)
+\method{summarize_data}{events}(x, ..., units = "hours")
 }
 \arguments{
 \item{x}{A data frame with continuous data}

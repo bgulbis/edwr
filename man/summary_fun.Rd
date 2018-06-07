@@ -4,12 +4,12 @@
 \alias{summary_fun}
 \title{Performs the summarize operation}
 \usage{
-summary_fun(x, grp_col, dt_col, val_col)
+summary_fun(x, ..., dt_col, val_col)
 }
 \arguments{
 \item{x}{tibble}
 
-\item{grp_col}{grouping quosures}
+\item{...}{optional grouping variables}
 
 \item{dt_col}{datetime column}
 

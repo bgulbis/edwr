@@ -204,84 +204,98 @@ calc_runtime.meds_inpt <- function(x, ..., drip.off = 12, no.doc = 24,
             units = units
         )
     } else {
-        calc_runtime.meds_sched(x, units = units, ...)
+        calc_runtime.meds_sched(x, ..., units = units)
     }
 }
 
-#' @export
-#' @rdname calc_runtime
-calc_runtime.meds_sched <- function(x, units = "hours", ...) {
-    id <- set_id_name(x)
+#' Performs the runtime calculation
+#'
+#' @param x tibble
+#' @param ... grouping quosures
+#' @param val_col event column (lab, med, etc.)
+#' @param dt_col datetime column
+#' @param units An optional character string specifying the time units to use in
+#'   calculations, default is hours
+#'
+#' @return tibble
+#'
+#' @keywords internal
+calc_runtime_fun <- function(x, ..., val_col, dt_col, units = "hours") {
+    id <- set_id_quo(x)
+    group_var <- quos(...)
 
-    df <- arrange_(x, .dots = list(id, "med", "med.datetime")) %>%
-        group_by_(.dots = c(id, "med")) %>%
-        dplyr::mutate_(.dots = set_names(
-            x = list(~difftime(med.datetime, dplyr::lag(med.datetime),
-                               units = units),
-                     ~dplyr::coalesce(duration, 0),
-                     ~difftime(med.datetime, dplyr::first(med.datetime),
-                               units = units)
+    val_col <- enquo(val_col)
+    dt_col <- enquo(dt_col)
+
+    df <- x %>%
+        arrange(!!id, !!!group_var, !!val_col, !!dt_col) %>%
+        group_by(!!id, !!!group_var, !!val_col) %>%
+        mutate(
+            !!"duration" := difftime(
+                !!dt_col,
+                dplyr::lag(!!dt_col),
+                units = units
             ),
-            nm = list("duration", "duration", "run.time")
-        )) %>%
-        ungroup()
-
-    reclass(x, df)
-}
-
-#' @export
-#' @rdname calc_runtime
-calc_runtime.labs <- function(x, units = "hours", ...) {
-    id <- set_id_name(x)
-
-    df <- arrange_(x, .dots = list(id, "lab", "lab.datetime")) %>%
-        group_by_(.dots = c(id, "lab")) %>%
-        mutate_(.dots = set_names(
-            x = list(~difftime(dplyr::lead(lab.datetime), lab.datetime,
-                               units = units),
-                     ~dplyr::coalesce(duration, 0),
-                     ~difftime(lab.datetime, dplyr::first(lab.datetime),
-                               units = units)
-            ),
-            nm = list("duration", "duration", "run.time")
-        )) %>%
-        ungroup()
-
-    reclass(x, df)
-}
-
-#' @export
-#' @rdname calc_runtime
-calc_runtime.events <- function(x, units = "hours", ...) {
-    x %>%
-        rename(
-            !!"lab.datetime" := !!sym("event.datetime"),
-            !!"lab" := !!sym("event"),
-            !!"lab.result" := !!sym("event.result"),
-            !!"lab.result.units" := !!sym("event.result.units"),
-            !!"lab.draw.location" := !!sym("event.location")
+            !!"run.time" := difftime(
+                !!dt_col,
+                dplyr::first(!!dt_col),
+                units = units
+            )
         ) %>%
-        mutate_at("lab.result", as.numeric) %>%
-        calc_runtime.labs()
+        mutate_at("duration", dplyr::funs(dplyr::coalesce(., 0))) %>%
+        ungroup()
+
+    reclass(x, df)
+
 }
 
 #' @export
 #' @rdname calc_runtime
-calc_runtime.vitals <- function(x, units = "hours", ...) {
-    id <- set_id_name(x)
+calc_runtime.meds_sched <- function(x, ..., units = "hours") {
+    calc_runtime_fun(
+        x,
+        ...,
+        val_col = !!sym("med"),
+        dt_col = !!sym("med.datetime"),
+        units = units
+    )
+}
 
-    df <- arrange_(x, .dots = list(id, "vital", "vital.datetime")) %>%
-        group_by_(.dots = c(id, "vital")) %>%
-        mutate_(.dots = set_names(
-            x = list(~difftime(dplyr::lead(vital.datetime), vital.datetime,
-                               units = units),
-                     ~dplyr::coalesce(duration, 0),
-                     ~difftime(vital.datetime, dplyr::first(vital.datetime),
-                               units = units)
-            ),
-            nm = list("duration", "duration", "run.time")
-        )) %>%
-        ungroup()
+#' @export
+#' @rdname calc_runtime
+calc_runtime.labs <- function(x, ..., units = "hours") {
+    calc_runtime_fun(
+        x,
+        ...,
+        val_col = !!sym("lab"),
+        dt_col = !!sym("lab.datetime"),
+        units = units
+    )
+    # was difftime(lead(lab.datetime), lab.datetime)
+}
 
-    reclass(x, df)
+#' @export
+#' @rdname calc_runtime
+calc_runtime.events <- function(x, ..., units = "hours") {
+    x %>%
+        mutate_at("event.result", as.numeric) %>%
+        calc_runtime_fun(
+            ...,
+            val_col = !!sym("event"),
+            dt_col = !!sym("event.datetime"),
+            units = units
+        )
+}
+
+#' @export
+#' @rdname calc_runtime
+calc_runtime.vitals <- function(x, ..., units = "hours") {
+    calc_runtime_fun(
+        x,
+        ...,
+        val_col = !!sym("vital"),
+        dt_col = !!sym("vital.datetime"),
+        units = units
+    )
+    # was difftime(lead(vital.datetime), vital.datetime)
 }

@@ -21,13 +21,13 @@ calc_runtime(x, ...)
 \method{calc_runtime}{meds_inpt}(x, ..., drip.off = 12, no.doc = 24,
   units = "hours", cont = TRUE)
 
-\method{calc_runtime}{meds_sched}(x, units = "hours", ...)
+\method{calc_runtime}{meds_sched}(x, ..., units = "hours")
 
-\method{calc_runtime}{labs}(x, units = "hours", ...)
+\method{calc_runtime}{labs}(x, ..., units = "hours")
 
-\method{calc_runtime}{events}(x, units = "hours", ...)
+\method{calc_runtime}{events}(x, ..., units = "hours")
 
-\method{calc_runtime}{vitals}(x, units = "hours", ...)
+\method{calc_runtime}{vitals}(x, ..., units = "hours")
 }
 \arguments{
 \item{x}{A data frame with serial measurement data}

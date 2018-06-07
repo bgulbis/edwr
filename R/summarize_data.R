@@ -200,26 +200,25 @@ summarize_data.meds_home <- function(x, ref, pts = NULL, home = TRUE, ...) {
 #' Performs the summarize operation
 #'
 #' @param x tibble
-#' @param grp_col grouping quosures
+#' @param ... optional grouping variables
 #' @param dt_col datetime column
 #' @param val_col numeric value column
 #'
 #' @return tibble
 #'
 #' @keywords internal
-summary_fun <- function(x, grp_col, dt_col, val_col) {
+summary_fun <- function(x, ..., dt_col, val_col) {
     # turn off scientific notation
     options(scipen = 999)
 
-    grp_col <- enquo(grp_col)
+    id <- set_id_quo(x)
+    group_var <- quos(...)
+
     dt_col <- enquo(dt_col)
     val_col <- enquo(val_col)
 
-    id <- set_id_quo(x)
-    grp <- quos(!!id, !!grp_col)
-
     df <- x %>%
-        group_by(!!!grp) %>%
+        group_by(!!id, !!!group_var) %>%
         summarize(
             !!"first.result" := dplyr::first(!!dt_col),
             !!"last.datetime" := dplyr::last(!!dt_col),
@@ -231,7 +230,7 @@ summary_fun <- function(x, grp_col, dt_col, val_col) {
             !!"auc" := MESS::auc(!!sym("run.time"), !!val_col),
             !!"duration" := dplyr::last(!!sym("run.time"))
         ) %>%
-        group_by(!!!grp) %>%
+        group_by(!!id, !!!group_var) %>%
         mutate_at("duration", as.numeric) %>%
         mutate(!!"time.wt.avg" := !!parse_expr("auc / duration")) %>%
         ungroup()
@@ -241,36 +240,40 @@ summary_fun <- function(x, grp_col, dt_col, val_col) {
 
 #' @export
 #' @rdname summarize_data
-summarize_data.meds_sched <- function(x, units = "hours", ...) {
+summarize_data.meds_sched <- function(x, ..., units = "hours") {
     summary_fun(x,
                 !!sym("med"),
-                !!sym("med.datetime"),
-                !!sym("med.dose")
+                dt_col = !!sym("med.datetime"),
+                val_col = !!sym("med.dose")
     )
 }
 
 #' @export
 #' @rdname summarize_data
-summarize_data.labs <- function(x, units = "hours", ...) {
+summarize_data.labs <- function(x, ..., units = "hours") {
     summary_fun(x,
                 !!sym("lab"),
-                !!sym("lab.datetime"),
-                !!sym("lab.result")
+                dt_col = !!sym("lab.datetime"),
+                val_col = !!sym("lab.result")
     )
 }
 
 #' @export
 #' @rdname summarize_data
-summarize_data.vitals <- function(x, units = "hours", ...) {
+summarize_data.vitals <- function(x, ..., units = "hours") {
     summary_fun(x,
                 !!sym("vital"),
-                !!sym("vital.datetime"),
-                !!sym("vital.result")
+                dt_col = !!sym("vital.datetime"),
+                val_col = !!sym("vital.result")
     )
 }
 
 #' @export
 #' @rdname summarize_data
-summarize_data.events <- function(x, units = "hours", ...) {
-    summarize_data.labs(x)
+summarize_data.events <- function(x, ..., units = "hours") {
+    summary_fun(x,
+                !!sym("event"),
+                dt_col = !!sym("event.datetime"),
+                val_col = !!sym("event.result")
+    )
 }

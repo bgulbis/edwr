@@ -15,11 +15,11 @@ calc_runtime(x, ...)
 
 \method{calc_runtime}{default}(x, ...)
 
-\method{calc_runtime}{meds_cont}(x, drip.off = 12, no.doc = 24,
-  units = "hours", ...)
+\method{calc_runtime}{meds_cont}(x, ..., drip.off = 12, no.doc = 24,
+  units = "hours")
 
-\method{calc_runtime}{meds_inpt}(x, drip.off = 12, no.doc = 24,
-  units = "hours", cont = TRUE, ...)
+\method{calc_runtime}{meds_inpt}(x, ..., drip.off = 12, no.doc = 24,
+  units = "hours", cont = TRUE)
 
 \method{calc_runtime}{meds_sched}(x, units = "hours", ...)
 
@@ -32,7 +32,7 @@ calc_runtime(x, ...)
 \arguments{
 \item{x}{A data frame with serial measurement data}
 
-\item{...}{additional arguments passed on to individual methods}
+\item{...}{optional grouping variables}
 
 \item{drip.off}{An optional numeric indicating the number of hours a
 medication infusion should be off to count as a new infusion, defaults to

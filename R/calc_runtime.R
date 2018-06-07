@@ -13,7 +13,7 @@
 #' data.
 #'
 #' @param x A data frame with serial measurement data
-#' @param ... additional arguments passed on to individual methods
+#' @param ... optional grouping variables
 #' @param drip.off An optional numeric indicating the number of hours a
 #'   medication infusion should be off to count as a new infusion, defaults to
 #'   12 hours
@@ -62,104 +62,122 @@ calc_runtime.default <- function(x, ...) {
 #'
 #' @export
 #' @rdname calc_runtime
-calc_runtime.meds_cont <- function(x, drip.off = 12, no.doc = 24,
-                                   units = "hours", ...) {
-    id <- set_id_name(x)
-    cont <- arrange_(x, .dots = list(id, "med", "med.datetime")) %>%
+calc_runtime.meds_cont <- function(x, ..., drip.off = 12, no.doc = 24,
+                                   units = "hours") {
+    id <- set_id_quo(x)
+
+    group_var <- quos(...)
+
+    med <- sym("med")
+    med.datetime <- sym("med.datetime")
+    med.rate <- sym("med.rate")
+    med.rate.units <- sym("med.rate.units")
+    change.num <- sym("change.num")
+    rate.change <- sym("rate.change")
+    rate <- sym("rate")
+    rate.duration <- sym("rate.duration")
+    rate.start <- sym("rate.start")
+    rate.stop <- sym("rate.stop")
+    time.next <- sym("time.next")
+    drip.start <- sym("drip.start")
+    drip.stop <- sym("drip.stop")
+    drip.count <- sym("drip.count")
+    duration <- sym("duration")
+
+    cont <- x %>%
+        arrange(!!id, !!!group_var, !!med, !!med.datetime) %>%
 
         # determine if it's a valid rate documentation
-        group_by_(.dots = list(id, "med")) %>%
-        mutate_(.dots = set_names(
-            x = list(~dplyr::if_else(is.na(med.rate.units), FALSE, TRUE),
-                     ~cumsum(rate.change)),
-            nm = list("rate.change", "change.num")
-        )) %>%
+        group_by(!!id, !!!group_var, !!med) %>%
+        mutate(
+            !!"rate.change" := !is.na(!!med.rate.units),
+            !!"change.num" := cumsum(!!rate.change)
+        ) %>%
 
         # fill in missing rates
-        group_by_("change.num", add = TRUE) %>%
-        mutate_(.dots = set_names(
-            x = list(~dplyr::if_else(is.na(med.rate.units),
-                                     dplyr::first(med.rate),
-                                     med.rate)),
-            nm = "rate"
-        )) %>%
+        group_by(!!id, !!!group_var, !!med, !!change.num) %>%
+        mutate(
+            !!"rate" := dplyr::if_else(
+                is.na(!!med.rate.units),
+                dplyr::first(!!med.rate),
+                !!med.rate
+            )
+        ) %>%
 
         # calculate time between rows and order of rate changes
-        group_by_(.dots = list(id, "med")) %>%
-        mutate_(.dots = set_names(
-            x = list(
-                ~difftime(dplyr::lead(med.datetime), med.datetime,
-                          units = units),
-                ~dplyr::if_else(is.na(dplyr::lag(rate)) |
-                                    rate != dplyr::lag(rate),
-                                TRUE,
-                                FALSE),
-                ~cumsum(rate.change)
+        group_by(!!id, !!!group_var, !!med) %>%
+        mutate(
+            !!"time.next" := difftime(
+                dplyr::lead(!!med.datetime),
+                !!med.datetime,
+                units = units
             ),
-            nm = list("time.next", "rate.change", "change.num")
-        )) %>%
+            !!"rate.change" := is.na(dplyr::lag(!!rate)) |
+                rate != dplyr::lag(!!rate),
+            !!"change.num" := cumsum(!!rate.change)
+        ) %>%
 
         # calculate how long the drip was at each rate
-        group_by_(.dots = list(id, "med", "change.num")) %>%
-        summarize_(.dots = set_names(
-            x = list(~dplyr::first(rate),
-                     ~dplyr::first(med.datetime),
-                     ~dplyr::last(med.datetime),
-                     ~difftime(dplyr::last(med.datetime),
-                               dplyr::first(med.datetime),
-                               units = units),
-                     ~dplyr::last(time.next)
+        group_by(!!id, !!!group_var, !!med, !!change.num) %>%
+        summarize(
+            !!"med.rate" := dplyr::first(!!rate),
+            !!"rate.start" := dplyr::first(!!med.datetime),
+            !!"rate.stop" := dplyr::last(!!med.datetime),
+            !!"rate.duration" := difftime(
+                dplyr::last(!!med.datetime),
+                dplyr::first(!!med.datetime),
+                units = units
             ),
-            nm = list("med.rate", "rate.start", "rate.stop", "rate.duration",
-                      "time.next")
-        )) %>%
+            !!"time.next" := dplyr::last(!!time.next)
+        ) %>%
 
         # identify individual drips
-        group_by_(.dots = list(id, "med")) %>%
-        mutate_(.dots = set_names(
-            x = list(
-                ~dplyr::if_else(time.next < drip.off & !is.na(time.next),
-                                rate.duration + time.next,
-                                rate.duration),
-                ~dplyr::if_else(is.na(time.next) | time.next > no.doc |
-                                    (med.rate == 0 & duration > drip.off),
-                                TRUE,
-                                FALSE),
-                ~dplyr::if_else(change.num == 1 | dplyr::lag(drip.stop == TRUE),
-                                TRUE,
-                                FALSE),
-                ~cumsum(drip.start)
+        group_by(!!id, !!!group_var, !!med) %>%
+        mutate(
+            !!"duration" := dplyr::if_else(
+                !!time.next < drip.off & !is.na(!!time.next),
+                !!rate.duration + !!time.next,
+                !!rate.duration
             ),
-            nm = list("duration", "drip.stop", "drip.start", "drip.count")
-        )) %>%
+            !!"drip.stop" := is.na(!!time.next) | !!time.next > no.doc |
+                (!!med.rate == 0 & !!duration > drip.off),
+            !!"drip.start" := !!change.num == 1 | dplyr::lag(!!drip.stop),
+            !!"drip.count" := cumsum(!!drip.start)
+        ) %>%
         dplyr::mutate_at("duration", as.numeric) %>%
 
         # calculate run time
-        group_by_(.dots = list(id, "med", "drip.count")) %>%
-        mutate_(.dots = set_names(
-            x = list(~difftime(rate.start, first(rate.start), units = units)),
-            nm = "run.time"
-        )) %>%
+        group_by(!!id, !!!group_var, !!med, !!drip.count) %>%
+        mutate(
+            !!"run.time" := difftime(
+                !!rate.start,
+                dplyr::first(!!rate.start),
+                units = units
+            )
+        ) %>%
 
         # remove unnecessary columns
-        select_(.dots = list(quote(-rate.duration),
-                             quote(-time.next),
-                             quote(-drip.stop),
-                             quote(-drip.start),
-                             quote(-change.num)
-        ))
+        select(
+            -!!rate.duration,
+            -!!time.next,
+            -!!drip.start,
+            -!!drip.stop,
+            -!!change.num
+        )
 
     # update drip stop information if rate of last row isn't 0
-    drip.end <- filter_(cont, .dots = list(
-        ~rate.stop == dplyr::last(rate.stop),
-        ~med.rate > 0)
-    ) %>%
+    drip.end <- cont %>%
+        filter(
+            !!rate.stop == dplyr::last(!!rate.stop),
+            !!med.rate > 0
+        ) %>%
 
         # calculate the run time for the last drip row
-        mutate_(.dots = set_names(
-            x = list(~duration + run.time, "rate.stop", 0),
-            nm = list("run.time", "rate.start", "duration")
-        )) %>%
+        mutate(
+            !!"run.time" := !!duration + !!sym("run.time"),
+            !!"rate.start" := !!rate.stop,
+            !!"duration" := 0
+        ) %>%
         ungroup()
 
     # bind the rows with drip end data and arrange by date/time; need to ungroup
@@ -167,23 +185,23 @@ calc_runtime.meds_cont <- function(x, drip.off = 12, no.doc = 24,
     df <- cont %>%
         ungroup() %>%
         dplyr::bind_rows(drip.end) %>%
-        arrange_(.dots = list(id, "med", "drip.count", "rate.start"))
+        arrange(!!id, !!!group_var, !!med, !!drip.count, !!rate.start)
 
     reclass(x, df)
 }
 
 #' @export
 #' @rdname calc_runtime
-calc_runtime.meds_inpt <- function(x, drip.off = 12, no.doc = 24,
-                                   units = "hours", cont = TRUE, ...) {
+calc_runtime.meds_inpt <- function(x, ..., drip.off = 12, no.doc = 24,
+                                   units = "hours", cont = TRUE) {
     # calls method for continuous meds
     if (cont) {
         calc_runtime.meds_cont(
             x,
+            ...,
             drip.off = drip.off,
             no.doc = no.doc,
-            units = units,
-            ...
+            units = units
         )
     } else {
         calc_runtime.meds_sched(x, units = units, ...)

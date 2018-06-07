@@ -16,7 +16,7 @@
 #' median, maximum, minimum, AUC, and time-weighted average result.
 #'
 #' @param x A data frame with continuous data
-#' @param ... additional arguments passed on to individual methods
+#' @param ... optional grouping variables
 #' @param units An optional character string specifying the time units to use in
 #'   calculations, default is hours
 #' @param ref A data frame with three columns: name, type, and group. See
@@ -77,21 +77,25 @@ summarize_data.default <- function(x, ...) {
 
 #' @export
 #' @rdname summarize_data
-summarize_data.meds_cont <- function(x, units = "hours", ...) {
+summarize_data.meds_cont <- function(x, ..., units = "hours") {
     # turn off scientific notation
     options(scipen = 999)
 
     id <- set_id_quo(x)
-    grp_by <- quos(!!id, !!sym("med"), !!sym("drip.count"))
+    group_var <- quos(...)
+
+    grp_by <- quos(!!id, !!!group_var, !!sym("med"), !!sym("drip.count"))
     med.rate <- sym("med.rate")
+    run.time <- sym("run.time")
+    rate.start <- sym("rate.start")
 
     cont <- x %>%
         group_by(!!!grp_by) %>%
-        filter(!!parse_expr("run.time > 0"))
+        filter(!!run.time > 0)
 
     # get last and min non-zero rate
     nz.rate <- cont %>%
-        filter(!!parse_expr("med.rate > 0")) %>%
+        filter(!!med.rate > 0) %>%
         summarize(
             !!"last.rate" := dplyr::last(!!med.rate),
             !!"min.rate" := min(!!med.rate, na.rm = TRUE),
@@ -101,17 +105,29 @@ summarize_data.meds_cont <- function(x, units = "hours", ...) {
     # get first and max rates and AUC
     df <- cont %>%
         summarize(
-            !!"start.datetime" := dplyr::first(!!sym("rate.start")),
-            !!"stop.datetime" := dplyr::last(!!sym("rate.stop")),
+            !!"start.datetime" := dplyr::first(!!rate.start),
+            !!"stop.datetime" := dplyr::if_else(
+                dplyr::last(!!med.rate) == 0,
+                dplyr::last(!!rate.start),
+                dplyr::last(!!sym("rate.stop"))
+            ),
             !!"cum.dose" := sum(!!parse_expr("med.rate * duration"), na.rm = TRUE),
             !!"first.rate" := dplyr::first(!!med.rate),
             !!"max.rate" := max(!!med.rate, na.rm = TRUE),
-            !!"auc" := MESS::auc(!!sym("run.time"), !!med.rate),
-            !!"duration" := dplyr::last(!!sym("run.time"))
+            !!"auc" := MESS::auc(!!run.time, !!med.rate),
+            !!"duration" := dplyr::last(!!run.time)
         ) %>%
         # join the last and min data, then calculate the time-weighted average
         # and interval
-        inner_join(nz.rate, by = c(rlang::quo_text(id), "med", "drip.count")) %>%
+        inner_join(
+            nz.rate,
+            by = c(
+                rlang::quo_text(id),
+                map_chr(group_var, rlang::quo_text),
+                "med",
+                "drip.count"
+            )
+        ) %>%
         group_by(!!!grp_by) %>%
         mutate_at("duration", as.numeric) %>%
         mutate(!!"time.wt.avg" := !!parse_expr("auc / duration")) %>%
@@ -122,9 +138,9 @@ summarize_data.meds_cont <- function(x, units = "hours", ...) {
 
 #' @export
 #' @rdname summarize_data
-summarize_data.meds_inpt <- function(x, units = "hours", cont = TRUE, ...) {
+summarize_data.meds_inpt <- function(x, ..., units = "hours", cont = TRUE) {
     if (cont) {
-        summarize_data.meds_cont(x, units = units, ...)
+        summarize_data.meds_cont(x, ..., units = units)
     } else {
         summarize_data.meds_sched(x, units = units, ...)
     }

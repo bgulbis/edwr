@@ -16,9 +16,9 @@ summarize_data(x, ...)
 
 \method{summarize_data}{default}(x, ...)
 
-\method{summarize_data}{meds_cont}(x, units = "hours", ...)
+\method{summarize_data}{meds_cont}(x, ..., units = "hours")
 
-\method{summarize_data}{meds_inpt}(x, units = "hours", cont = TRUE, ...)
+\method{summarize_data}{meds_inpt}(x, ..., units = "hours", cont = TRUE)
 
 \method{summarize_data}{meds_home}(x, ref, pts = NULL, home = TRUE, ...)
 
@@ -33,7 +33,7 @@ summarize_data(x, ...)
 \arguments{
 \item{x}{A data frame with continuous data}
 
-\item{...}{additional arguments passed on to individual methods}
+\item{...}{optional grouping variables}
 
 \item{units}{An optional character string specifying the time units to use in
 calculations, default is hours}

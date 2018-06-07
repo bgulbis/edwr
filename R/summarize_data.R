@@ -142,7 +142,7 @@ summarize_data.meds_inpt <- function(x, ..., units = "hours", cont = TRUE) {
     if (cont) {
         summarize_data.meds_cont(x, ..., units = units)
     } else {
-        summarize_data.meds_sched(x, units = units, ...)
+        summarize_data.meds_sched(x, ..., units = units)
     }
 }
 
@@ -155,7 +155,7 @@ summarize_data.meds_inpt <- function(x, ..., units = "hours", cont = TRUE) {
 #'
 #' @export
 #' @rdname summarize_data
-summarize_data.meds_home <- function(x, ref, pts = NULL, home = TRUE, ...) {
+summarize_data.meds_home <- function(x, ..., ref, pts = NULL, home = TRUE) {
     id <- set_id_quo(x)
 
     # for any med classes, lookup the meds included in the class

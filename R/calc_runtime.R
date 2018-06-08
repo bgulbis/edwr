@@ -219,7 +219,6 @@ calc_runtime.meds_inpt <- function(x, ..., drip.off = 12, no.doc = 24,
 #'
 #' @return tibble
 #'
-#' @importFrom rlang .data
 #' @keywords internal
 calc_runtime_fun <- function(x, ..., val_col, dt_col, units = "hours") {
     id <- set_id_quo(x)

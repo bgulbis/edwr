@@ -12,9 +12,13 @@
 #' @return data_frame
 #' @keywords internal
 add_patients <- function(tidy, patients) {
-    full_join(tidy, patients["pie.id"], by = "pie.id") %>%
-        group_by_("pie.id") %>%
-        dplyr::mutate_at(dplyr::vars(), function(x) dplyr::coalesce(x, FALSE)) %>%
+    tidy %>%
+        full_join(patients["pie.id"], by = "pie.id") %>%
+        group_by(!!sym("pie.id")) %>%
+        dplyr::mutate_at(
+            dplyr::vars(),
+            dplyr::funs(dplyr::coalesce(., FALSE))
+        ) %>%
         ungroup()
 }
 
@@ -86,11 +90,10 @@ set_timezone <- function(x) {
 #' @keywords internal
 set_id_name <- function(x) {
     if (attr(x, "data") == "edw") {
-        id <- "pie.id"
+        "pie.id"
     } else {
-        id <- "millennium.id"
+        "millennium.id"
     }
-    id
 }
 
 #' Set the name of the id field based on data source as a quosure

@@ -29,26 +29,32 @@ check_pregnant.default <- function(x, ...) {
 #' @export
 #' @rdname check_pregnant
 check_pregnant.diagnosis <- function(x, ...) {
-    preg9 <- filter_(x, .dots = list(~icd9 == TRUE)) %>%
-        icd::icd9_comorbid(map = preg.icd9,
-                           icd_name = "diag.code",
-                           return_df = TRUE) %>%
-        filter_(.dots = list(~pregnant == TRUE))
+    icd9 <- sym("icd9")
+    pregnant <- sym("pregnant")
 
-    preg10 <- filter_(x, .dots = list(~icd9 == FALSE)) %>%
-        icd::icd10_comorbid(map = preg.icd10,
-                           icd_name = "diag.code",
-                           return_df = TRUE) %>%
-        filter_(.dots = list(~pregnant == TRUE))
+    preg9 <- x %>%
+        filter(!!icd9) %>%
+        icd::icd9_comorbid(
+            map = preg.icd9,
+            icd_name = "diag.code",
+            return_df = TRUE
+        ) %>%
+        fitler(!!pregnant)
 
-    if (attr(x, "data") == "edw") {
-        encounter <- "pie.id"
-    } else {
-        encounter <- "millennium.id"
-    }
+    preg10 <- x %>%
+        filter(!!icd9 == FALSE) %>%
+        icd::icd10_comorbid(
+            map = preg.icd10,
+            icd_name = "diag.code",
+            return_df = TRUE
+        ) %>%
+        fitler(!!pregnant)
 
-    df <- full_join(preg9[encounter], preg10[encounter], by = encounter) %>%
-        distinct_()
+    id <- set_id_name(x)
+
+    df <- preg9[id] %>%
+        full_join(preg10[id], by = id) %>%
+        distinct()
 
     reclass(x, df)
 }
@@ -57,23 +63,23 @@ check_pregnant.diagnosis <- function(x, ...) {
 #' @rdname check_pregnant
 check_pregnant.labs <- function(x, ...) {
     # consider pregnant if they have a positve urine or serum pregnancy test
-    preg.test <- filter_(x, .dots = list(
-        ~lab %in% c("u preg", "s preg"),
-        ~lab.result == "Positive"))
+    preg.test <- x %>%
+        filter(
+            !!parse_expr("lab %in% c('u preg', 's preg')"),
+            !!parse_expr("lab.result == 'Positive'")
+        )
 
     # or if beta hcg is > 5
-    bhcg <- filter_(x, .dots = list(~lab %in% c("hcg tot", "hcg total"))) %>%
+    bhcg <- x %>%
+        filter(!!parse_expr("lab %in% c('hcg tot', 'hcg total')")) %>%
         tidy_data() %>%
-        filter_(.dots = list(~lab.result > 5))
+        filter(!!sym("lab.result") > 5)
 
-    if (attr(x, "data") == "edw") {
-        encounter <- "pie.id"
-    } else {
-        encounter <- "millennium.id"
-    }
+    id <- set_id_name(x)
 
-    df <- full_join(preg.test[encounter], bhcg[encounter], by = encounter) %>%
-        distinct_()
+    df <- preg.test[id] %>%
+        full_join(bhcg[id], by = id) %>%
+        distinct()
 
     reclass(x, df)
 }

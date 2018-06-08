@@ -34,24 +34,31 @@ lab_change <- function(x, .lab, change.by, FUN, back = 2) {
     # calculate the running min/max during the time window, then calculate the
     # change from the running min/max to current value, then filter values which
     # exceed the change.by value
-    id <- set_id_name(x)
+    id <- set_id_quo(x)
 
-    df <- filter_(x, .dots = list(~lab %in% .lab)) %>%
-        arrange_(.dots = list(id, "lab", "lab.datetime")) %>%
-        group_by_(.dots = list(id, "lab")) %>%
-        mutate_(.dots = set_names(
-            x = list(~count_rowsback(lab.datetime, back)),
-            nm = list("rowsback")
-        )) %>%
-        filter_(.dots = list(~!is.na(rowsback))) %>%
-        mutate_(.dots = set_names(
-            x = list(~zoo::rollapplyr(lab.result, rowsback, FUN, fill = NA,
-                                      partial = TRUE),
-                     ~lab.result - running),
-            nm = list("running", "change")
-        )) %>%
-        filter_(.dots = list(~abs(change) >= abs(change.by))) %>%
-        ungroup()
+    lab <- sym("lab")
+    lab.datetime <- sym("lab.datetime")
+    rowsback <- sym("rowsback")
+    lab.result <- sym("lab.result")
+
+    df <- x %>%
+        filter(!!parse_expr("lab %in% .lab")) %>%
+        arrange(!!id, !!lab, !!lab.datetime) %>%
+        group_by(!!id, !!lab) %>%
+        mutate(!!"rowsback" := count_rowsback(!!lab.datetime, back)) %>%
+        filter(!is.na(!!rowsback)) %>%
+        mutate(
+            !!"running" := zoo::rollapplyr(
+                !!lab.result,
+                !!rowsback,
+                FUN,
+                fill = NA,
+                partial = TRUE
+            ),
+            !!"change" := !!lab.result - !!sym("running")
+        ) %>%
+        filter(abs(!!sym("change") >= abs(change.by))) %>%
+        ungroup
 
     reclass(x, df)
 }

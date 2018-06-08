@@ -20,16 +20,24 @@
 #'
 #' @export
 make_inr_ranges <- function(x) {
+    warfarin.event <- sym("warfarin.event")
+    warfarin.result <- sym("warfarin.result")
+
     # make sure we are only working with INR range data, remove and empty values
-    tidy <- filter_(x, .dots = list(~warfarin.event == "inr range",
-                                    ~warfarin.result != ""))
+    tidy <- x %>%
+        filter(
+            !!warfarin.event == "inr range",
+            !!warfarin.result != ""
+        )
 
     fix_ranges <- function(y, z) {
-        tidy <<- purrrlyr::dmap_at(.d = tidy,
-                                .at = "warfarin.result",
-                                .f = stringr::str_replace_all,
-                                pattern = stringr::regex(y, ignore_case = TRUE),
-                                replacement = z)
+        tidy <<- tidy %>%
+            mutate_at(
+                "warfarin.result",
+                stringr::str_replace_all,
+                pattern = stringr::regex(y, ignore_case = TRUE),
+                replacement = z
+            )
     }
 
     find <- c("(INR|Goal)|-\\.|\\(.*\\)|=",
@@ -59,14 +67,25 @@ make_inr_ranges <- function(x) {
     }
 
     # separate the inr range into two columns, goal low and high
-    df <- tidyr::extract_(data = tidy, col = "warfarin.result",
-                            into = c("goal.low", "goal.high"),
-                            regex = "([0-9\\.]+ ?)-( ?[0-9\\.]+)",
-                            remove = FALSE, convert = TRUE) %>%
-        purrrlyr::dmap_at(.at = c("goal.low", "goal.high"), .f = fix_div, n = 100) %>%
-        purrrlyr::dmap_at(.at = c("goal.low", "goal.high"), .f = fix_div, n = 10) %>%
-        select_(.dots = list(quote(-warfarin.result),
-                             quote(-warfarin.event)))
+    df <- tidy %>%
+        tidyr::extract(
+            col = !!warfarin.result,
+            into = c("goal.low", "goal.high"),
+            regex = "([0-9\\.]+ ?)-( ?[0-9\\.]+)",
+            remove = FALSE,
+            convert = TRUE
+        ) %>%
+        mutate_at(
+            c("goal.low", "goal.high"),
+            fix_div,
+            n = 100
+        ) %>%
+        mutate_at(
+            c("goal.low", "goal.high"),
+            fix_div,
+            n = 10
+        ) %>%
+        select(-!!warfarin.result, -!!warfarin.event)
 
     reclass(x, df)
 }
@@ -90,68 +109,86 @@ make_inr_ranges <- function(x) {
 #'
 #' @export
 make_indications <- function(x) {
+    warfarin.event <- sym("warfarin.event")
+    warfarin.result <- sym("warfarin.result")
+
     # make sure we are only working with warfarin indication data, remove and
     # empty values
-    tidy <- filter_(x, .dots = list(~warfarin.event == "warfarin indication",
-                                    ~warfarin.result != ""))
-
-    # detect the matching pattern
-    find_string <- function(x) {
-        lazyeval::interp(
-            ~stringr::str_detect(
-                tidy$warfarin.result,
-                stringr::regex(y, ignore_case = TRUE)),
-            y = x)
-    }
-
-    # patterns to use for each indication
-    find <- c("Atrial fibrillation|a(.*)?fib|a(.*)?flutter",
-              "D-V-T|DVT(?!( prophylaxis))|VTE",
-              "P-E|PE",
-              "Heart valve \\(Mech/porc/bioprost\\)|valve|avr|mvr",
-              "st(ro|or)ke|cva|ica|mca",
-              "vad|hm[ ]?ii|heart( )?mate|heartware|syncardia|total artificial heart|tah",
-              "throm|clot|emboli|occl",
-              "malig|anti(.)?phos|lupus|apla|hypercoag|deficien|leiden|fvl|factor v",
-              "prophylax")
-
+    df <- x %>%
+        filter(
+            !!warfarin.event == "warfarin indication",
+            !!warfarin.result != ""
+        ) %>%
 
     # substitute an alternate string for standard DVT and PE strings, at
     # facilitate identifying other types of thrombosis
-    df <- purrrlyr::dmap_at(.d = tidy,
-                           .at = "warfarin.result",
-                           .f = stringr::str_replace_all,
-                           pattern = "Deep vein thrombosis",
-                           replacement = "D-V-T") %>%
-
-        purrrlyr::dmap_at(.at = "warfarin.result",
-                       .f = stringr::str_replace_all,
-                       pattern = "Pulmonary embolism",
-                       replacement = "P-E") %>%
-
-        mutate_(.dots = set_names(
-            x = purrr::map(find, find_string),
-            nm = c("afib", "dvt", "pe", "valve", "stroke", "vad", "thrombus",
-                   "hypercoag", "prophylaxis")
-        )) %>%
+        mutate_at(
+            "warfarin.result",
+            stringr::str_replace_all,
+            pattern = "Deep vein thrombosis",
+            replacement = "D-V-T"
+        ) %>%
+        mutate_at(
+            "warfarin.result",
+            stringr::str_replace_all,
+            pattern = "Pulmonary embolism",
+            replacement = "P-E"
+        ) %>%
+        mutate(
+            !!"afib" := stringr::str_detect(
+                !!warfarin.result,
+                "Atrial fibrillation|a(.*)?fib|a(.*)?flutter"
+            ),
+            !!"dvt" := stringr::str_detect(
+                !!warfarin.result,
+                "D-V-T|DVT(?!( prophylaxis))|VTE"
+            ),
+            !!"pe" := stringr::str_detect(
+                !!warfarin.result,
+                "P-E|PE"
+            ),
+            !!"valve" := stringr::str_detect(
+                !!warfarin.result,
+                "Heart valve \\(Mech/porc/bioprost\\)|valve|avr|mvr"
+            ),
+            !!"stroke" := stringr::str_detect(
+                !!warfarin.result,
+                "st(ro|or)ke|cva|ica|mca"
+            ),
+            !!"vad" := stringr::str_detect(
+                !!warfarin.result,
+                "vad|hm[ ]?ii|heart( )?mate|heartware|syncardia|total artificial heart|tah"
+            ),
+            !!"thrombus" := stringr::str_detect(
+                !!warfarin.result,
+                "throm|clot|emboli|occl"
+            ),
+            !!"hypercoag" := stringr::str_detect(
+                !!warfarin.result,
+                "malig|anti(.)?phos|lupus|apla|hypercoag|deficien|leiden|fvl|factor v"
+            ),
+            !!"prophylaxis" := stringr::str_detect(
+                !!warfarin.result,
+                "prophylax"
+            )
+        ) %>%
 
         # if none of the other indications were found, use "other"
-        dplyr::mutate_(.dots = set_names(
-            x = list(~dplyr::if_else(afib == FALSE &
-                                         dvt == FALSE &
-                                         pe == FALSE &
-                                         valve == FALSE &
-                                         stroke == FALSE &
-                                         vad == FALSE &
-                                         thrombus == FALSE &
-                                         hypercoag == FALSE &
-                                         prophylaxis == FALSE,
-                                     TRUE, FALSE)),
-            nm = "other"
-        )) %>%
-
-        select_(.dots = list(quote(-warfarin.result),
-                             quote(-warfarin.event)))
+        mutate(
+            !!"other" := sum(
+                !!sym("afib"),
+                !!sym("dvt"),
+                !!sym("pe"),
+                !!sym("valve"),
+                !!sym("stroke"),
+                !!sym("vad"),
+                !!sym("thrombus"),
+                !!sym("hypercoag"),
+                !!sym("prophylaxis"),
+                na.rm = TRUE
+            ) == 0
+        ) %>%
+        select(-!!warfarin.result, -!!warfarin.event)
 
     reclass(x, df)
 }

@@ -30,8 +30,7 @@ labs <- read_data(dir_sample, "labs") %>%
 
 meds_home <- read_data(dir_sample, "meds_home") %>%
     as.meds_home() %>%
-    mutate(pie.id = as.character(as.numeric(pie.id) + rnum)) %>%
-    select(-`Orig Orderable Type-Flag`)
+    mutate(pie.id = as.character(as.numeric(pie.id) + rnum))
 
 med_sample <- read_data(dir_sample, "meds_cont") %>%
     as.meds_cont() %>%

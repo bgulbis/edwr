@@ -44,7 +44,7 @@ med_class_lookup <- function(meds) {
     contains <- sym("contains")
 
     med.classes %>%
-        mutaet(
+        mutate(
             !!"contains" := stringr::str_detect(
                 !!sym("med.name"),
                 stringr::regex(

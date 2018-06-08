@@ -32,7 +32,7 @@ make_inr_ranges <- function(x) {
 
     fix_ranges <- function(y, z) {
         tidy <<- tidy %>%
-            mutate_at(
+            dplyr::mutate_at(
                 "warfarin.result",
                 stringr::str_replace_all,
                 pattern = stringr::regex(y, ignore_case = TRUE),
@@ -75,12 +75,12 @@ make_inr_ranges <- function(x) {
             remove = FALSE,
             convert = TRUE
         ) %>%
-        mutate_at(
+        dplyr::mutate_at(
             c("goal.low", "goal.high"),
             fix_div,
             n = 100
         ) %>%
-        mutate_at(
+        dplyr::mutate_at(
             c("goal.low", "goal.high"),
             fix_div,
             n = 10
@@ -122,13 +122,13 @@ make_indications <- function(x) {
 
     # substitute an alternate string for standard DVT and PE strings, at
     # facilitate identifying other types of thrombosis
-        mutate_at(
+        dplyr::mutate_at(
             "warfarin.result",
             stringr::str_replace_all,
             pattern = "Deep vein thrombosis",
             replacement = "D-V-T"
         ) %>%
-        mutate_at(
+        dplyr::mutate_at(
             "warfarin.result",
             stringr::str_replace_all,
             pattern = "Pulmonary embolism",

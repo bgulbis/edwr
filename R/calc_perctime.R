@@ -151,9 +151,9 @@ perctime <- function(x, ..., thrshld) {
         group_by(!!!group_var) %>%
         summarize(!!"total.dur" := dplyr::last(!!sym("run.time"))) %>%
         mutate_at("total.dur", as.numeric) %>%
-        full_join(goal, by = map_chr(group_var, rlang::quo_text)) %>%
+        full_join(goal, by = purrr::map_chr(group_var, rlang::quo_text)) %>%
         group_by(!!!group_var) %>%
-        mutate_at("time.goal", dplyr::funs(dplyr::coalesce(., 0))) %>%
+        dplyr::mutate_at("time.goal", dplyr::funs(dplyr::coalesce(., 0))) %>%
         mutate(
             !!"perc.time" := dplyr::if_else(
                 !!sym("total.dur") > 0,

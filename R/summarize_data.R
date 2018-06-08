@@ -123,13 +123,13 @@ summarize_data.meds_cont <- function(x, ..., units = "hours") {
             nz.rate,
             by = c(
                 rlang::quo_text(id),
-                map_chr(group_var, rlang::quo_text),
+                purrr::map_chr(group_var, rlang::quo_text),
                 "med",
                 "drip.count"
             )
         ) %>%
         group_by(!!!grp_by) %>%
-        mutate_at("duration", as.numeric) %>%
+        dplyr::mutate_at("duration", as.numeric) %>%
         mutate(!!"time.wt.avg" := !!parse_expr("auc / duration")) %>%
         ungroup()
 
@@ -231,7 +231,7 @@ summary_fun <- function(x, ..., dt_col, val_col) {
             !!"duration" := dplyr::last(!!sym("run.time"))
         ) %>%
         group_by(!!id, !!!group_var) %>%
-        mutate_at("duration", as.numeric) %>%
+        dplyr::mutate_at("duration", as.numeric) %>%
         mutate(!!"time.wt.avg" := !!parse_expr("auc / duration")) %>%
         ungroup()
 

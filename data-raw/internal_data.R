@@ -5,7 +5,7 @@
 # medication classes downloaded from EDW
 # last updated: 9/27/2017
 
-library(dplyr)
+library(tidyverse)
 library(icd)
 
 dirr::gzip_files("data-raw", pattern = "medication_classes.csv")

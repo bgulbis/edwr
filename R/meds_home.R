@@ -9,6 +9,7 @@
 #'   \item{pie.id}{encounter identifier}
 #'   \item{med}{name of medication}
 #'   \item{order.name}{order mnemonic used in EMR}
+#'   \item{type.flag}{flag numeric value}
 #'   \item{med.type}{flag indicating a home medication or discharge prescription}
 #' }
 #'

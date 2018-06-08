@@ -39,7 +39,7 @@ check_pregnant.diagnosis <- function(x, ...) {
             icd_name = "diag.code",
             return_df = TRUE
         ) %>%
-        fitler(!!pregnant)
+        filter(!!pregnant)
 
     preg10 <- x %>%
         filter(!!icd9 == FALSE) %>%

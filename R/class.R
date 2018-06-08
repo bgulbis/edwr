@@ -620,6 +620,7 @@ as.meds_home <- function(x, extras = NULL) {
         varnames <- c(edw_id, list(
             "med" = "Order Catalog Short Description",
             "order.name" = "Order Catalog Mnemonic",
+            "type.flag" = "Orig Orderable Type-Flag",
             "med.type" = "Orig Orderable Type-Flag Desc"
         ))
 

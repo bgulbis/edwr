@@ -242,7 +242,7 @@ calc_runtime_fun <- function(x, ..., val_col, dt_col, units = "hours") {
                 units = units
             )
         ) %>%
-        mutate_at("duration", dplyr::funs(dplyr::coalesce(., 0))) %>%
+        dplyr::mutate_at("duration", dplyr::funs(dplyr::coalesce(., 0))) %>%
         ungroup()
 
     reclass(x, df)
@@ -278,7 +278,7 @@ calc_runtime.labs <- function(x, ..., units = "hours") {
 #' @rdname calc_runtime
 calc_runtime.events <- function(x, ..., units = "hours") {
     x %>%
-        mutate_at("event.result", as.numeric) %>%
+        dplyr::mutate_at("event.result", as.numeric) %>%
         calc_runtime_fun(
             ...,
             val_col = !!sym("event"),

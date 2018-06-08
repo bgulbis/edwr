@@ -6,19 +6,15 @@
 #' added patients are \code{FALSE}
 #'
 #' @param tidy data_frame with the data being returned
-#' @param patients data_frame with a column \code{pie.id} that contains all
-#'   included patients
+#' @param patients data_frame which contains all included patients
 #'
 #' @return data_frame
 #' @keywords internal
 add_patients <- function(tidy, patients) {
+    id <- set_id_name(tidy)
+
     tidy %>%
-        full_join(patients["pie.id"], by = "pie.id") %>%
-        # group_by(!!sym("pie.id")) %>%
-        # dplyr::mutate_at(
-        #     "",
-        #     dplyr::funs(dplyr::coalesce(., FALSE))
-        # ) %>%
+        full_join(patients[id], by = id) %>%
         ungroup()
 }
 

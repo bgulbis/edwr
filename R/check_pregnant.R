@@ -48,7 +48,7 @@ check_pregnant.diagnosis <- function(x, ...) {
             icd_name = "diag.code",
             return_df = TRUE
         ) %>%
-        fitler(!!pregnant)
+        filter(!!pregnant)
 
     id <- set_id_name(x)
 

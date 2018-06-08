@@ -14,11 +14,11 @@
 add_patients <- function(tidy, patients) {
     tidy %>%
         full_join(patients["pie.id"], by = "pie.id") %>%
-        group_by(!!sym("pie.id")) %>%
-        dplyr::mutate_at(
-            dplyr::vars(),
-            dplyr::funs(dplyr::coalesce(., FALSE))
-        ) %>%
+        # group_by(!!sym("pie.id")) %>%
+        # dplyr::mutate_at(
+        #     "",
+        #     dplyr::funs(dplyr::coalesce(., FALSE))
+        # ) %>%
         ungroup()
 }
 

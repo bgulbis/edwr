@@ -219,6 +219,7 @@ calc_runtime.meds_inpt <- function(x, ..., drip.off = 12, no.doc = 24,
 #'
 #' @return tibble
 #'
+#' @importFrom rlang .data
 #' @keywords internal
 calc_runtime_fun <- function(x, ..., val_col, dt_col, units = "hours") {
     id <- set_id_quo(x)
@@ -242,7 +243,12 @@ calc_runtime_fun <- function(x, ..., val_col, dt_col, units = "hours") {
                 units = units
             )
         ) %>%
-        dplyr::mutate_at("duration", dplyr::funs(dplyr::coalesce(., 0))) %>%
+        dplyr::mutate_at(
+            "duration",
+            dplyr::funs(
+                dplyr::coalesce(.data, 0)
+            )
+        ) %>%
         ungroup()
 
     reclass(x, df)

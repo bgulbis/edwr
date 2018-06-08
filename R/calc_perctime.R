@@ -133,6 +133,7 @@ calc_perctime.vitals <- function(x, thrshld, ...) {
 #'
 #' @return data_frame
 #'
+#' @importFrom rlang .data
 #' @keywords internal
 perctime <- function(x, ..., thrshld) {
     # turn off scientific notation
@@ -150,10 +151,15 @@ perctime <- function(x, ..., thrshld) {
     df <- x %>%
         group_by(!!!group_var) %>%
         summarize(!!"total.dur" := dplyr::last(!!sym("run.time"))) %>%
-        mutate_at("total.dur", as.numeric) %>%
+        dplyr::mutate_at("total.dur", as.numeric) %>%
         full_join(goal, by = purrr::map_chr(group_var, rlang::quo_text)) %>%
         group_by(!!!group_var) %>%
-        dplyr::mutate_at("time.goal", dplyr::funs(dplyr::coalesce(., 0))) %>%
+        dplyr::mutate_at(
+            "time.goal",
+            dplyr::funs(
+                dplyr::coalesce(.data, 0)
+            )
+        ) %>%
         mutate(
             !!"perc.time" := dplyr::if_else(
                 !!sym("total.dur") > 0,

@@ -18,7 +18,8 @@
 #'
 #' @export
 med_lookup <- function(med_class) {
-    filter_(med.classes, .dots = list(~med.class %in% med_class))
+    med.classes %>%
+        filter(!!parse_expr("med.class %in% med_class"))
 }
 
 #' Lookup medication class by medication generic name
@@ -39,12 +40,19 @@ med_class_lookup <- function(meds) {
     # make a regular expression string of desired meds, then check each
     # medication to see if it is in the list of desired meds, then filter only
     # medications which match, then remove contains from data frame
-    lookup <- paste(meds, collapse = "|")
-    regex <- stringr::regex(lookup, ignore_case = TRUE)
-    dots <- list(~stringr::str_detect(med.name, regex))
+
+    contains <- sym("contains")
 
     med.classes %>%
-        mutate_(.dots = set_names(dots, "contains")) %>%
-        filter_(.dots = list(~contains == TRUE)) %>%
-        select_(.dots = list(quote(-contains)))
+        mutaet(
+            !!"contains" := stringr::str_detect(
+                !!sym("med.name"),
+                stringr::regex(
+                    paste(meds, collapse = "|"),
+                    ignore_case = TRUE
+                )
+            )
+        ) %>%
+        filter(!!contains) %>%
+        select(-!!contains)
 }

@@ -4,14 +4,14 @@
 \alias{perctime}
 \title{Calculate percent time above or below a threshold}
 \usage{
-perctime(x, thrshld, vars)
+perctime(x, ..., thrshld)
 }
 \arguments{
 \item{x}{data_frame}
 
-\item{thrshld}{list of criteria}
+\item{...}{optional grouping variables}
 
-\item{vars}{character vector with columns for grouping}
+\item{thrshld}{list of criteria}
 }
 \value{
 data_frame

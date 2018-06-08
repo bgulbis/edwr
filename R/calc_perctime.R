@@ -14,8 +14,10 @@
 #' ~variable > value2)}
 #'
 #' @param x A data frame with serial measurement data
+#' @param thrshld A charactor vector of the criteria
+#' @param cont A logical, if TRUE (default), treat the data as continuous
+#'   when calculating the percent time
 #' @param ... additional arguments passed on to individual methods
-#' @param thrshld A list of the criteria
 #'
 #' @return A data frame
 #'
@@ -34,7 +36,7 @@
 #'
 #' # calculate the proportion of time the infusion rate was > 10 units/kg/hour
 #' print(head(
-#'   calc_perctime(y, list(~med.rate > 10))
+#'   calc_perctime(y, "med.rate > 10")
 #' ))
 #'
 #' @export
@@ -53,49 +55,112 @@ calc_perctime.default <- function(x, ...) {
 #' @rdname calc_perctime
 calc_perctime.meds_cont <- function(x, thrshld, ...) {
     # a wrapper for perctime
-    id <- set_id_name(x)
-    perctime(x, thrshld, vars = c(id, "med", "drip.count"))
+    id <- set_id_quo(x)
+    perctime(x,
+             !!id,
+             !!sym("med"),
+             !!sym("drip.count"),
+             thrshld = thrshld
+    )
+}
+
+#' @export
+#' @rdname calc_perctime
+calc_perctime.meds_inpt <- function(x, thrshld, cont = TRUE, ...) {
+    # a wrapper for perctime
+    id <- set_id_quo(x)
+
+    if (cont) {
+        calc_perctime.meds_cont(x, thrshld = thrshld, ...)
+    } else {
+        calc_perctime.meds_sched(x, thrshld = thrshld, ...)
+    }
+}
+
+#' @export
+#' @rdname calc_perctime
+calc_perctime.meds_sched <- function(x, thrshld, ...) {
+    # a wrapper for perctime
+    id <- set_id_quo(x)
+    perctime(x,
+             !!id,
+             !!sym("med"),
+             thrshld = thrshld
+    )
+}
+
+#' @export
+#' @rdname calc_perctime
+calc_perctime.events <- function(x, thrshld, ...) {
+    # a wrapper for perctime
+    id <- set_id_quo(x)
+    perctime(x,
+             !!id,
+             !!sym("event"),
+             thrshld = thrshld
+    )
 }
 
 #' @export
 #' @rdname calc_perctime
 calc_perctime.labs <- function(x, thrshld, ...) {
     # a wrapper for perctime
-    id <- set_id_name(x)
-    perctime(x, thrshld, vars = c(id, "lab"))
+    id <- set_id_quo(x)
+    perctime(x,
+             !!id,
+             !!sym("lab"),
+             thrshld = thrshld
+    )
+}
+
+#' @export
+#' @rdname calc_perctime
+calc_perctime.vitals <- function(x, thrshld, ...) {
+    # a wrapper for perctime
+    id <- set_id_quo(x)
+    perctime(x,
+             !!id,
+             !!sym("vital"),
+             thrshld = thrshld
+    )
 }
 
 #' Calculate percent time above or below a threshold
 #'
 #' @param x data_frame
+#' @param ... optional grouping variables
 #' @param thrshld list of criteria
-#' @param vars character vector with columns for grouping
 #'
 #' @return data_frame
 #'
 #' @keywords internal
-perctime <- function(x, thrshld, vars) {
-    cont <- group_by_(x, .dots = as.list(vars))
+perctime <- function(x, ..., thrshld) {
+    # turn off scientific notation
+    options(scipen = 999)
+
+    group_var <- quos(...)
 
     # find all values within threshold and calculate the total time at goal
-    goal <- filter_(cont, .dots = thrshld) %>%
-        summarise_(.dots = set_names(
-            x = list(~sum(duration, na.rm = TRUE)),
-            nm = "time.goal"
-        ))
+    goal <- x %>%
+        group_by(!!!group_var) %>%
+        filter(!!!rlang::parse_exprs(thrshld)) %>%
+        summarize(!!"time.goal" := sum(!!sym("duration"), na.rm = TRUE))
 
     # get the total duration of data
-    df <- summarise_(cont, .dots = set_names(
-        x = list(~dplyr::last(run.time)),
-        nm = "total.dur"
-    )) %>%
-        full_join(goal, by = vars) %>%
-        group_by_(.dots = as.list(vars)) %>%
-        mutate_(.dots = set_names(
-            x = list(~dplyr::coalesce(time.goal, 0),
-                     ~dplyr::if_else(total.dur > 0, time.goal / total.dur, 0)),
-            nm = list("time.goal", "perc.time")
-        )) %>%
+    df <- x %>%
+        group_by(!!!group_var) %>%
+        summarize(!!"total.dur" := dplyr::last(!!sym("run.time"))) %>%
+        mutate_at("total.dur", as.numeric) %>%
+        full_join(goal, by = map_chr(group_var, rlang::quo_text)) %>%
+        group_by(!!!group_var) %>%
+        mutate_at("time.goal", dplyr::funs(dplyr::coalesce(., 0))) %>%
+        mutate(
+            !!"perc.time" := dplyr::if_else(
+                !!sym("total.dur") > 0,
+                !!sym("time.goal") / !!sym("total.dur"),
+                0
+            )
+        ) %>%
         ungroup()
 
     reclass(x, df)

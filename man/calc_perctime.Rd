@@ -4,7 +4,11 @@
 \alias{calc_perctime}
 \alias{calc_perctime.default}
 \alias{calc_perctime.meds_cont}
+\alias{calc_perctime.meds_inpt}
+\alias{calc_perctime.meds_sched}
+\alias{calc_perctime.events}
 \alias{calc_perctime.labs}
+\alias{calc_perctime.vitals}
 \title{Calculate proportion of time above or below a threshold}
 \usage{
 calc_perctime(x, ...)
@@ -13,14 +17,25 @@ calc_perctime(x, ...)
 
 \method{calc_perctime}{meds_cont}(x, thrshld, ...)
 
+\method{calc_perctime}{meds_inpt}(x, thrshld, cont = TRUE, ...)
+
+\method{calc_perctime}{meds_sched}(x, thrshld, ...)
+
+\method{calc_perctime}{events}(x, thrshld, ...)
+
 \method{calc_perctime}{labs}(x, thrshld, ...)
+
+\method{calc_perctime}{vitals}(x, thrshld, ...)
 }
 \arguments{
 \item{x}{A data frame with serial measurement data}
 
 \item{...}{additional arguments passed on to individual methods}
 
-\item{thrshld}{A list of the criteria}
+\item{thrshld}{A charactor vector of the criteria}
+
+\item{cont}{A logical, if TRUE (default), treat the data as continuous
+when calculating the percent time}
 }
 \value{
 A data frame
@@ -53,7 +68,7 @@ y <- calc_runtime(x)
 
 # calculate the proportion of time the infusion rate was > 10 units/kg/hour
 print(head(
-  calc_perctime(y, list(~med.rate > 10))
+  calc_perctime(y, "med.rate > 10")
 ))
 
 }

@@ -57,7 +57,7 @@ lab_change <- function(x, .lab, change.by, FUN, back = 2) {
             ),
             !!"change" := !!lab.result - !!sym("running")
         ) %>%
-        filter(abs(!!sym("change") >= abs(change.by))) %>%
+        filter(!!parse_expr("abs(change) >= abs(change.by)")) %>%
         ungroup
 
     reclass(x, df)

@@ -94,18 +94,18 @@ print(head(
 
 # tidy home medications
 print(head(
-  summarize_data(meds_home, ref)
+  summarize_data(meds_home, ref = ref)
 ))
 
 # return all patients, even if they do not have any of the desired home meds
 pts <- dplyr::distinct(meds_home, pie.id)
 print(head(
-  summarize_data(meds_home, ref, pts = pts)
+  summarize_data(meds_home, ref = ref, pts = pts)
 ))
 
 # return discharge prescriptions instead of home meds
 print(head(
-  summarize_data(meds_home, ref, pts = pts, home = FALSE)
+  summarize_data(meds_home, ref = ref, pts = pts, home = FALSE)
 ))
 
 }

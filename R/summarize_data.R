@@ -49,18 +49,18 @@
 #'
 #' # tidy home medications
 #' print(head(
-#'   summarize_data(meds_home, ref)
+#'   summarize_data(meds_home, ref = ref)
 #' ))
 #'
 #' # return all patients, even if they do not have any of the desired home meds
 #' pts <- dplyr::distinct(meds_home, pie.id)
 #' print(head(
-#'   summarize_data(meds_home, ref, pts = pts)
+#'   summarize_data(meds_home, ref = ref, pts = pts)
 #' ))
 #'
 #' # return discharge prescriptions instead of home meds
 #' print(head(
-#'   summarize_data(meds_home, ref, pts = pts, home = FALSE)
+#'   summarize_data(meds_home, ref = ref, pts = pts, home = FALSE)
 #' ))
 #'
 #' @export
@@ -157,13 +157,13 @@ summarize_data.meds_inpt <- function(x, ..., units = "hours", cont = TRUE) {
 #' @rdname summarize_data
 summarize_data.meds_home <- function(x, ..., ref, pts = NULL, home = TRUE) {
     id <- set_id_quo(x)
-
+    type <- sym("type")
     # for any med classes, lookup the meds included in the class
-    y <- filter(ref, !!parse_expr("type == 'class'"))
+    y <- filter(ref, !!type == "class")
     meds <- med_lookup(y$name)
 
     # join the list of meds with any indivdual meds included
-    y <- filter(ref, !!parse_expr("type == 'med'"))
+    y <- filter(ref, !!type == "med")
     lookup.meds <- c(y$name, meds$med.name)
 
     # filter to either home medications or discharge medications, then use the
@@ -191,7 +191,8 @@ summarize_data.meds_home <- function(x, ..., ref, pts = NULL, home = TRUE) {
     # join with list of all patients, fill in values of FALSE for any patients
     # not in the data set
     if (!is.null(pts)) {
-        df <- add_patients(df, pts)
+        df <- reclass(x, df) %>%
+            add_patients(pts)
     }
 
     reclass(x, df)

@@ -9,8 +9,7 @@ add_patients(tidy, patients)
 \arguments{
 \item{tidy}{data_frame with the data being returned}
 
-\item{patients}{data_frame with a column \code{pie.id} that contains all
-included patients}
+\item{patients}{data_frame which contains all included patients}
 }
 \value{
 data_frame

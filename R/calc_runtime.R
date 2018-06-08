@@ -237,16 +237,11 @@ calc_runtime_fun <- function(x, ..., val_col, dt_col, units = "hours") {
                 dplyr::lag(!!dt_col),
                 units = units
             ),
+            !!"duration" := dplyr::coalesce(!!sym("duration"), 0),
             !!"run.time" := difftime(
                 !!dt_col,
                 dplyr::first(!!dt_col),
                 units = units
-            )
-        ) %>%
-        dplyr::mutate_at(
-            "duration",
-            dplyr::funs(
-                dplyr::coalesce(.data, 0)
             )
         ) %>%
         ungroup()

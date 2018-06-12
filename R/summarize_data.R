@@ -221,9 +221,11 @@ summary_fun <- function(x, ..., dt_col, val_col) {
     val_col <- enquo(val_col)
 
     df <- x %>%
-        group_by(!!id, !!!group_var) %>%
+        dplyr::add_count(!!id, !!!group_var) %>%
+        group_by(!!id, !!!group_var, !!sym("n")) %>%
         summarize(
             !!"first.result" := dplyr::first(!!dt_col),
+            !!"first.datetime" := dplyr::first(!!dt_col),
             !!"last.datetime" := dplyr::last(!!dt_col),
             !!"first.result" := dplyr::first(!!val_col),
             !!"last.result" := dplyr::last(!!val_col),

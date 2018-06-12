@@ -185,7 +185,8 @@ calc_runtime.meds_cont <- function(x, ..., drip.off = 12, no.doc = 24,
     df <- cont %>%
         ungroup() %>%
         dplyr::bind_rows(drip.end) %>%
-        arrange(!!id, !!!group_var, !!med, !!drip.count, !!rate.start)
+        arrange(!!id, !!!group_var, !!med, !!drip.count, !!rate.start) %>%
+        distinct()
 
     reclass(x, df)
 }

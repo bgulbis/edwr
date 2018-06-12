@@ -89,12 +89,13 @@ summarize_data.meds_cont <- function(x, ..., units = "hours") {
     run.time <- sym("run.time")
     rate.start <- sym("rate.start")
 
-    cont <- x %>%
-        group_by(!!!grp_by) %>%
-        filter(!!run.time > 0)
+    # cont <- x %>%
+    #     group_by(!!!grp_by) %>%
+    #     filter(!!run.time > 0)
 
     # get last and min non-zero rate
-    nz.rate <- cont %>%
+    nz.rate <- x %>%
+        group_by(!!!grp_by) %>%
         filter(!!med.rate > 0) %>%
         summarize(
             !!"last.rate" := dplyr::last(!!med.rate),
@@ -103,7 +104,8 @@ summarize_data.meds_cont <- function(x, ..., units = "hours") {
         )
 
     # get first and max rates and AUC
-    df <- cont %>%
+    df <- x %>%
+        group_by(!!!grp_by) %>%
         summarize(
             !!"start.datetime" := dplyr::first(!!rate.start),
             !!"stop.datetime" := dplyr::if_else(

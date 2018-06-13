@@ -224,9 +224,9 @@ summary_fun <- function(x, ..., dt_col, val_col) {
         dplyr::add_count(!!id, !!!group_var) %>%
         group_by(!!id, !!!group_var, !!sym("n")) %>%
         summarize(
-            !!"first.result" := dplyr::first(!!dt_col),
             !!"first.datetime" := dplyr::first(!!dt_col),
             !!"last.datetime" := dplyr::last(!!dt_col),
+            !!"cum.dose" := sum(!!val_col),
             !!"first.result" := dplyr::first(!!val_col),
             !!"last.result" := dplyr::last(!!val_col),
             !!"median.result" := stats::median(!!val_col, na.rm = TRUE),
@@ -246,8 +246,10 @@ summary_fun <- function(x, ..., dt_col, val_col) {
 #' @export
 #' @rdname summarize_data
 summarize_data.meds_sched <- function(x, ..., units = "hours") {
+    grp_by <- quos(!!sym("med"), !!!quos(...))
+
     summary_fun(x,
-                !!sym("med"),
+                !!!grp_by,
                 dt_col = !!sym("med.datetime"),
                 val_col = !!sym("med.dose")
     )

@@ -23,9 +23,8 @@ calc_morph_eq <- function(x) {
 
     products <- quos(
         stringr::str_detect(med.product, "7.5-200mg") ~ 7.5,
-        stringr::str_detect(med.product, "10/325|325-10mg") ~ 10,
-        stringr::str_detect(med.product, "325-7.5") ~ 7.5,
-        stringr::str_detect(med.product, "5/325|325(mg)?-5") ~ 5,
+        stringr::str_detect(med.product, "10/325|325( )?(mg)?-10") ~ 10,
+        stringr::str_detect(med.product, "325( )?(mg)?-7.5") ~ 7.5,
         stringr::str_detect(med.product, "300( mg)?-15") ~ 15,
         stringr::str_detect(med.product, "#3|300( mg)?-30") ~ 30,
         stringr::str_detect(med.product, "#4|300( mg)?-60|325( mg)?-60") ~ 60,
@@ -36,21 +35,25 @@ calc_morph_eq <- function(x) {
         stringr::str_detect(med.product, "10 mg/ml") ~ 10,
         stringr::str_detect(med.product, "2.5 mg/2.5 ml") ~ 1,
         stringr::str_detect(med.product, "16.2-30") ~ 30,
-        stringr::str_detect(med.product, "12 microgram/hr patch") ~ 12,
-        stringr::str_detect(med.product, "25 microgram/hr patch") ~ 25,
-        stringr::str_detect(med.product, "50 microgram/hr patch") ~ 50,
-        stringr::str_detect(med.product, "75 microgram/hr patch") ~ 75,
-        stringr::str_detect(med.product, "100 microgram/hr patch") ~ 100
+        stringr::str_detect(med.product, "12 microgram/hr") ~ 12,
+        stringr::str_detect(med.product, "25 microgram/hr") ~ 25,
+        stringr::str_detect(med.product, "50 microgram/hr") ~ 50,
+        stringr::str_detect(med.product, "75 microgram/hr") ~ 75,
+        stringr::str_detect(med.product, "100 microgram/hr") ~ 100,
+        stringr::str_detect(med.product, "8 mg - 2 mg") ~ 8,
+        stringr::str_detect(med.product, "5/325|325( )?(mg)?-5|5( )?mg") ~ 5,
+        med.product == "acetaminophen-hydrocodone" ~ 5,
+        med.product == "acetaminophen-codeine" ~ 30
     )
 
     freq <- quos(
-        stringr::str_detect(frequency, "Q72|ONCE") ~ 3,
-        stringr::str_detect(frequency, "Q48") ~ 2
+        stringr::str_detect(frequency, "Q72|ONCE") & route.group == "TOP" ~ 3,
+        stringr::str_detect(frequency, "Q48") & route.group == "TOP" ~ 2
     )
 
     convert <- quos(
         med == "buprenorphine" & route.group == "TOP" ~ 3.8,
-        med == "buprenorphine" & route.group == "PO" ~ 3.3,
+        stringr::str_detect(med, "buprenorphine") & route.group == "PO" ~ 3.3,
         med == "butorphenol" ~ dose.mg * 5,
         stringr::str_detect(med, "codeine") & route.group == "PO" ~ dose.mg * 0.05,
         stringr::str_detect(med, "codeine") & route.group == "IV" ~ dose.mg * 0.1,
@@ -77,8 +80,41 @@ calc_morph_eq <- function(x) {
         TRUE ~ dose.mg
     )
 
+    routes_po <- c(
+        "DHT",
+        "GT",
+        "JT",
+        "NG",
+        "NJ",
+        "OGT",
+        "PEG",
+        "PO",
+        "PR",
+        "SL"
+    )
+
+    routes_iv <- c(
+        "IM",
+        "IV",
+        "IV Central",
+        "IVP",
+        "IVPB",
+        "EPIDURAL",
+        "DIALYSIS"
+    )
+
+    routes_top <- c("TOP", "Transdermal")
+
+    routes <- quos(
+        route %in% routes_po ~ "PO",
+        route %in% routes_iv ~ "IV",
+        route %in% routes_top ~ "TOP",
+        route == "NASAL" ~ "NASAL"
+    )
+
     df <- x %>%
         mutate(
+            !!"route.group" := dplyr::case_when(!!!routes),
             !!"tab.mg" := dplyr::case_when(!!!products),
             !!"dose.mg" := !!parse_expr(
                 'dplyr::if_else(

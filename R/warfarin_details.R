@@ -28,6 +28,17 @@ make_inr_ranges <- function(x) {
         filter(
             !!warfarin.event == "inr range",
             !!warfarin.result != ""
+        ) %>%
+        dplyr::mutate_at(
+            "warfarin.result",
+            stringr::str_replace_all,
+            pattern = stringr::regex("inr|goal", ignore_case = TRUE),
+            replacement = ""
+        ) %>%
+        dplyr::mutate_at(
+            "warfarin.result",
+            stringr::str_trim,
+            side = "both"
         )
 
     fix_ranges <- function(y, z) {
@@ -40,30 +51,54 @@ make_inr_ranges <- function(x) {
             )
     }
 
-    find <- c("(INR|Goal)|-\\.|\\(.*\\)|=",
-              "\\.\\.",
-              "--|to|/",
-              "[0-9\\.]+( )[0-9\\.]+",
-              "[1-9\\.]+([0])[1-9\\.]+",
-              "(>|above|greater[ than]?)[ ]?([0-9\\.]+)",
-              "(<|below|less[ than]?)[ ]?([0-9\\.]+)",
-              "^1.[5-9]$",
-              "^2$",
-              "^2.[1-4]$",
-              "^2.5$",
-              "^2.[6-9]$",
-              "^3$",
-              "^3.5$")
+    find <- c(
+        "(INR|Goal)|-\\.|\\(.*\\)|=",
+        "\\.\\.",
+        "\\.-",
+        "--|to|/",
+        "[0-9\\.]+( )[0-9\\.]+",
+        "[1-9\\.]+([0])[1-9\\.]+",
+        "(>|above|greater[ than]?)[ ]?([0-9\\.]+)",
+        "(<|below|less[ than]?)[ ]?([0-9\\.]+)",
+        "^1.[5-9]$",
+        "^2$|^2\\.0$",
+        "^2.[1-4]$",
+        "^2.5$|^23$",
+        "^2.[6-9]$",
+        "^3$|^2\\.5.3\\.5$",
+        "^3.5$"
+    )
 
-    replace <- c("", ".", "-", "-", "-", "\\2-3.5", "1.5-\\2",
-                 "1.5-2", "1.5-2.5", "2-2.5", "2-3", "2.5-3", "2.5-3.5", "3-4")
+    replace <- c(
+        "",
+        ".",
+        ".",
+        "-",
+        "-",
+        "-",
+        "\\2-3.5",
+        "1.5-\\2",
+        "1.5-2",
+        "1.5-2.5",
+        "2-2.5",
+        "2-3",
+        "2.5-3",
+        "2.5-3.5",
+        "3-4"
+    )
 
     # perform string replacements to clean up inr ranges
     purrr::walk2(.x = find, .y = replace, .f = fix_ranges)
 
     # correct any goals like "200", which should be "2.0", or "25" = "2.5"
     fix_div <- function(y, n) {
-        purrr::as_vector(purrr::map_if(y, ~ !is.na(.x) && .x >= n, ~ .x / n))
+        purrr::as_vector(
+            purrr::map_if(
+                y,
+                ~ !is.na(.x) && is.numeric(.x) && .x >= n,
+                ~ .x / n
+            )
+        )
     }
 
     # separate the inr range into two columns, goal low and high

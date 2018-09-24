@@ -55,9 +55,20 @@ format_dates <- function(x, date_col, tz = NULL) {
         tzone <- tz
     }
 
-    x %>%
-        dplyr::mutate_at(date_col, lubridate::ymd_hms, tz = tzone) %>%
-        dplyr::mutate_at(date_col, lubridate::with_tz, tzone = "US/Central")
+    if (attr(x, "archive")) {
+        x %>%
+            dplyr::mutate_at(
+                date_col,
+                lubridate::parse_date_time,
+                orders = "%m/%d/%Y %I:%M:%S %p",
+                tz = tzone
+            ) %>%
+            dplyr::mutate_at(date_col, lubridate::with_tz, tzone = "US/Central")
+    } else {
+        x %>%
+            dplyr::mutate_at(date_col, lubridate::ymd_hms, tz = tzone) %>%
+            dplyr::mutate_at(date_col, lubridate::with_tz, tzone = "US/Central")
+    }
 }
 
 #' Set timezone based on data source

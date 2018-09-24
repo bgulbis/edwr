@@ -6,10 +6,10 @@
 #' csv files and binds them together into a data frame
 #'
 #' This function takes a directory and file name and reads in all matching csv
-#' files and binds them together into a data frame using
-#' \code{read_csv} from \code{readr}. The resulting data frame has
-#' a class of \code{edwr}, and can then be passed to one of the edwr-related
-#' class types for variable renaming and type setting (example: \code{as.labs}).
+#' files and binds them together into a data frame using \code{read_csv} from
+#' \code{readr}. The resulting data frame has a class of \code{edwr}, and can
+#' then be passed to one of the edwr-related class types for variable renaming
+#' and type setting (example: \code{as.labs}).
 #'
 #' The following table lists the edwr-related class which corresponds to each
 #' EDW Standard Project Queries.
@@ -49,8 +49,9 @@
 #' @param file.name A character string with name of data file or pattern to
 #'   match
 #' @param edw A boolean indicating if the data came from EDW; set to FALSE for
-#'   MBO data
-#'
+#' @param archive A boolean indicating if the data was extracted as a csv
+#'   archive. If TRUE, will recursively search folders for csv files and will
+#'   skip the first line for column headers
 #' @return A data frame of class \code{tbl_edwr}
 #'
 #' @examples
@@ -66,13 +67,27 @@
 #' class(y)
 #'
 #' @export
-read_data <- function(data.dir, file.name, edw = TRUE) {
+read_data <- function(data.dir, file.name, edw = TRUE, archive = FALSE) {
+    if (archive) {
+        recursive = TRUE
+        skip = 1
+    } else {
+        recursive = FALSE
+        skip = 0
+    }
+
     # get list of files in specified directory and matching file name
-    x <- list.files(data.dir, pattern = file.name, full.names = TRUE) %>%
+    x <- list.files(
+        data.dir,
+        pattern = file.name,
+        full.names = TRUE,
+        recursive = recursive
+    ) %>%
         purrr::map_df(
             readr::read_csv,
             col_types = readr::cols(.default = "c"),
-            na = c("", "NA", "Unknown")
+            na = c("", "NA", "Unknown"),
+            skip = skip
         ) %>%
         as.tbl_edwr()
 
@@ -82,6 +97,8 @@ read_data <- function(data.dir, file.name, edw = TRUE) {
     } else {
         attr(x, "data") <- "mbo"
     }
+
+    attr(x, "archive") <- archive
 
     x
 }

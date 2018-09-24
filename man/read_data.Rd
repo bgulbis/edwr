@@ -4,7 +4,7 @@
 \alias{read_data}
 \title{Read data from csv files}
 \usage{
-read_data(data.dir, file.name, edw = TRUE)
+read_data(data.dir, file.name, edw = TRUE, archive = FALSE)
 }
 \arguments{
 \item{data.dir}{A character string with the name of the directory containing
@@ -13,8 +13,11 @@ the data files}
 \item{file.name}{A character string with name of data file or pattern to
 match}
 
-\item{edw}{A boolean indicating if the data came from EDW; set to FALSE for
-MBO data}
+\item{edw}{A boolean indicating if the data came from EDW; set to FALSE for}
+
+\item{archive}{A boolean indicating if the data was extracted as a csv
+archive. If TRUE, will recursively search folders for csv files and will
+skip the first line for column headers}
 }
 \value{
 A data frame of class \code{tbl_edwr}
@@ -25,10 +28,10 @@ csv files and binds them together into a data frame
 }
 \details{
 This function takes a directory and file name and reads in all matching csv
-files and binds them together into a data frame using
-\code{read_csv} from \code{readr}. The resulting data frame has
-a class of \code{edwr}, and can then be passed to one of the edwr-related
-class types for variable renaming and type setting (example: \code{as.labs}).
+files and binds them together into a data frame using \code{read_csv} from
+\code{readr}. The resulting data frame has a class of \code{edwr}, and can
+then be passed to one of the edwr-related class types for variable renaming
+and type setting (example: \code{as.labs}).
 
 The following table lists the edwr-related class which corresponds to each
 EDW Standard Project Queries.

@@ -21,6 +21,7 @@ reclass.default <- function(x, result) {
         class(result) <- c(class(x)[1:cls], class(result))
     }
     attr(result, "data") <- attr(x, "data")
+    attr(result, "archive") <- attr(x, "archive")
     result
 }
 

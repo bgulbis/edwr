@@ -1117,8 +1117,8 @@ as.patients <- function(x, extras = NULL) {
 
     x %>%
         assign_names(varnames, extras) %>%
-        dplyr::mutate_at("age", as.numeric) %>%
         format_dates("discharge.datetime") %>%
+        dplyr::mutate_at("age", as.numeric) %>%
         assign_class(x, "patients")
 }
 

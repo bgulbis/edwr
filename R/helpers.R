@@ -55,7 +55,13 @@ format_dates <- function(x, date_col, tz = NULL) {
         tzone <- tz
     }
 
-    if (attr(x, "archive")) {
+    if ("archive" %in% attributes(x)$names) {
+        archive <- attr(x, "archive")
+    } else {
+        archive <- FALSE
+    }
+
+    if (archive) {
         x %>%
             dplyr::mutate_at(
                 date_col,

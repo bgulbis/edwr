@@ -55,7 +55,7 @@ format_dates <- function(x, date_col, tz = NULL) {
         tzone <- tz
     }
 
-    if ("archive" %in% attributes(x)$names) {
+    if ("archive" %in% names(attributes(x))) {
         archive <- attr(x, "archive")
     } else {
         archive <- FALSE

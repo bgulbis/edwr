@@ -40,10 +40,113 @@ assign_names <- function(x, varnames, extras = NULL) {
         varnames <- c(varnames, extras)
     }
 
+    # y <- vals %in% colnames(orders)
+    # t <- rename(orders, !!!vals[y])
+
     x %>%
         rename(!!!varnames) %>%
         distinct()
 }
+
+#' Assign desired names to columns
+#'
+#' @param x data frame
+#' @param varnames named list of standard column names for given class
+#' @param extras optional named list of additional column names
+#'
+#' @return data frame
+#'
+#' @keywords internal
+assign_names_alt <- function(x, varnames, extras = NULL) {
+    # if extra var names are given, append those to the list
+    if (!is.null(extras)) {
+        varnames <- c(varnames, extras)
+    }
+
+    y <- varnames %in% colnames(x)
+
+    x %>%
+        rename(orders, !!!varnames[y]) %>%
+        distinct()
+}
+
+# mbo names --------------------------------------------
+mbo_names <- list(
+    "Clinical Event End Date/Time",
+    "millennium.id" = "Encounter Identifier",
+    "visit.type" = "Encounter Class Subtype",
+
+    "blood.datetime" = "Date and Time - Performed",
+    "blood.prod" = "Clinical Event",
+    "blood.type" = "Clinical Event Result",
+    "blood.location" = "Nurse Unit (Event)",
+    "event.id" = "Event Id",
+    "event.parent.id" = "Parent Event Id",
+    "order.id" = "Order Id",
+    "order.parent.id" = "Parent Order Id",
+
+    "age" = "Age- Years (At Admit)",
+    "gender" = "Gender",
+    "race" = "Race",
+    "disposition" = "Discharge Disposition",
+    "length.stay" = "LOS (Curr)",
+    "visit.type" = "Encounter Class Subtype",
+    "facility" = "Facility (Curr)",
+
+    "diag.code" = "Diagnosis Code",
+    "code.source" = "Diagnosis Code Source Vocabulary",
+    "diag.type" = "Diagnosis Type",
+    "diag.seq" = "Diagnosis Code (Primary VS Non Primary)",
+
+    "drg" = "DRG Code",
+    "drg.desc" = "DRG Description",
+    "drg.priority" = "DRG Priority",
+
+    "admit.datetime" = "Date and Time - Admit",
+    "visit.type" = "Encounter Class Subtype",
+    "facility" = "Facility (Curr)",
+    "disposition" = "Discharge Disposition",
+
+    "event.datetime" = "Date and Time - Performed",
+    "event.datetime" = "Date and Time - Scheduled OR Given On",
+
+    "event" = "Clinical Event",
+    "event.result" = "Clinical Event Result",
+    "event.result.units" = "Clinical Event Result Units",
+    "event.location" = "Nurse Unit (Event)",
+    "event.id" = "Event Id",
+    "event.parent.id" = "Parent Event Id",
+
+    "fin" = "Financial Number",
+
+    "lab.datetime" = "Date and Time - Nurse Draw",
+    "lab" = "Lab Event (FILTER ON)",
+    "lab.result" = "Lab Result",
+    "lab.result.units" = "Lab Result Units",
+    "lab.draw.location" = "Nurse Unit (Lab)",
+    "lab.id" = "Lab Event Id",
+
+    "arrive.datetime" = "Date and Time - Nurse Unit Begin",
+    "depart.datetime" = "Date and Time - Nurse Unit End",
+    "unit.name" = "Nurse Unit All",
+
+    "measure" = "Clinical Event",
+    "measure.result" = "Clinical Event Result",
+    "measure.units" = "Clinical Event Result Units",
+
+    "med" = "Medication (Generic)",
+    "scheduled_datetime" = "Date and Time - Scheduled",
+    "admin_datetime" = "Date and Time - Administration",
+    "admin_end_datetime" = "Date and Time - Administration End",
+    "document_source" = "Med Documentation Source",
+    "scan_patient" = "Scanned Armband (PPID)",
+    "scan_med" = "Scanned Medication (PMID)",
+    "med.location" = "Nurse Unit (Med)",
+    "order.id" = "Order Id",
+    "order.parent.id" = "Parent Order Id"
+
+)
+
 
 # constructor functions --------------------------------
 
@@ -1307,19 +1410,24 @@ as.uop <- function(x, extras = NULL) {
     if (missing(x)) x <- character()
     if (is.uop(x)) return(x)
     if (!is.tbl_edwr(x)) x <- as.tbl_edwr(x)
-    if (!is.events(x)) x <- as.events(x, extras)
+    # if (!is.events(x)) x <- as.events(x, extras)
 
     # default EDW names
     if (attr(x, "data") == "edw") {
-        varnames <- list(
-            "uop.datetime" = "event.datetime",
-            "uop" = "event",
-            "uop.result" = "event.result"
+        varnames <- c(
+            edw_id,
+            list(
+                "uop.datetime" = event_dt,
+                "uop" = event_nm,
+                "uop.result" = event_val
+            )
         )
     }
 
     x %>%
-        rename(!!!varnames) %>%
+        assign_names(varnames, extras) %>%
+        # rename(!!!varnames) %>%
+        format_dates("uop.datetime") %>%
         assign_class(x, "uop")
 }
 

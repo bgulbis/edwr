@@ -1282,7 +1282,7 @@ as.procedures <- function(x, extras = NULL) {
 
     x %>%
         assign_names(varnames, extras) %>%
-        format_dates("proc.date") %>%
+        format_dates("proc.date", tz = "US/Central", date_only = TRUE) %>%
         assign_class(x, "procedures")
 }
 

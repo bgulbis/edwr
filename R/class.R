@@ -40,58 +40,19 @@ assign_names <- function(x, varnames, extras = NULL) {
         varnames <- c(varnames, extras)
     }
 
-    # y <- vals %in% colnames(orders)
-    # t <- rename(orders, !!!vals[y])
-
     x %>%
         rename(!!!varnames) %>%
         distinct()
 }
 
-#' Assign desired names to columns
-#'
-#' @param x data frame
-#' @param varnames named list of standard column names for given class
-#' @param extras optional named list of additional column names
-#'
-#' @return data frame
-#'
-#' @keywords internal
-assign_names_alt <- function(x, varnames, extras = NULL) {
-    # if extra var names are given, append those to the list
-    if (!is.null(extras)) {
-        varnames <- c(varnames, extras)
-    }
-
-    y <- varnames %in% colnames(x)
-
-    x %>%
-        rename(orders, !!!varnames[y]) %>%
-        distinct()
-}
-
 # mbo names --------------------------------------------
 mbo_names <- list(
-    "Clinical Event End Date/Time",
+    "event.datetime" = "Clinical Event End Date/Time",
     "millennium.id" = "Encounter Identifier",
     "visit.type" = "Encounter Class Subtype",
 
-    "blood.datetime" = "Date and Time - Performed",
-    "blood.prod" = "Clinical Event",
-    "blood.type" = "Clinical Event Result",
-    "blood.location" = "Nurse Unit (Event)",
     "event.id" = "Event Id",
     "event.parent.id" = "Parent Event Id",
-    "order.id" = "Order Id",
-    "order.parent.id" = "Parent Order Id",
-
-    "age" = "Age- Years (At Admit)",
-    "gender" = "Gender",
-    "race" = "Race",
-    "disposition" = "Discharge Disposition",
-    "length.stay" = "LOS (Curr)",
-    "visit.type" = "Encounter Class Subtype",
-    "facility" = "Facility (Curr)",
 
     "diag.code" = "Diagnosis Code",
     "code.source" = "Diagnosis Code Source Vocabulary",
@@ -102,7 +63,6 @@ mbo_names <- list(
     "drg.desc" = "DRG Description",
     "drg.priority" = "DRG Priority",
 
-    "admit.datetime" = "Date and Time - Admit",
     "visit.type" = "Encounter Class Subtype",
     "facility" = "Facility (Curr)",
     "disposition" = "Discharge Disposition",
@@ -130,20 +90,12 @@ mbo_names <- list(
     "depart.datetime" = "Date and Time - Nurse Unit End",
     "unit.name" = "Nurse Unit All",
 
-    "measure" = "Clinical Event",
-    "measure.result" = "Clinical Event Result",
-    "measure.units" = "Clinical Event Result Units",
+    "scheduled.datetime" = "Date and Time - Scheduled",
+    "admin.end.datetime" = "Date and Time - Administration End",
+    "document.source" = "Med Documentation Source",
+    "scan.patient" = "Scanned Armband (PPID)",
+    "scan.med" = "Scanned Medication (PMID)"
 
-    "med" = "Medication (Generic)",
-    "scheduled_datetime" = "Date and Time - Scheduled",
-    "admin_datetime" = "Date and Time - Administration",
-    "admin_end_datetime" = "Date and Time - Administration End",
-    "document_source" = "Med Documentation Source",
-    "scan_patient" = "Scanned Armband (PPID)",
-    "scan_med" = "Scanned Medication (PMID)",
-    "med.location" = "Nurse Unit (Med)",
-    "order.id" = "Order Id",
-    "order.parent.id" = "Parent Order Id"
 
 )
 

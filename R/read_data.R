@@ -70,7 +70,7 @@
 read_data <- function(data.dir, file.name, edw = TRUE, archive = FALSE) {
     if (archive) {
         recursive = TRUE
-        skip = 1
+        skip = 0
     } else {
         recursive = FALSE
         skip = 0
@@ -102,3 +102,113 @@ read_data <- function(data.dir, file.name, edw = TRUE, archive = FALSE) {
 
     x
 }
+
+# column name assignments ------------------------------
+col_names <- list(
+    "admit.datetime" = "Date and Time - Admit",
+    "age" = "Age- Years (At Admit)",
+    "disposition" = "Discharge Disposition",
+    "discharge.datetime" = "Date and Time - Discharge",
+    "event.id" = "Med Event Id",
+    "event.tag" = "Infusion Actions",
+    "facility" = "Facility (Curr)",
+    "fin" = "Financial Number",
+    "fin" = "Formatted Financial Nbr",
+    "freq" = "Frequency",
+    "gender" = "Gender",
+    "length.stay" = "LOS (Curr)",
+    "med" = "Medication (Generic)",
+    "med.datetime" = "Date and Time - Administration",
+    "med.dose" = "Admin Dosage",
+    "med.dose.units" = "Admin Dosage Unit",
+    "med.location" = "Nurse Unit (Med)",
+    "med.rate" = "Infusion Rate",
+    "med.rate.units" = "Infusion Unit",
+    "millennium.id" = "Encounter Identifier",
+    "order" = "Mnemonic (Primary Generic) FILTER ON",
+    "order.datetime" = "Date and Time - Original (Placed)",
+    "order.id" = "Order Id",
+    "order.location" = "Nurse Unit (Order)",
+    "order.parent.id" = "Parent Order Id",
+    "order.provider" = "Ordering Provider LIMITS",
+    "order.provider.position" = "Ordering Provider Position LIMITS",
+    "order.route" = "Order Route",
+    "pie.id" = "PowerInsight Encounter Id",
+    "prn" = "PRN Indicator",
+    "race" = "Race",
+    "route" = "Admin Route",
+    "service" = "Medical Service",
+    "service.start.datetime" = "Medical Service Begin Date & Time",
+    "service.stop.datetime" = "Medical Service End Date & Time",
+    "visit.type" = "Encounter Class Subtype"
+)
+
+#' Read data, automatically assign names and format dates
+#'
+#' @param data.dir A character string with the name of the directory containing
+#'   the data files
+#' @param file.name A character string with name of data file or pattern to
+#'   match
+#' @param recursive logical. Should the listing recurse into directories?
+#' @param skip Number of lines to skip before reading data.
+#' @param edw logical. TRUE if the data came from EDW, FALSE for MBO
+#'
+#' @return A data frame of class \code{tbl_edwr}
+#' @export
+read_data2 <- function(data.dir, file.name, edw = TRUE, recursive = FALSE, skip = 0) {
+
+    if (edw) {
+        my_locale <- readr::locale(tz = "US/Central")
+    } else {
+        my_locale <- readr::locale()
+    }
+
+    # get list of files in specified directory and matching file name
+    x <- list.files(
+        data.dir,
+        pattern = file.name,
+        full.names = TRUE,
+        recursive = recursive
+    ) %>%
+        purrr::map_df(
+            readr::read_csv,
+            # col_types = readr::cols(.default = "c"),
+            na = c("", "NA", "Unknown"),
+            skip = skip,
+            locale = my_locale
+        ) %>%
+        as.tbl_edwr() %>%
+        distinct()
+
+    y <- col_names %in% colnames(x)
+    z <- "datetime"
+
+    x <- x %>%
+        rename(!!!col_names[y]) %>%
+        mutate_at(
+            dplyr::vars(dplyr::contains(z)),
+            stringr::str_replace_all,
+            pattern = "/",
+            replacement = "-"
+        ) %>%
+        mutate_at(
+            dplyr::vars(dplyr::contains(z)),
+            readr::parse_datetime,
+            locale = my_locale
+        ) %>%
+        mutate_at(
+            dplyr::vars(dplyr::contains(z)),
+            lubridate::with_tz,
+            tzone = "US/Central"
+        )
+
+    # set attribute to indicate source of data as EDW or MBO
+    if (edw) {
+        attr(x, "data") <- "edw"
+    } else {
+        attr(x, "data") <- "mbo"
+    }
+
+    x
+}
+

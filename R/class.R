@@ -18,8 +18,18 @@ event_val <- "Clinical Event Result"
 #'
 #' @return data frame
 #'
+#' @name assign_class
 #' @keywords internal
 assign_class <- function(df, x, new_class) {
+    after <- match(new_class, class(x), nomatch = 0L)
+    class(df) <- append(class(x), new_class, after = after)
+    df
+}
+
+#' @rdname assign_class
+#' @keywords internal
+assign_class2 <- function(x, new_class) {
+    df <- x
     after <- match(new_class, class(x), nomatch = 0L)
     class(df) <- append(class(x), new_class, after = after)
     df
@@ -44,61 +54,6 @@ assign_names <- function(x, varnames, extras = NULL) {
         rename(!!!varnames) %>%
         distinct()
 }
-
-# mbo names --------------------------------------------
-mbo_names <- list(
-    "event.datetime" = "Clinical Event End Date/Time",
-    "millennium.id" = "Encounter Identifier",
-    "visit.type" = "Encounter Class Subtype",
-
-    "event.id" = "Event Id",
-    "event.parent.id" = "Parent Event Id",
-
-    "diag.code" = "Diagnosis Code",
-    "code.source" = "Diagnosis Code Source Vocabulary",
-    "diag.type" = "Diagnosis Type",
-    "diag.seq" = "Diagnosis Code (Primary VS Non Primary)",
-
-    "drg" = "DRG Code",
-    "drg.desc" = "DRG Description",
-    "drg.priority" = "DRG Priority",
-
-    "visit.type" = "Encounter Class Subtype",
-    "facility" = "Facility (Curr)",
-    "disposition" = "Discharge Disposition",
-
-    "event.datetime" = "Date and Time - Performed",
-    "event.datetime" = "Date and Time - Scheduled OR Given On",
-
-    "event" = "Clinical Event",
-    "event.result" = "Clinical Event Result",
-    "event.result.units" = "Clinical Event Result Units",
-    "event.location" = "Nurse Unit (Event)",
-    "event.id" = "Event Id",
-    "event.parent.id" = "Parent Event Id",
-
-    "fin" = "Financial Number",
-
-    "lab.datetime" = "Date and Time - Nurse Draw",
-    "lab" = "Lab Event (FILTER ON)",
-    "lab.result" = "Lab Result",
-    "lab.result.units" = "Lab Result Units",
-    "lab.draw.location" = "Nurse Unit (Lab)",
-    "lab.id" = "Lab Event Id",
-
-    "arrive.datetime" = "Date and Time - Nurse Unit Begin",
-    "depart.datetime" = "Date and Time - Nurse Unit End",
-    "unit.name" = "Nurse Unit All",
-
-    "scheduled.datetime" = "Date and Time - Scheduled",
-    "admin.end.datetime" = "Date and Time - Administration End",
-    "document.source" = "Med Documentation Source",
-    "scan.patient" = "Scanned Armband (PPID)",
-    "scan.med" = "Scanned Medication (PMID)"
-
-
-)
-
 
 # constructor functions --------------------------------
 
@@ -176,6 +131,23 @@ as.blood <- function(x, extras = NULL) {
     if (is.blood(x)) return(x)
     if (!is.tbl_edwr(x)) x <- as.tbl_edwr(x)
 
+    prods <- c("Cryo(.*)" = "cryo",
+               "FFP(.*)" = "ffp",
+               "(P)?RBC(.*)" = "prbc",
+               "Platelet(.*)" = "platelet")
+
+    if ("millennium.id" %in% colnames(x) | "pie.id" %in% colnames(x)){
+        df <- x %>%
+            dplyr::mutate_at(
+                "event",
+                stringr::str_replace_all,
+                pattern = prods
+            ) %>%
+            assign_class2("blood")
+
+        return(df)
+    }
+
     # default EDW names
     if (attr(x, "data") == "edw") {
         if (!is.events(x)) x <- as.events(x)
@@ -199,16 +171,13 @@ as.blood <- function(x, extras = NULL) {
         ))
     }
 
-    prods <- c("Cryo(.*)" = "cryo",
-               "FFP(.*)" = "ffp",
-               "(P)?RBC(.*)" = "prbc",
-               "Platelet(.*)" = "platelet")
-
     x %>%
         assign_names(varnames, extras) %>%
-        dplyr::mutate_at("blood.prod",
-                         stringr::str_replace_all,
-                         pattern = prods) %>%
+        dplyr::mutate_at(
+            "blood.prod",
+            stringr::str_replace_all,
+            pattern = prods
+        ) %>%
         format_dates("blood.datetime") %>%
         assign_class(x, "blood")
 }
@@ -470,6 +439,12 @@ as.labs <- function(x, extras = NULL) {
     if (is.labs(x)) return(x)
     if (!is.tbl_edwr(x)) x <- as.tbl_edwr(x)
 
+    if ("millennium.id" %in% colnames(x) | "pie.id" %in% colnames(x)){
+        df <- assign_class2(x, "labs")
+
+        return(df)
+    }
+
     # default EDW names
     if (attr(x, "data") == "edw") {
         # if (!is.events(x)) x <- as.events(x)
@@ -577,6 +552,14 @@ as.meds_admin <- function(x, extras = NULL) {
     if (is.meds_admin(x)) return(x)
     if (!is.tbl_edwr(x)) x <- as.tbl_edwr(x)
 
+    if ("millennium.id" %in% colnames(x) | "pie.id" %in% colnames(x)){
+        df <- x %>%
+            dplyr::mutate_at("med", stringr::str_to_lower) %>%
+            assign_class2("meds_admin")
+
+        return(df)
+    }
+
     # default EDW names
     if (attr(x, "data") == "edw") {
         varnames <- c(edw_id, list(
@@ -617,6 +600,14 @@ as.meds_cont <- function(x, extras = NULL) {
     if (missing(x)) x <- character()
     if (is.meds_cont(x)) return(x)
     if (!is.tbl_edwr(x)) x <- as.tbl_edwr(x)
+
+    if ("millennium.id" %in% colnames(x) | "pie.id" %in% colnames(x)){
+        df <- x %>%
+            dplyr::mutate_at("med", stringr::str_to_lower) %>%
+            assign_class2("meds_cont")
+
+        return(df)
+    }
 
     # default EDW names
     if (attr(x, "data") == "edw") {
@@ -659,16 +650,24 @@ as.meds_freq <- function(x, extras = NULL) {
 #' @export
 as.meds_home <- function(x, extras = NULL) {
 
+    if (missing(x)) x <- character()
+    if (is.meds_home(x)) return(x)
+    if (!is.tbl_edwr(x)) x <- as.tbl_edwr(x)
+
+    if ("millennium.id" %in% colnames(x) | "pie.id" %in% colnames(x)){
+        df <- x %>%
+            dplyr::mutate_at("med", stringr::str_to_lower) %>%
+            assign_class2("meds_home")
+
+        return(df)
+    }
+
     fx <- function(df, x) {
         if (attr(x, "data") == "mbo") {
             df <- format_dates(df, "order.datetime")
         }
         df
     }
-
-    if (missing(x)) x <- character()
-    if (is.meds_home(x)) return(x)
-    if (!is.tbl_edwr(x)) x <- as.tbl_edwr(x)
 
     # default EDW names
     if (attr(x, "data") == "edw") {
@@ -701,6 +700,14 @@ as.meds_inpt <- function(x, extras = NULL) {
     if (missing(x)) x <- character()
     if (is.meds_cont(x)) return(x)
     if (!is.tbl_edwr(x)) x <- as.tbl_edwr(x)
+
+    if ("millennium.id" %in% colnames(x) | "pie.id" %in% colnames(x)){
+        df <- x %>%
+            dplyr::mutate_at("med", stringr::str_to_lower) %>%
+            assign_class2("meds_inpt")
+
+        return(df)
+    }
 
     # default EDW names
     if (attr(x, "data") == "edw") {
@@ -747,6 +754,14 @@ as.meds_sched <- function(x, extras = NULL) {
     if (missing(x)) x <- character()
     if (is.meds_sched(x)) return(x)
     if (!is.tbl_edwr(x)) x <- as.tbl_edwr(x)
+
+    if ("millennium.id" %in% colnames(x) | "pie.id" %in% colnames(x)){
+        df <- x %>%
+            dplyr::mutate_at("med", stringr::str_to_lower) %>%
+            assign_class2("meds_sched")
+
+        return(df)
+    }
 
     # default EDW names
     if (attr(x, "data") == "edw") {
@@ -1266,6 +1281,11 @@ as.services <- function(x, extras = NULL) {
     if (missing(x)) x <- character()
     if (is.services(x)) return(x)
     if (!is.tbl_edwr(x)) x <- as.tbl_edwr(x)
+
+    if ("pie.id" %in% colnames(x)) {
+        df <- assign_class2(x, "services")
+        return(df)
+    }
 
     # default EDW names
     if (attr(x, "data") == "edw") {

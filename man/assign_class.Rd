@@ -2,9 +2,12 @@
 % Please edit documentation in R/class.R
 \name{assign_class}
 \alias{assign_class}
+\alias{assign_class2}
 \title{Assign edwr class type}
 \usage{
 assign_class(df, x, new_class)
+
+assign_class2(x, new_class)
 }
 \arguments{
 \item{df}{new data_frame}

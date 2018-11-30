@@ -115,19 +115,27 @@ tidy_data.diagnosis <- function(x, ...) {
 #' @export
 #' @rdname tidy_data
 tidy_data.labs <- function(x, censor = TRUE, ...) {
+    if ("lab.result" %in% colnames(x)) {
+        lab.result <- sym("lab.result")
+    } else if ("event.result" %in% colnames(x)) {
+        lab.result <- sym("event.result")
+    } else {
+        warning("No valid result column found, need lab.result or event.result")
+        return(x)
+    }
+
     df <- x
     # create a column noting if data was censored
-    if (censor == TRUE) {
-        lab.result <- sym("lab.result")
-        df <- df %>%
-            mutate(
-                !!"censor.low" := stringr::str_detect(!!lab.result, "<"),
-                !!"censor.high" := stringr::str_detect(!!lab.result, ">")
-            )
+    if (censor) {
+        df <- mutate(
+            df,
+            !!"censor.low" := stringr::str_detect(!!lab.result, "<"),
+            !!"censor.high" := stringr::str_detect(!!lab.result, ">")
+        )
     }
 
     # convert lab results to numeric values
-    df <- dplyr::mutate_at(df, "lab.result", as.numeric)
+    df <- dplyr::mutate_at(df, dplyr::vars(!!lab.result), as.numeric)
 
     reclass(x, df)
 }

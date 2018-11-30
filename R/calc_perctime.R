@@ -79,18 +79,6 @@ calc_perctime.meds_inpt <- function(x, thrshld, cont = TRUE, ...) {
 
 #' @export
 #' @rdname calc_perctime
-calc_perctime.meds_sched <- function(x, thrshld, ...) {
-    # a wrapper for perctime
-    id <- set_id_quo(x)
-    perctime(x,
-             !!id,
-             !!sym("med"),
-             thrshld = thrshld
-    )
-}
-
-#' @export
-#' @rdname calc_perctime
 calc_perctime.events <- function(x, thrshld, ...) {
     # a wrapper for perctime
     id <- set_id_quo(x)
@@ -104,25 +92,49 @@ calc_perctime.events <- function(x, thrshld, ...) {
 #' @export
 #' @rdname calc_perctime
 calc_perctime.labs <- function(x, thrshld, ...) {
-    # a wrapper for perctime
-    id <- set_id_quo(x)
-    perctime(x,
-             !!id,
-             !!sym("lab"),
-             thrshld = thrshld
-    )
+    if ("lab" %in% colnames(x)) {
+        # a wrapper for perctime
+        id <- set_id_quo(x)
+        perctime(x,
+                 !!id,
+                 !!sym("lab"),
+                 thrshld = thrshld
+        )
+    } else {
+        calc_perctime.events(x, thrshld, ...)
+    }
+}
+
+#' @export
+#' @rdname calc_perctime
+calc_perctime.meds_sched <- function(x, thrshld, ...) {
+    if ("med" %in% colnames(x)) {
+        # a wrapper for perctime
+        id <- set_id_quo(x)
+        perctime(x,
+                 !!id,
+                 !!sym("med"),
+                 thrshld = thrshld
+        )
+    } else {
+        calc_perctime.events(x, thrshld, ...)
+    }
 }
 
 #' @export
 #' @rdname calc_perctime
 calc_perctime.vitals <- function(x, thrshld, ...) {
-    # a wrapper for perctime
-    id <- set_id_quo(x)
-    perctime(x,
-             !!id,
-             !!sym("vital"),
-             thrshld = thrshld
-    )
+    if ("vital" %in% colnames(x)) {
+        # a wrapper for perctime
+        id <- set_id_quo(x)
+        perctime(x,
+                 !!id,
+                 !!sym("vital"),
+                 thrshld = thrshld
+        )
+    } else {
+        calc_perctime.events(x, thrshld, ...)
+    }
 }
 
 #' Calculate percent time above or below a threshold
@@ -151,7 +163,10 @@ perctime <- function(x, ..., thrshld) {
         group_by(!!!group_var) %>%
         summarize(!!"total.dur" := dplyr::last(!!sym("run.time"))) %>%
         dplyr::mutate_at("total.dur", as.numeric) %>%
-        full_join(goal, by = purrr::map_chr(group_var, rlang::quo_text)) %>%
+        full_join(
+            goal,
+            by = purrr::map_chr(group_var, rlang::quo_text)
+        ) %>%
         group_by(!!!group_var) %>%
         mutate(
             !!"time.goal" := dplyr::coalesce(!!sym("time.goal"), 0),

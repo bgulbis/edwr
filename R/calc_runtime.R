@@ -252,31 +252,6 @@ calc_runtime_fun <- function(x, ..., val_col, dt_col, units = "hours") {
 
 #' @export
 #' @rdname calc_runtime
-calc_runtime.meds_sched <- function(x, ..., units = "hours") {
-    calc_runtime_fun(
-        x,
-        ...,
-        val_col = !!sym("med"),
-        dt_col = !!sym("med.datetime"),
-        units = units
-    )
-}
-
-#' @export
-#' @rdname calc_runtime
-calc_runtime.labs <- function(x, ..., units = "hours") {
-    calc_runtime_fun(
-        x,
-        ...,
-        val_col = !!sym("lab"),
-        dt_col = !!sym("lab.datetime"),
-        units = units
-    )
-    # was difftime(lead(lab.datetime), lab.datetime)
-}
-
-#' @export
-#' @rdname calc_runtime
 calc_runtime.events <- function(x, ..., units = "hours") {
     x %>%
         dplyr::mutate_at("event.result", as.numeric) %>%
@@ -290,13 +265,50 @@ calc_runtime.events <- function(x, ..., units = "hours") {
 
 #' @export
 #' @rdname calc_runtime
+calc_runtime.labs <- function(x, ..., units = "hours") {
+    if ("lab" %in% colnames(x)) {
+        calc_runtime_fun(
+            x,
+            ...,
+            val_col = !!sym("lab"),
+            dt_col = !!sym("lab.datetime"),
+            units = units
+        )
+    # was difftime(lead(lab.datetime), lab.datetime)
+    } else {
+        calc_runtime.events(x, ..., units)
+    }
+}
+
+#' @export
+#' @rdname calc_runtime
+calc_runtime.meds_sched <- function(x, ..., units = "hours") {
+    if ("med" %in% colnames(x)) {
+        calc_runtime_fun(
+            x,
+            ...,
+            val_col = !!sym("med"),
+            dt_col = !!sym("med.datetime"),
+            units = units
+        )
+    } else {
+        calc_runtime.events(x, ..., units)
+    }
+}
+
+#' @export
+#' @rdname calc_runtime
 calc_runtime.vitals <- function(x, ..., units = "hours") {
-    calc_runtime_fun(
-        x,
-        ...,
-        val_col = !!sym("vital"),
-        dt_col = !!sym("vital.datetime"),
-        units = units
-    )
-    # was difftime(lead(vital.datetime), vital.datetime)
+    if ("vital" %in% colnames(x)) {
+        calc_runtime_fun(
+            x,
+            ...,
+            val_col = !!sym("vital"),
+            dt_col = !!sym("vital.datetime"),
+            units = units
+        )
+        # was difftime(lead(vital.datetime), vital.datetime)
+    } else {
+        calc_runtime.events(x, ..., units)
+    }
 }

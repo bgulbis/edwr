@@ -1515,6 +1515,7 @@ as.vitals <- function(x, extras = NULL) {
     if (missing(x)) x <- character()
     if (is.vitals(x)) return(x)
     if (!is.tbl_edwr(x)) x <- as.tbl_edwr(x)
+    if (check_rename(x)) return(assign_class2("vitals"))
 
     # default EDW names
     if (attr(x, "data") == "edw") {

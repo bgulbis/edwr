@@ -562,7 +562,7 @@ as.meds_admin <- function(x, extras = NULL) {
     if (is.meds_admin(x)) return(x)
     if (!is.tbl_edwr(x)) x <- as.tbl_edwr(x)
 
-    if ("millennium.id" %in% colnames(x) | "pie.id" %in% colnames(x)){
+    if (check_rename(x)){
         df <- x %>%
             dplyr::mutate_at("med", stringr::str_to_lower) %>%
             assign_class2("meds_admin")
@@ -611,7 +611,7 @@ as.meds_cont <- function(x, extras = NULL) {
     if (is.meds_cont(x)) return(x)
     if (!is.tbl_edwr(x)) x <- as.tbl_edwr(x)
 
-    if ("millennium.id" %in% colnames(x) | "pie.id" %in% colnames(x)){
+    if (check_rename(x)){
         df <- x %>%
             dplyr::mutate_at("med", stringr::str_to_lower) %>%
             assign_class2("meds_cont")
@@ -664,7 +664,7 @@ as.meds_home <- function(x, extras = NULL) {
     if (is.meds_home(x)) return(x)
     if (!is.tbl_edwr(x)) x <- as.tbl_edwr(x)
 
-    if ("millennium.id" %in% colnames(x) | "pie.id" %in% colnames(x)){
+    if (check_rename(x)){
         df <- x %>%
             dplyr::mutate_at("med", stringr::str_to_lower) %>%
             assign_class2("meds_home")
@@ -765,7 +765,7 @@ as.meds_sched <- function(x, extras = NULL) {
     if (is.meds_sched(x)) return(x)
     if (!is.tbl_edwr(x)) x <- as.tbl_edwr(x)
 
-    if ("millennium.id" %in% colnames(x) | "pie.id" %in% colnames(x)){
+    if (check_rename(x)){
         df <- x %>%
             dplyr::mutate_at("med", stringr::str_to_lower) %>%
             assign_class2("meds_sched")
@@ -1291,11 +1291,7 @@ as.services <- function(x, extras = NULL) {
     if (missing(x)) x <- character()
     if (is.services(x)) return(x)
     if (!is.tbl_edwr(x)) x <- as.tbl_edwr(x)
-
-    if ("pie.id" %in% colnames(x)) {
-        df <- assign_class2(x, "services")
-        return(df)
-    }
+    if (check_rename(x)) return(assign_class2(x, "services"))
 
     # default EDW names
     if (attr(x, "data") == "edw") {

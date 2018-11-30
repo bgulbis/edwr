@@ -59,11 +59,18 @@ assign_names <- function(x, varnames, extras = NULL) {
 #'
 #' @param x data frame
 #'
-#' @return data frame
+#' @return logical
 #'
 #' @keywords internal
 check_rename <- function(x) {
-    vals <- c("millennium.id", "pie.id", "fin", "person.id")
+    vals <- c(
+        "millennium.id",
+        "pie.id",
+        "fin",
+        "person.id",
+        "order.id",
+        "event.id"
+    )
 
     sum(vals %in% colnames(x)) >= 1
 }
@@ -561,14 +568,7 @@ as.meds_admin <- function(x, extras = NULL) {
     if (missing(x)) x <- character()
     if (is.meds_admin(x)) return(x)
     if (!is.tbl_edwr(x)) x <- as.tbl_edwr(x)
-
-    if (check_rename(x)){
-        df <- x %>%
-            dplyr::mutate_at("med", stringr::str_to_lower) %>%
-            assign_class2("meds_admin")
-
-        return(df)
-    }
+    if (check_rename(x)) return(assign_class2("meds_admin"))
 
     # default EDW names
     if (attr(x, "data") == "edw") {
@@ -610,14 +610,7 @@ as.meds_cont <- function(x, extras = NULL) {
     if (missing(x)) x <- character()
     if (is.meds_cont(x)) return(x)
     if (!is.tbl_edwr(x)) x <- as.tbl_edwr(x)
-
-    if (check_rename(x)){
-        df <- x %>%
-            dplyr::mutate_at("med", stringr::str_to_lower) %>%
-            assign_class2("meds_cont")
-
-        return(df)
-    }
+    if (check_rename(x)) return(assign_class2("meds_cont"))
 
     # default EDW names
     if (attr(x, "data") == "edw") {
@@ -659,18 +652,10 @@ as.meds_freq <- function(x, extras = NULL) {
 #' @rdname set_edwr_class
 #' @export
 as.meds_home <- function(x, extras = NULL) {
-
     if (missing(x)) x <- character()
     if (is.meds_home(x)) return(x)
     if (!is.tbl_edwr(x)) x <- as.tbl_edwr(x)
-
-    if (check_rename(x)){
-        df <- x %>%
-            dplyr::mutate_at("med", stringr::str_to_lower) %>%
-            assign_class2("meds_home")
-
-        return(df)
-    }
+    if (check_rename(x)) return(assign_class2("meds_home"))
 
     fx <- function(df, x) {
         if (attr(x, "data") == "mbo") {
@@ -710,14 +695,7 @@ as.meds_inpt <- function(x, extras = NULL) {
     if (missing(x)) x <- character()
     if (is.meds_cont(x)) return(x)
     if (!is.tbl_edwr(x)) x <- as.tbl_edwr(x)
-
-    if (check_rename(x)) {
-        df <- x %>%
-            dplyr::mutate_at("med", stringr::str_to_lower) %>%
-            assign_class2("meds_inpt")
-
-        return(df)
-    }
+    if (check_rename(x)) return(assign_class2("meds_inpt"))
 
     # default EDW names
     if (attr(x, "data") == "edw") {
@@ -764,14 +742,7 @@ as.meds_sched <- function(x, extras = NULL) {
     if (missing(x)) x <- character()
     if (is.meds_sched(x)) return(x)
     if (!is.tbl_edwr(x)) x <- as.tbl_edwr(x)
-
-    if (check_rename(x)){
-        df <- x %>%
-            dplyr::mutate_at("med", stringr::str_to_lower) %>%
-            assign_class2("meds_sched")
-
-        return(df)
-    }
+    if (check_rename(x)) return(assign_class2("meds_sched"))
 
     # default EDW names
     if (attr(x, "data") == "edw") {

@@ -82,8 +82,12 @@ tidy_data.diagnosis <- function(x, ...) {
     # find codes which are valid
     valid_codes <- x %>%
         mutate(
-            !!"icd9" := icd::icd_is_valid(icd::as.icd9cm(!!diag_code)),
-            !!"icd10" := icd::icd_is_valid(icd::as.icd10cm(!!diag_code))
+            !!"icd9" := icd::icd_is_valid(
+                icd::as.icd9cm(!!diag_code)
+            ),
+            !!"icd10" := icd::icd_is_valid(
+                icd::as.icd10cm(!!diag_code)
+            )
         )
 
     # if code only valid in one type, then assign it to the correct group
@@ -93,8 +97,12 @@ tidy_data.diagnosis <- function(x, ...) {
     undefined <- valid_codes %>%
         filter(!!icd9, !!icd10) %>%
         mutate(
-            !!"icd9" := icd::icd_is_defined(icd::as.icd9cm(!!diag_code)),
-            !!"icd10" := icd::icd_is_defined(icd::as.icd10cm(!!diag_code))
+            !!"icd9" := icd::icd_is_defined(
+                icd::as.icd9cm(!!diag_code)
+            ),
+            !!"icd10" := icd::icd_is_defined(
+                icd::as.icd10cm(!!diag_code)
+            )
         )
 
     # if code only defined in one type, assign it to the correct group
@@ -103,8 +111,11 @@ tidy_data.diagnosis <- function(x, ...) {
     # for codes defined in both, use the source assignment from EDW
     source_default <- undefined %>%
         filter(!!icd9, !!icd10) %>%
-        mutate(!!"icd9" := !!parse_expr('code.source == "ICD-9-CM" |
-                                        code.source == "ICD9"'))
+        mutate(
+            !!"icd9" := !!parse_expr(
+                'code.source == "ICD-9-CM" | code.source == "ICD9"'
+            )
+        )
 
     df <- dplyr::bind_rows(assign, icd_defined, source_default) %>%
         select(-!!icd10)
@@ -362,9 +373,14 @@ tidy_data.services <- function(x, ...) {
         # determine if they went to a different service, then make a count of
         # different services
         mutate(
-            !!"diff.service" := !!parse_expr("is.na(service) |
-                                             is.na(dplyr::lag(service)) |
-                                             service != dplyr::lag(service)"),
+            !!"diff.service" := !!parse_expr(
+                # "is.na(service) | is.na(dplyr::lag(service)) | service !=
+                # dplyr::lag(service)"
+                sprintf(
+                    "is.na(service) | is.na(%1$s) | service != %1$s",
+                    "dplyr::lag(service)"
+                )
+            ),
             !!"service.count" := cumsum(!!sym("diff.service"))
         ) %>%
 
@@ -380,11 +396,15 @@ tidy_data.services <- function(x, ...) {
         # use the start time for the next service to calculate an end time
         group_by(!!sym("pie.id")) %>%
         mutate(!!"end.datetime" := dplyr::lead(!!sym("start.datetime")),
-               !!"end.datetime" := dplyr::coalesce(!!sym("end.datetime"),
-                                                   !!sym("end.recorded")),
-               !!"service.duration" := difftime(!!sym("end.datetime"),
-                                                !!sym("start.datetime"),
-                                                units = "days")) %>%
+               !!"end.datetime" := dplyr::coalesce(
+                   !!sym("end.datetime"),
+                   !!sym("end.recorded")
+               ),
+               !!"service.duration" := difftime(
+                   !!sym("end.datetime"),
+                   !!sym("start.datetime"),
+                   units = "days")
+        ) %>%
         ungroup() %>%
         select(-!!sym("end.recorded"))
 

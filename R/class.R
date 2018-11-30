@@ -55,6 +55,19 @@ assign_names <- function(x, varnames, extras = NULL) {
         distinct()
 }
 
+#' Check if column names have already been renamed by read_data2
+#'
+#' @param x data frame
+#'
+#' @return data frame
+#'
+#' @keywords internal
+check_rename <- function(x) {
+    vals <- c("millennium.id", "pie.id", "fin", "person.id")
+
+    sum(vals %in% colnames(x)) >= 1
+}
+
 # constructor functions --------------------------------
 
 #' Construct edwr data types
@@ -136,7 +149,7 @@ as.blood <- function(x, extras = NULL) {
                "(P)?RBC(.*)" = "prbc",
                "Platelet(.*)" = "platelet")
 
-    if ("millennium.id" %in% colnames(x) | "pie.id" %in% colnames(x)){
+    if (check_rename(x)){
         df <- x %>%
             dplyr::mutate_at(
                 "event",
@@ -248,6 +261,7 @@ as.diagnosis <- function(x, extras = NULL) {
     if (missing(x)) stop("Missing object")
     if (is.diagnosis(x)) return(x)
     if (!is.tbl_edwr(x)) x <- as.tbl_edwr(x)
+    if (check_rename(x)) return(assign_class2(x, "diagnosis"))
 
     # default EDW names
     if (attr(x, "data") == "edw") {
@@ -439,7 +453,7 @@ as.labs <- function(x, extras = NULL) {
     if (is.labs(x)) return(x)
     if (!is.tbl_edwr(x)) x <- as.tbl_edwr(x)
 
-    if ("millennium.id" %in% colnames(x) | "pie.id" %in% colnames(x)){
+    if (check_rename(x)){
         df <- assign_class2(x, "labs")
 
         return(df)

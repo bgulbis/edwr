@@ -165,9 +165,9 @@ tidy_data.locations <- function(x, ...) {
 
             # determine if pt went to different unit, count num of different units
             mutate(
-                !!"diff.unit" := !!parse_expr("is.na(unit.to) |
-                                              is.na(dplyr::lag(unit.to)) |
-                                              unit.to != dplyr::lag(unit.to)"),
+                !!"diff.unit" := !!parse_expr(
+                    "is.na(unit.to) | is.na(dplyr::lag(unit.to)) | unit.to != dplyr::lag(unit.to)"
+                ),
                 !!"unit.count" := cumsum(!!diff_unit)
             ) %>%
 
@@ -185,13 +185,17 @@ tidy_data.locations <- function(x, ...) {
             group_by(!!id) %>%
             mutate(
                 !!"depart.datetime" := dplyr::lead(!!arrive_datetime),
-                !!"depart.datetime" := dplyr::coalesce(!!depart_datetime,
-                                                       !!depart_recorded)
+                !!"depart.datetime" := dplyr::coalesce(
+                    !!depart_datetime,
+                    !!depart_recorded
+                )
             ) %>%
             ungroup() %>%
-            mutate(!!"unit.length.stay" := difftime(!!depart_datetime,
-                                                    !!arrive_datetime,
-                                                    units = "days")) %>%
+            mutate(!!"unit.length.stay" := difftime(
+                !!depart_datetime,
+                !!arrive_datetime,
+                units = "days")
+            ) %>%
             select(-!!depart_recorded)
     } else {
         id <- sym("millennium.id")
@@ -202,7 +206,9 @@ tidy_data.locations <- function(x, ...) {
             group_by(!!id) %>%
             # determine if pt went to different unit, count num of different units
             mutate(
-                !!"diff.unit" := !!parse_expr("unit.name != dplyr::lag(unit.name)"),
+                !!"diff.unit" := !!parse_expr(
+                    "unit.name != dplyr::lag(unit.name)"
+                ),
                 !!"diff.unit" := dplyr::coalesce(!!sym("diff.unit"), TRUE),
                 !!"unit.count" := cumsum(!!diff_unit)
             ) %>%
@@ -215,11 +221,14 @@ tidy_data.locations <- function(x, ...) {
             ) %>%
             # combine location stays that are < 5 minutes
             mutate(
-                !!"duration" := difftime(!!depart_datetime,
-                                         !!arrive_datetime,
-                                         units = "mins"),
-                !!"diff.unit" := !!parse_expr("duration > 5 |
-                                              is.na(dplyr::lag(duration))"),
+                !!"duration" := difftime(
+                    !!depart_datetime,
+                    !!arrive_datetime,
+                    units = "mins"
+                ),
+                !!"diff.unit" := !!parse_expr(
+                    "duration > 5 | is.na(dplyr::lag(duration))"
+                ),
                 !!"unit.count" := cumsum(!!diff_unit)
             ) %>%
             # use the count to group multiple rows of the same unit together
@@ -232,7 +241,9 @@ tidy_data.locations <- function(x, ...) {
             # determine again if pt went to different unit, count num of
             # different units
             mutate(
-                !!"diff.unit" := !!parse_expr("location != dplyr::lag(location)"),
+                !!"diff.unit" := !!parse_expr(
+                    "location != dplyr::lag(location)"
+                ),
                 !!"diff.unit" := dplyr::coalesce(!!diff_unit, TRUE),
                 !!"unit.count" := cumsum(!!diff_unit)
             ) %>%
@@ -244,9 +255,13 @@ tidy_data.locations <- function(x, ...) {
                 !!"depart.datetime" := max(!!depart_datetime)
             ) %>%
             ungroup() %>%
-            mutate(!!"unit.length.stay" := difftime(!!depart_datetime,
-                                                    !!arrive_datetime,
-                                                    units = "days"))
+            mutate(
+                !!"unit.length.stay" := difftime(
+                    !!depart_datetime,
+                    !!arrive_datetime,
+                    units = "days"
+                )
+            )
     }
 
     reclass(x, df)

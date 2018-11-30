@@ -6,10 +6,10 @@
 \alias{summarize_data.meds_cont}
 \alias{summarize_data.meds_inpt}
 \alias{summarize_data.meds_home}
-\alias{summarize_data.meds_sched}
-\alias{summarize_data.labs}
-\alias{summarize_data.vitals}
 \alias{summarize_data.events}
+\alias{summarize_data.labs}
+\alias{summarize_data.meds_sched}
+\alias{summarize_data.vitals}
 \title{Summary calculations for serial measurement data}
 \usage{
 summarize_data(x, ...)
@@ -24,13 +24,13 @@ summarize_data(x, ...)
 \method{summarize_data}{meds_home}(x, ..., ref, pts = NULL,
   home = TRUE)
 
-\method{summarize_data}{meds_sched}(x, ..., units = "hours")
+\method{summarize_data}{events}(x, ..., units = "hours")
 
 \method{summarize_data}{labs}(x, ..., units = "hours")
 
-\method{summarize_data}{vitals}(x, ..., units = "hours")
+\method{summarize_data}{meds_sched}(x, ..., units = "hours")
 
-\method{summarize_data}{events}(x, ..., units = "hours")
+\method{summarize_data}{vitals}(x, ..., units = "hours")
 }
 \arguments{
 \item{x}{A data frame with continuous data}

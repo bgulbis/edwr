@@ -398,11 +398,19 @@ tidy_data.services <- function(x, ...) {
 #' @export
 #' @rdname tidy_data
 tidy_data.vent_times <- function(x, dc, ...) {
+    if (missing(dc)) stop("Please include data frame with discharge.datetime")
 
     id <- set_id_quo(x)
 
     if ("vent.datetime" %in% colnames(x)) {
         vent_datetime <- sym("vent.datetime")
+        vent_event <- "vent.event"
+    } else if ("event.datetime" %in% colnames(x)) {
+        vent_datetime <- sym("event.datetime")
+        vent_event <- "event"
+    } else {
+        warning("No valid date/time columns found, need vent.datetime or event.datetime")
+        return(x)
     }
 
     stop_datetime <- sym("stop.datetime")
@@ -415,15 +423,20 @@ tidy_data.vent_times <- function(x, dc, ...) {
 
         # if it's the first event or the next event is a stop, then count as a
         # new vent event
-        mutate(!!"diff.event" := !!parse_expr("is.na(dplyr::lag(vent.event)) |
-                                               vent.event != lag(vent.event)"),
-                !!"event.count" := cumsum(!!sym("diff.event"))
+        mutate(
+            !!"diff.event" := !!parse_expr(
+                sprintf(
+                    "is.na(dplyr::lag(%1$s)) | %1$s != lag(%1$s)",
+                    vent_event
+                )
+            ),
+            !!"event.count" := cumsum(!!sym("diff.event"))
         ) %>%
 
         # for each event count, get the first and last date/time
         group_by(!!!quos(!!id, !!sym("event.count"))) %>%
         summarize(
-            !!"event" := dplyr::first(!!sym("vent.event")),
+            !!"event" := dplyr::first(!!sym(vent_event)),
             !!"first.event.datetime" := dplyr::first(!!vent_datetime),
             !!"last.event.datetime" := dplyr::last(!!vent_datetime)
         ) %>%
@@ -432,26 +445,30 @@ tidy_data.vent_times <- function(x, dc, ...) {
         # be the last stop event if there are multiple stop events in a row. if
         # there isn't a stop date/time because there was start with no stop, use
         # the discharge date/time as stop date/time
-        left_join(dc[c(rlang::quo_text(id), "discharge.datetime")],
-                  by = rlang::quo_text(id)) %>%
+        left_join(
+            dc[c(rlang::quo_text(id), "discharge.datetime")],
+            by = rlang::quo_text(id)
+        ) %>%
         group_by(!!id) %>%
         mutate(
             !!"stop.datetime" := dplyr::lead(!!sym("last.event.datetime")),
-            !!"stop.datetime" := dplyr::coalesce(!!stop_datetime,
-                                                 !!sym("discharge.datetime"))
+            !!"stop.datetime" := dplyr::coalesce(
+                !!stop_datetime,
+                !!sym("discharge.datetime")
+            )
         ) %>%
-
         filter(!!parse_expr('event == "vent start time"')) %>%
         select(
             !!id,
-            # !!parse_expr('"start.datetime" = "first.event.datetime"'),
             !!"start.datetime" := !!sym("first.event.datetime"),
             !!stop_datetime
         ) %>%
         ungroup() %>%
-        mutate(!!"vent.duration" := difftime(!!stop_datetime,
-                                             !!sym("start.datetime"),
-                                             units = "hours"))
+        mutate(!!"vent.duration" := difftime(
+            !!stop_datetime,
+            !!sym("start.datetime"),
+            units = "hours")
+        )
 
     reclass(x, df)
 }

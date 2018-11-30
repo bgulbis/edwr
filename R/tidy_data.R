@@ -131,7 +131,7 @@ tidy_data.labs <- function(x, censor = TRUE, ...) {
     } else if ("event.result" %in% colnames(x)) {
         lab_result <- sym("event.result")
     } else {
-        warning("No valid result column found, need lab_result or event.result")
+        warning("No valid result column found, need lab.result or event.result")
         return(x)
     }
 

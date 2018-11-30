@@ -30,22 +30,37 @@
 #'
 #' @export
 lab_change <- function(x, .lab, change.by, FUN, back = 2) {
+    if ("lab.result" %in% colnames(x)) {
+        lab_col <- "lab"
+        lab_datetime <- sym("lab.datetime")
+        lab_result <- sym("lab.result")
+    } else if ("event.result" %in% colnames(x)) {
+        lab_col <- "event"
+        lab_datetime <- sym("event.datetime")
+        lab_result <- sym("event.result")
+    } else {
+        warning("No valid result column found, need lab.result or event.result")
+        return(x)
+    }
+
     # calculate the number of rows that are included within the window, then
     # calculate the running min/max during the time window, then calculate the
     # change from the running min/max to current value, then filter values which
     # exceed the change.by value
     id <- set_id_quo(x)
 
-    lab <- sym("lab")
-    lab.datetime <- sym("lab.datetime")
+    lab <- sym(lab_col)
     rowsback <- sym("rowsback")
-    lab.result <- sym("lab.result")
 
     df <- x %>%
-        filter(!!parse_expr("lab %in% .lab")) %>%
-        arrange(!!id, !!lab, !!lab.datetime) %>%
+        filter(
+            !!parse_expr(
+                paste(lab_col, "%in% .lab")
+            )
+        ) %>%
+        arrange(!!id, !!lab, !!lab_datetime) %>%
         group_by(!!id, !!lab) %>%
-        mutate(!!"rowsback" := count_rowsback(!!lab.datetime, back)) %>%
+        mutate(!!"rowsback" := count_rowsback(!!lab_datetime, back)) %>%
         filter(!is.na(!!rowsback)) %>%
         mutate(
             !!"running" := zoo::rollapplyr(
@@ -55,7 +70,7 @@ lab_change <- function(x, .lab, change.by, FUN, back = 2) {
                 fill = NA,
                 partial = TRUE
             ),
-            !!"change" := !!lab.result - !!sym("running")
+            !!"change" := !!lab_result - !!sym("running")
         ) %>%
         filter(!!parse_expr("abs(change) >= abs(change.by)")) %>%
         ungroup

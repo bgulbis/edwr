@@ -323,6 +323,7 @@ read_data2 <- function(data.dir, file.name, edw = TRUE, recursive = FALSE, skip 
 
     y <- col_names %in% colnames(x)
     z <- "datetime"
+    lower <- c("event", "lab", "med")
 
     x <- x %>%
         rename(!!!col_names[y]) %>%
@@ -341,6 +342,10 @@ read_data2 <- function(data.dir, file.name, edw = TRUE, recursive = FALSE, skip 
             dplyr::vars(dplyr::contains(z)),
             lubridate::with_tz,
             tzone = "US/Central"
+        ) %>%
+        mutate_at(
+            dplyr::vars(dplyr::one_of(lower)),
+            stringr::str_to_lower
         )
 
     # set attribute to indicate source of data as EDW or MBO

@@ -221,6 +221,7 @@ summary_fun <- function(x, ..., dt_col, val_col) {
     val_col <- enquo(val_col)
 
     df <- x %>%
+        dplyr::mutate_at(dplyr::vars(!!val_col), as.numeric) %>%
         dplyr::add_count(!!id, !!!group_var) %>%
         group_by(!!id, !!!group_var, !!sym("n")) %>%
         summarize(

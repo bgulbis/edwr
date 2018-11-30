@@ -174,10 +174,15 @@ tidy_data.locations <- function(x, ...) {
             arrange(!!id, !!arrive_datetime) %>%
             group_by(!!id) %>%
 
-            # determine if pt went to different unit, count num of different units
+            # determine if pt went to different unit, count num of different
+            # units "is.na(unit.to) | is.na(dplyr::lag(unit.to)) | unit.to !=
+            # dplyr::lag(unit.to)"
             mutate(
                 !!"diff.unit" := !!parse_expr(
-                    "is.na(unit.to) | is.na(dplyr::lag(unit.to)) | unit.to != dplyr::lag(unit.to)"
+                    sprintf(
+                        "is.na(unit.to) | is.na(%1$s) | unit.to != %1$s",
+                        "dplyr::lag(unit.to)"
+                    )
                 ),
                 !!"unit.count" := cumsum(!!diff_unit)
             ) %>%

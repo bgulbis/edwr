@@ -245,13 +245,11 @@ summary_fun <- function(x, ..., dt_col, val_col) {
 
 #' @export
 #' @rdname summarize_data
-summarize_data.meds_sched <- function(x, ..., units = "hours") {
-    grp_by <- quos(!!sym("med"), !!!quos(...))
-
+summarize_data.events <- function(x, ..., units = "hours") {
     summary_fun(x,
-                !!!grp_by,
-                dt_col = !!sym("med.datetime"),
-                val_col = !!sym("med.dose")
+                !!sym("event"),
+                dt_col = !!sym("event.datetime"),
+                val_col = !!sym("event.result")
     )
 }
 
@@ -267,20 +265,22 @@ summarize_data.labs <- function(x, ..., units = "hours") {
 
 #' @export
 #' @rdname summarize_data
-summarize_data.vitals <- function(x, ..., units = "hours") {
+summarize_data.meds_sched <- function(x, ..., units = "hours") {
+    grp_by <- quos(!!sym("med"), !!!quos(...))
+
     summary_fun(x,
-                !!sym("vital"),
-                dt_col = !!sym("vital.datetime"),
-                val_col = !!sym("vital.result")
+                !!!grp_by,
+                dt_col = !!sym("med.datetime"),
+                val_col = !!sym("med.dose")
     )
 }
 
 #' @export
 #' @rdname summarize_data
-summarize_data.events <- function(x, ..., units = "hours") {
+summarize_data.vitals <- function(x, ..., units = "hours") {
     summary_fun(x,
-                !!sym("event"),
-                dt_col = !!sym("event.datetime"),
-                val_col = !!sym("event.result")
+                !!sym("vital"),
+                dt_col = !!sym("vital.datetime"),
+                val_col = !!sym("vital.result")
     )
 }

@@ -281,11 +281,21 @@ tidy_fun <- function(x, group, ref = NULL) {
 
     if(!is.null(ref)) {
         # for any med classes, lookup the meds included in the class
-        y <- filter(ref, !!parse_expr(paste0('type == "class" & group == "', group, '"')))
+        y <- filter(
+            ref,
+            !!parse_expr(
+                paste0('type == "class" & group == "', group, '"')
+            )
+        )
         class_meds <- med_lookup(y$name)
 
         # join the list of meds with any indivdual meds included
-        y <- filter(ref, !!parse_expr(paste0('type == "med" & group == "', group, '"')))
+        y <- filter(
+            ref,
+            !!parse_expr(
+                paste0('type == "med" & group == "', group, '"')
+            )
+        )
 
         lookup_meds <- c(y$name, class_meds$med.name) %>%
             stringr::str_to_lower()

@@ -711,7 +711,7 @@ as.meds_inpt <- function(x, extras = NULL) {
     if (is.meds_cont(x)) return(x)
     if (!is.tbl_edwr(x)) x <- as.tbl_edwr(x)
 
-    if ("millennium.id" %in% colnames(x) | "pie.id" %in% colnames(x)){
+    if (check_rename(x)) {
         df <- x %>%
             dplyr::mutate_at("med", stringr::str_to_lower) %>%
             assign_class2("meds_inpt")

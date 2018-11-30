@@ -116,11 +116,11 @@ tidy_data.diagnosis <- function(x, ...) {
 #' @rdname tidy_data
 tidy_data.labs <- function(x, censor = TRUE, ...) {
     if ("lab.result" %in% colnames(x)) {
-        lab.result <- sym("lab.result")
+        lab_result <- sym("lab.result")
     } else if ("event.result" %in% colnames(x)) {
-        lab.result <- sym("event.result")
+        lab_result <- sym("event.result")
     } else {
-        warning("No valid result column found, need lab.result or event.result")
+        warning("No valid result column found, need lab_result or event.result")
         return(x)
     }
 
@@ -129,13 +129,13 @@ tidy_data.labs <- function(x, censor = TRUE, ...) {
     if (censor) {
         df <- mutate(
             df,
-            !!"censor.low" := stringr::str_detect(!!lab.result, "<"),
-            !!"censor.high" := stringr::str_detect(!!lab.result, ">")
+            !!"censor.low" := stringr::str_detect(!!lab_result, "<"),
+            !!"censor.high" := stringr::str_detect(!!lab_result, ">")
         )
     }
 
     # convert lab results to numeric values
-    df <- dplyr::mutate_at(df, dplyr::vars(!!lab.result), as.numeric)
+    df <- dplyr::mutate_at(df, dplyr::vars(!!lab_result), as.numeric)
 
     reclass(x, df)
 }
@@ -400,7 +400,11 @@ tidy_data.services <- function(x, ...) {
 tidy_data.vent_times <- function(x, dc, ...) {
 
     id <- set_id_quo(x)
-    vent_datetime <- sym("vent.datetime")
+
+    if ("vent.datetime" %in% colnames(x)) {
+        vent_datetime <- sym("vent.datetime")
+    }
+
     stop_datetime <- sym("stop.datetime")
 
     # remove any missing data

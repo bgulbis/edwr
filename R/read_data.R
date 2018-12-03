@@ -290,6 +290,7 @@ col_names <- list(
     "unit.to" = "Person Location - Nurse Unit (To)",
     "unit.name" = "Nurse Unit All",
     "verify.datetime" = "Date and Time - Pharmacist Review",
+    "verify.rph" = "Verifying Pharmacist",
     "visit.subtype" = "Encounter Class Subtype",
     "visit.type" = "Encounter Class Type",
     "visit.type" = "Encounter Type",

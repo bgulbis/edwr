@@ -21,6 +21,7 @@ calc_morph_eq <- function(x) {
     dose.mg <- sym("dose.mg")
     med.dose.units <- sym("med.dose.units")
 
+    # parse product name to get tablet strength, needed for combination products
     products <- quos(
         stringr::str_detect(med.product, "7.5-200mg") ~ 7.5,
         stringr::str_detect(med.product, "10/325|325( )?(mg)?-10") ~ 10,
@@ -46,11 +47,13 @@ calc_morph_eq <- function(x) {
         med.product == "acetaminophen-codeine" ~ 30
     )
 
+    # determine frequency for patches
     freq <- quos(
         stringr::str_detect(frequency, "Q72|ONCE") & route.group == "TOP" ~ 3,
         stringr::str_detect(frequency, "Q48") & route.group == "TOP" ~ 2
     )
 
+    # conversion to morphine equivalents
     convert <- quos(
         med == "buprenorphine" & route.group == "TOP" ~ 3.8,
         stringr::str_detect(med, "buprenorphine") & route.group == "PO" ~ 3.3,
@@ -80,6 +83,7 @@ calc_morph_eq <- function(x) {
         TRUE ~ dose.mg
     )
 
+    # group all oral routes
     routes_po <- c(
         "DHT",
         "GT",
@@ -93,6 +97,7 @@ calc_morph_eq <- function(x) {
         "SL"
     )
 
+    # group all IV routes
     routes_iv <- c(
         "IM",
         "IV",
@@ -103,8 +108,10 @@ calc_morph_eq <- function(x) {
         "DIALYSIS"
     )
 
+    # group transdermal routes
     routes_top <- c("TOP", "Transdermal")
 
+    # consolidate route groups
     routes <- quos(
         route %in% routes_po ~ "PO",
         route %in% routes_iv ~ "IV",
@@ -116,6 +123,8 @@ calc_morph_eq <- function(x) {
         mutate(
             !!"route.group" := dplyr::case_when(!!!routes),
             !!"tab.mg" := dplyr::case_when(!!!products),
+            # calculate the mg given in each dose; needed when dose is charted
+            # in number of tabs, etc.
             !!"dose.mg" := !!parse_expr(
                 'dplyr::if_else(
                     med.dose.units %in% c("tab", "mL", "supp", "patch"),
